@@ -16,15 +16,15 @@ This repo maintains the supporting documentation and supplementary material for 
 
 ## Research Team
 
-**Pablo Estrada**
+**Pablo Estrada**<br>
 Graduate Student • Department of Economics • Emory University<br>
 [pabloestrada.io](https://www.pabloestrada.io/) <br>
 
-**Ian McCarthy**
+**Ian McCarthy**<br>
 Associate Professor • Department of Economics • Emory University<br>
 Research Associate • National Bureau of Economic Research<br>
 [ianmccarthyecon.com](https://www.ianmccarthyecon.com) • [\@ianhealthecon](https://twitter.com/ianhealthecon) <br>
 
-**Jillian Wilkins**
+**Jillian Wilkins**<br>
 Graduate Student • Department of Economics • Emory University<br>
 [jillwilkins.github.io](https://jillwilkins.github.io/)
