@@ -4,8 +4,8 @@ This repo maintains the supporting documentation and supplementary material for 
 
 ## External Project Links
 
-- [OneDrive Folder](OneDrive Folder Link) to share data, papers, etc. Special access required to access this folder.
-- Literature review on [network analysis](network analysis link) and [physician networks](physician networks link)
+- [OneDrive Folder](https://emory-my.sharepoint.com/:f:/r/personal/immccar_emory_edu/Documents/physician-referrals-formation?csf=1&web=1&e=6J4gMJ) to share data, papers, etc. Special permission is required to access this folder.
+- [Overleaf Project Folder](https://www.overleaf.com/project/678e3b1bab4b5b45ab4136fb) for the paper. Special permission is required to access this folder.
 
 ## Navigating the Repo
 
