@@ -16,14 +16,20 @@ This repo maintains the supporting documentation and supplementary material for 
 
 ## Research Team
 
-**Pablo Estrada**<br>
-Graduate Student • Department of Economics • Emory University<br>
-[pabloestrada.io](https://www.pabloestrada.io/) <br>
-
 **Ian McCarthy**<br>
 Associate Professor • Department of Economics • Emory University<br>
 Research Associate • National Bureau of Economic Research<br>
 [ianmccarthyecon.com](https://www.ianmccarthyecon.com) • [\@ianhealthecon](https://twitter.com/ianhealthecon) <br>
+
+**Shirley Cai**<br>
+Graduate Student • Department of Economics • Emory University<br>
+[shirleycai.netlify.app](https://shirleycai.netlify.app/) <br>
+
+
+**Pablo Estrada**<br>
+Principal Quantitative Modeler • Capital One<br>
+[pabloestrada.io](https://www.pabloestrada.io/) <br>
+
 
 **Jillian Wilkins**<br>
 Graduate Student • Department of Economics • Emory University<br>
