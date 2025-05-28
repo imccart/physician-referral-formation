@@ -61,6 +61,8 @@ write_csv(agg_data, "aggregated_data.csv")
 
 
 
+df_full_referrals %>% group_by(Year) %>% summarize(n_spec=n_distinct(specialist)) %>% ungroup() %>% summarize(mean_pcp_year=mean(n_spec))
+
 
 
 
@@ -100,9 +102,9 @@ doc_full <- side_stats(df_full_referrals,
                        doctor, specialist,
                        doc_sex, doc_race, doc_birth)
 
-doc_move <- side_stats(df_logit_cond,
+doc_move <- side_stats(df_initial_referrals,
                        doctor, specialist,
-                       sex_doc, race_rf_doc, birth_doc)
+                       doc_sex, doc_race, doc_birth)
 
 # ──────────────────────────────────────────────────────────
 # Panel B: specialists (receivers)
@@ -111,9 +113,9 @@ spec_full <- side_stats(df_full_referrals,
                         specialist, doctor,
                         spec_sex, spec_race, spec_birth)
 
-spec_move <- side_stats(df_logit_cond,
+spec_move <- side_stats(df_initial_referrals,
                         specialist, doctor,
-                        sex_spec, race_rf_spec, birth_spec)
+                        spec_sex, spec_race, spec_birth)
 
 # ──────────────────────────────────────────────────────────
 # assemble long table, reshape for LaTeX
@@ -149,6 +151,20 @@ table_tex %>%
 # ------------------------------------------------------------------
 # -- Figure 1: distribution of network size ------------------------
 # ------------------------------------------------------------------
+deg_out <- df_full_referrals %>%
+  group_by(doctor) %>%
+  summarise(deg = n_distinct(specialist), .groups = "drop") %>%
+  mutate(side = "PCP (out-degree)")
+
+## receiver-side degree: how many distinct PCPs refer to each specialist
+deg_in  <- df_full_referrals %>%
+  group_by(specialist) %>%
+  summarise(deg = n_distinct(doctor), .groups = "drop") %>%
+  mutate(side = "Specialist (in-degree)")
+
+## put them in one long data frame for facetted plotting
+deg_all <- bind_rows(deg_out, deg_in)
+
 deg_plot <- deg_all %>%
   mutate(deg_bin = if_else(deg > 20, ">20", as.character(deg))) %>%
   mutate(deg_bin = factor(deg_bin,
