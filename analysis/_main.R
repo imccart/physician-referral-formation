@@ -11,17 +11,26 @@ pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, margi
 
 
 # Import data -------------------------------------------------------------
-df_full_referrals  <- read_csv("data/output/df_full_referrals.csv") %>%    # All observed pairs
+
+## Referral data for all PCP/specialist pairs
+df_full_referrals  <- read_csv("data/output/df_full_referrals.csv") %>%
     filter(doc_hrr==spec_hrr)
+
+## Movers and their referral pairs
+df_movers <- read_csv("data/output/df_movers.csv") 
+
+## Referral data for movers only
 df_initial_referrals <- read_csv("data/output/df_initial_referrals.csv") %>% # Initial referrals (movers only)
     filter(doc_hrr==spec_hrr)
 
-df_logit <- read_csv("data/output/df_logit.csv") %>%                    # "Standard" logit data
+## Referral "choice" data for standard logit
+df_logit <- read_csv("data/output/df_logit.csv") %>%
     filter(doc_hrr==spec_hrr) %>%
     mutate(doc_male=(doc_sex=="M"), spec_male=(spec_sex=="M"), 
            exp_spec=(year-spec_grad_year)/10)
 
-df_logit_twfe <- read_csv("data/output/df_logit_jochmans.csv") %>%          # "TWFE" logit data (Jochmans, 2018)
+## Referral choice data for Jochmans (2018) logit
+df_logit_twfe <- read_csv("data/output/df_logit_jochmans.csv") %>%
     filter(doc_hrr==spec_hrr)
 
 
