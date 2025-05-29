@@ -26,5 +26,6 @@ df_full_referrals <- df_referrals %>%
          dist_miles = dist_km * 0.621371) %>%
   select(-c(lat_doc, lon_doc, lat_spec, lon_spec, dist_km)) %>%
   rename(doctor=Practice_ID, specialist=Specialist_ID)
+  left_join(spec_quality, by = "specialist")
 
 write_csv(df_full_referrals, "data/output/df_full_referrals.csv", na = "")

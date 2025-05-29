@@ -68,6 +68,7 @@ final_ref <-
     diff_age      = abs(as.numeric(doc_birth)     - as.numeric(spec_birth)),
     diff_gradyear = abs(as.numeric(doc_grad_year) - as.numeric(spec_grad_year)),
     diff_dist     = dist_miles
-  )
+  ) %>%
+  left_join(spec_quality, by = "specialist")
 
 write.csv(final_ref, "data/output/df_logit.csv", row.names=FALSE)
