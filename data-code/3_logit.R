@@ -67,7 +67,7 @@ final_ref <-
     same_zip      = as.integer(doc_zip        == spec_zip),
     diff_age      = abs(as.numeric(doc_birth)     - as.numeric(spec_birth)),
     diff_gradyear = abs(as.numeric(doc_grad_year) - as.numeric(spec_grad_year)),
-    diff_dist     = dist_miles
+    diff_dist     = abs(dist_miles)
   ) %>%
   left_join(spec_quality, by = "specialist")
 

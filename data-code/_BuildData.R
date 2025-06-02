@@ -81,13 +81,13 @@ for (year in 2009:2018) {
 df_mdppas  <- as_tibble(df_mdppas)
 
 # Referral data
-df_referrals <- read_csv("data/input/referrals/ReferralPairs_Full.csv")
+df_referrals <- read_csv("data/input/referrals/ReferralPairs_Large.csv")
 
 # Specialist quality only
 spec_quality <- df_referrals %>%
   group_by(Specialist_ID) %>%
   slice(1) %>%
-  select(specialist=Specialist_ID, spec_qual)  
+  select(specialist=Specialist_ID, spec_qual, total_spec_patients)  
 
 # physician race data
 df_race <- read_csv("data/input/physician-race/final-npi-combined.csv")

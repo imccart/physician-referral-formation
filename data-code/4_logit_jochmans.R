@@ -84,12 +84,12 @@ make_block <- function(block) {
 df_logit <- final_ref %>%
   group_by(Year, doc_hrr) %>%
   group_split() %>%
-  map_dfr(make_block) %>%
+  map_dfr(make_block)
 
 df_logit_final <- df_logit %>%
   ungroup() %>%
-  left_join(spec_quality %>% rename(spec1_qual=spec_qual), by = c("spec1"="specialist")) %>%
-  left_join(spec_quality %>% rename(spec2_qual=spec_qual), by = c("spec2"="specialist"))
+  left_join(spec_quality %>% rename(spec1_qual=spec_qual, spec1_total_patients=total_spec_patients), by = c("spec1"="specialist")) %>%
+  left_join(spec_quality %>% rename(spec2_qual=spec_qual, spec2_total_patients=total_spec_patients), by = c("spec2"="specialist"))
 
 write_csv(df_logit_final, "data/output/df_logit_jochmans.csv", na = "")
 
