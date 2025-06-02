@@ -1,5 +1,19 @@
 ## Descriptive Statistics
 
+# Overall sample size and relevant counts ----------------------------
+df_full_referrals %>%
+  summarise(
+    n_physicians = n_distinct(doctor),
+    n_specialists = n_distinct(specialist),
+    n_pairs = n()
+  )
+
+total_patients <- df_full_referrals %>%
+  group_by(specialist) %>%
+  summarise(total_patients = sum(total_spec_patients))
+
+
+
 # Map of movers ----------------------------------------------
 
 if (is.na(st_crs(gdf))) {
@@ -69,12 +83,10 @@ flows %>% summarize(total_movers = sum(n_movers)) # total number of movers
 flows_top %>% summarize(total_movers = sum(n_movers)) # total number of movers
 
 
-## Descriptive Statistics for Logit Model --------------------------------
+# Descriptive Statistics  --------------------------------
 
 
-# ──────────────────────────────────────────────────────────
-# helper that computes degree, age, gender & race shares
-# ──────────────────────────────────────────────────────────
+## helper that computes degree, age, gender & race shares
 side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
   df %>%
     group_by({{ id_var }}, Year) %>%                               # doctor or specialist
@@ -98,9 +110,8 @@ side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
     )
 }
 
-# ──────────────────────────────────────────────────────────
-# Panel A: doctors (senders)
-# ──────────────────────────────────────────────────────────
+
+## Panel A: doctors (senders)
 doc_full <- side_stats(df_full_referrals,
                        doctor, specialist,
                        doc_sex, doc_race, doc_birth)
@@ -109,9 +120,7 @@ doc_move <- side_stats(df_initial_referrals,
                        doctor, specialist,
                        doc_sex, doc_race, doc_birth)
 
-# ──────────────────────────────────────────────────────────
-# Panel B: specialists (receivers)
-# ──────────────────────────────────────────────────────────
+## Panel B: specialists (receivers)
 spec_full <- side_stats(df_full_referrals,
                         specialist, doctor,
                         spec_sex, spec_race, spec_birth)
@@ -120,9 +129,8 @@ spec_move <- side_stats(df_initial_referrals,
                         specialist, doctor,
                         spec_sex, spec_race, spec_birth)
 
-# ──────────────────────────────────────────────────────────
-# assemble long table, reshape for LaTeX
-# ──────────────────────────────────────────────────────────
+
+## assemble long table, reshape for LaTeX
 table_long <- bind_rows(
   doc_full  %>% mutate(sample = "Full",   panel = "Doctors"),
   doc_move  %>% mutate(sample = "Movers", panel = "Doctors"),
@@ -134,10 +142,6 @@ table_tex <- table_long %>%
   pivot_longer(-c(sample, panel), names_to = "stat") %>%
   pivot_wider(names_from = sample, values_from = value) %>%
   arrange(match(panel, c("Doctors","Specialists")), stat)
-
-# ──────────────────────────────────────────────────────────
-# write LaTeX file “tab_physicians.tex”
-# ──────────────────────────────────────────────────────────
 
 table_tex %>%
   mutate(across(where(is.double), ~ round(.x, 3))) %>%   # light rounding
@@ -151,9 +155,7 @@ table_tex %>%
   writeLines("results/desc.tex")
 
 
-# ------------------------------------------------------------------
-# -- Figure 1: distribution of network size ------------------------
-# ------------------------------------------------------------------
+## Distribution of network size
 deg_out <- df_full_referrals %>%
   group_by(doctor, Year) %>%
   summarise(deg = n_distinct(specialist), .groups = "drop") %>%

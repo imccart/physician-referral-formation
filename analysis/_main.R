@@ -20,7 +20,7 @@ df_full_referrals  <- read_csv("data/output/df_full_referrals.csv") %>%
 df_movers <- read_csv("data/output/df_movers.csv") 
 
 ## Referral data for movers only
-df_initial_referrals <- read_csv("data/output/df_initial_referrals.csv") %>% # Initial referrals (movers only)
+df_initial_referrals <- read_csv("data/output/df_initial_referrals.csv") %>% 
     filter(doc_hrr==spec_hrr)
 
 ## Referral "choice" data for standard logit

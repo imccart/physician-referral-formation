@@ -51,8 +51,7 @@ df_ref_initial <-
   df_full_referrals %>%
   inner_join(df_ref_movers, 
             by = c("doctor", "specialist", "Year" = "year")) %>%
-  filter(origin != spec_hrr) %>%
-  left_join(spec_quality, by = "specialist")  
+  filter(origin != spec_hrr)
 
 write.csv(df_ref_movers, "data/output/df_movers.csv", row.names=FALSE)
 write.csv(df_ref_initial, "data/output/df_initial_referrals.csv", row.names=FALSE)
