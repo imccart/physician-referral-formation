@@ -2,7 +2,7 @@
 ## Title:         Formation of Physician Referral Networks
 ## Author:        Ian McCarthy
 ## Date Created:  5/20/2025
-## Date Edited:   5/20/2025
+## Date Edited:   5/29/2025
 
 
 # Preliminaries -----------------------------------------------------------
@@ -33,4 +33,14 @@ df_logit <- read_csv("data/output/df_logit.csv") %>%
 df_logit_twfe <- read_csv("data/output/df_logit_jochmans.csv") %>%
     filter(doc_hrr==spec_hrr)
 
+## HRR shapefile
+gdf <- st_read("data/input/HRR_ShapeFile.shp") %>%
+  filter(!str_starts(HRRCITY, "AK") & !str_starts(HRRCITY, "HI"))
 
+
+# Minor cleanup -----------------------------------------------------------
+
+movers <- df_movers %>%
+    group_by(doctor) %>%
+    slice(1) %>%
+    select(doctor, origin, destination)

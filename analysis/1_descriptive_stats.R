@@ -1,69 +1,72 @@
 ## Descriptive Statistics
 
+# Map of movers ----------------------------------------------
 
-# Group by 'year' and 'hrr_doc' and count unique physicians
-hrr_physicians <- df_ref_initial %>%
-  group_by(year, hrr_doc) %>%
-  summarise(unique_doctors = n_distinct(doctor), .groups = "drop")
+if (is.na(st_crs(gdf))) {
+  st_crs(gdf) <- 4269      # NAD83 (EPSG:4269); change if your file uses another CRS
+}
 
-# Filter and visualize the number of HRRs per physician count
-hrr_distribution <- hrr_physicians %>%
-  filter(unique_doctors > 1) %>%
-  count(unique_doctors)
-
-# Bar plot for the distribution
-ggplot(hrr_distribution, aes(x = as.factor(unique_doctors), y = n)) +
-  geom_bar(stat = "identity") +
-  labs(
-    title = "Number of HRRs per number of physicians",
-    x = "Number of Physicians",
-    y = "Number of HRRs"
-  ) +
-  theme_minimal()
-
-# Add visualization
-ggsave("hrr_distribution_plot.png")
-
-# Creating additional features
-df_ref_initial <- df_ref_initial %>%
-  mutate(
-    male_spec = ifelse(sex_spec == "M", 1, 0),
-    male_doc = ifelse(sex_doc == "M", 1, 0),
-    exp_spec = year - grad_year_spec
-  )
-
-# Example for grouping and aggregation (replace with actual logic as needed)
-agg_data <- df_ref_initial %>%
-  group_by(year) %>%
-  summarise(
-    total_referrals = sum(referral, na.rm = TRUE),
-    avg_diff_gradyear = mean(diff_gradyear, na.rm = TRUE)
-  )
-
-# Export processed data
-write_csv(df_ref_initial, "processed_data.csv")
-write_csv(agg_data, "aggregated_data.csv")
-
-# Placeholder for MD-PPAS data processing (if applicable)
-# mdppas <- read_csv("path/to/PhysicianData_2012.csv")
-# mdppas <- mdppas %>%
-#   select(npi, sex, birth_dt) %>%
-#   mutate(phy_zip1 = str_pad(phy_zip1, 5, pad = "0")) %>%
-#   drop_na()
-
-# Uncomment to show top 20 specialties (if the data includes 'spec')
-# top_specialties <- mdppas %>%
-#   count(spec, sort = TRUE) %>%
-#   mutate(percentage = n / sum(n) * 100) %>%
-#   slice_max(n = 20, order_by = n)
-# print(top_specialties)
+hrr_centroids <- gdf %>%
+  st_point_on_surface() %>%
+  st_coordinates() %>%
+  as_tibble() %>%
+  bind_cols(hrr = gdf$HRRNUM) |>
+  rename(lon = X, lat = Y)
 
 
+flows <- movers %>% filter(!is.na(origin) & !is.na(destination)) %>%
+  group_by(origin, destination) %>%
+  summarise(n_movers = n_distinct(doctor), .groups = "drop")
+
+top_origins <- flows %>%
+  group_by(origin) %>%
+  summarise(total_movers = sum(n_movers), .groups = "drop") %>%
+  slice_max(total_movers, n = 20) %>%
+  pull(origin)
+
+flows_top <- flows %>%
+  filter(origin %in% top_origins) %>%
+  group_by(origin) %>%
+  slice_max(n_movers, n = 10, with_ties = FALSE) %>%
+  ungroup() %>%
+  left_join(hrr_centroids,  by = c("origin"      = "hrr")) %>%
+  rename(lon_o = lon, lat_o = lat) %>%
+  left_join(hrr_centroids,  by = c("destination" = "hrr")) %>%
+  rename(lon_d = lon, lat_d = lat) %>%
+  filter(!is.na(lon_o) & !is.na(lon_d)) %>%
+  mutate(curv_up = lon_o < lon_d)
 
 
-df_full_referrals %>% group_by(Year) %>% summarize(n_spec=n_distinct(specialist)) %>% ungroup() %>% summarize(mean_pcp_year=mean(n_spec))
+mover_plot <- ggplot() +
+  geom_sf(data = gdf, fill = "grey95", colour = "black", linewidth = 0.1) +
+  ## upward-arching curves
+  geom_curve(data = filter(flows_top,  curv_up),
+             aes(x = lon_o, y = lat_o, xend = lon_d, yend = lat_d),
+             curvature =  0.5,
+             colour = "grey20",
+             linewidth=0.2,
+             arrow  = arrow(length = unit(0.08, "cm"), type = "closed"),
+             alpha  = 0.8) +
+  ## downward-arching curves
+  geom_curve(data = filter(flows_top, !curv_up),
+             aes(x = lon_o, y = lat_o, xend = lon_d, yend = lat_d),
+             curvature = -0.3,
+             colour = "grey20",
+             linewidth=0.2,
+             arrow  = arrow(length = unit(0.08, "cm"), type = "closed"),
+             alpha  = 0.8) +
+  coord_sf(crs = st_crs(gdf)) +
+  theme_void() +
+  theme(legend.position = "right")
 
+ggsave("results/fig_movers.png",
+       plot   = mover_plot,
+       width  = 6,       # inches
+       height = 4,       # inches
+       dpi    = 300)     # crisp PNG output
 
+flows %>% summarize(total_movers = sum(n_movers)) # total number of movers
+flows_top %>% summarize(total_movers = sum(n_movers)) # total number of movers
 
 
 ## Descriptive Statistics for Logit Model --------------------------------
@@ -74,10 +77,10 @@ df_full_referrals %>% group_by(Year) %>% summarize(n_spec=n_distinct(specialist)
 # ──────────────────────────────────────────────────────────
 side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
   df %>%
-    group_by({{ id_var }}) %>%                               # doctor or specialist
+    group_by({{ id_var }}, Year) %>%                               # doctor or specialist
     summarise(
       deg  = n_distinct({{ partner_var }}),                 # out- or in-degree
-      age  = mean(year - {{ birth_var }}, na.rm = TRUE),    # years since birth
+      age  = mean(Year - {{ birth_var }}, na.rm = TRUE),    # years since birth
       male = first({{ sex_var }}) == "M",
       race = first({{ race_var }}),
       .groups = "drop"
@@ -91,7 +94,7 @@ side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
       "Percent White" = mean(race == "white",    na.rm = TRUE),
       "Percent Black" = mean(race == "black",    na.rm = TRUE),
       "Percent Hispanic"  = mean(race == "hispanic", na.rm = TRUE),
-      "Observations"    = n() # number of physicians
+      "Observations"    = n_distinct({{ id_var }}) # number of distinct physicians
     )
 }
 
@@ -152,13 +155,13 @@ table_tex %>%
 # -- Figure 1: distribution of network size ------------------------
 # ------------------------------------------------------------------
 deg_out <- df_full_referrals %>%
-  group_by(doctor) %>%
+  group_by(doctor, Year) %>%
   summarise(deg = n_distinct(specialist), .groups = "drop") %>%
   mutate(side = "PCP (out-degree)")
 
 ## receiver-side degree: how many distinct PCPs refer to each specialist
 deg_in  <- df_full_referrals %>%
-  group_by(specialist) %>%
+  group_by(specialist, Year) %>%
   summarise(deg = n_distinct(doctor), .groups = "drop") %>%
   mutate(side = "Specialist (in-degree)")
 
@@ -173,7 +176,7 @@ deg_plot <- deg_all %>%
 
 p <- ggplot(deg_plot, aes(deg_bin, n)) +
   geom_col(fill = "grey60") +
-  facet_wrap(~ side, ncol = 2) +             # default scales = "fixed"
+  facet_wrap(~ side, ncol = 2, scales="free_y") +             # default scales = "fixed"
   scale_y_continuous(labels = comma) +           # ← comma-format  
   labs(x = "Number of distinct network partners",
        y = "Count of physicians") +
