@@ -1,15 +1,29 @@
 ## Descriptive Statistics
 
 # Overall sample size and relevant counts ----------------------------
-df_full_referrals %>%
+df_full_referrals %>% group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
   summarise(
     n_physicians = n_distinct(doctor),
     n_specialists = n_distinct(specialist),
     n_pairs = n()
   )
 
-total_patients <- df_full_referrals %>%
-  group_by(specialist) %>%
+## Total patients
+df_full_referrals %>%
+  group_by(specialist) %>% slice(1) %>% ungroup() %>%
+  summarise(total_patients = sum(total_spec_patients))
+
+
+df_initial_referrals %>% group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
+  summarise(
+    n_physicians = n_distinct(doctor),
+    n_specialists = n_distinct(specialist),
+    n_pairs = n()
+  )
+
+## Total patients
+df_initial_referrals %>%
+  group_by(specialist) %>% slice(1) %>% ungroup() %>%
   summarise(total_patients = sum(total_spec_patients))
 
 
@@ -28,7 +42,7 @@ hrr_centroids <- gdf %>%
   rename(lon = X, lat = Y)
 
 
-flows <- movers %>% filter(!is.na(origin) & !is.na(destination)) %>%
+flows <- movers %>% filter(!is.na(origin) & !is.na(destination)) %>% inner_join(df_initial_referrals %>% distinct(doctor), by = "doctor") %>%
   group_by(origin, destination) %>%
   summarise(n_movers = n_distinct(doctor), .groups = "drop")
 
@@ -87,7 +101,7 @@ flows_top %>% summarize(total_movers = sum(n_movers)) # total number of movers
 
 
 ## helper that computes degree, age, gender & race shares
-side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
+side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var, dist_var) {
   df %>%
     group_by({{ id_var }}, Year) %>%                               # doctor or specialist
     summarise(
@@ -95,6 +109,7 @@ side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
       age  = mean(Year - {{ birth_var }}, na.rm = TRUE),    # years since birth
       male = first({{ sex_var }}) == "M",
       race = first({{ race_var }}),
+      distance = mean({{ dist_var }}, na.rm = TRUE), # average distance to partner
       .groups = "drop"
     ) %>%
     summarise(
@@ -102,6 +117,7 @@ side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
       "Network Degree (SD)"   = sd(deg),
       "Network Degree (Median)"  = median(deg),
       "Mean Age" = mean(age, na.rm = TRUE),
+      "Mean Distance (mi)" = mean(distance, na.rm = TRUE),
       "Percent Male"  = mean(male, na.rm = TRUE),
       "Percent White" = mean(race == "white",    na.rm = TRUE),
       "Percent Black" = mean(race == "black",    na.rm = TRUE),
@@ -114,20 +130,20 @@ side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var) {
 ## Panel A: doctors (senders)
 doc_full <- side_stats(df_full_referrals,
                        doctor, specialist,
-                       doc_sex, doc_race, doc_birth)
+                       doc_sex, doc_race, doc_birth, dist_miles)
 
 doc_move <- side_stats(df_initial_referrals,
                        doctor, specialist,
-                       doc_sex, doc_race, doc_birth)
+                       doc_sex, doc_race, doc_birth, dist_miles)
 
 ## Panel B: specialists (receivers)
 spec_full <- side_stats(df_full_referrals,
                         specialist, doctor,
-                        spec_sex, spec_race, spec_birth)
+                        spec_sex, spec_race, spec_birth, dist_miles)
 
 spec_move <- side_stats(df_initial_referrals,
                         specialist, doctor,
-                        spec_sex, spec_race, spec_birth)
+                        spec_sex, spec_race, spec_birth, dist_miles)
 
 
 ## assemble long table, reshape for LaTeX
@@ -147,11 +163,11 @@ table_tex %>%
   mutate(across(where(is.double), ~ round(.x, 3))) %>%   # light rounding
   select(-panel) %>%
   kable(format   = "latex", booktabs = TRUE,
-        col.names = c("Statistic", "All referrals", "New movers"),
+        col.names = c(" ", "All referrals", "PCP movers"),
         align     = c("l","r","r")) %>%
   kable_styling(latex_options = "hold_position") %>%
-  group_rows("Panel A. Doctors (any outgoing referrals)", 1, 9) %>%
-  group_rows("Panel B. Specialists (any incoming referrals)", 10, 18) %>%
+  group_rows("Panel A. Doctors (any outgoing referrals)", 1, 10) %>%
+  group_rows("Panel B. Specialists (any incoming referrals)", 11, 20) %>%
   writeLines("results/desc.tex")
 
 
@@ -190,3 +206,93 @@ ggsave("results/fig_degree.png",
        width  = 6,       # inches
        height = 3.5,     # inches
        dpi    = 300)     # crisp PNG output
+
+
+## Network density
+density_tbl <- df_full_referrals %>%
+  distinct(doctor, specialist, Year, hrr = doc_hrr) %>%  # one row per link
+  group_by(Year, hrr) %>%
+  summarise(
+    observed  = n(),                                     # # distinct links
+    n_docs    = n_distinct(doctor),
+    n_specs   = n_distinct(specialist),
+    potential = n_docs * n_specs,                        # all possible pairs
+    .groups   = "drop"
+  )
+network_density <- sum(density_tbl$observed) / sum(density_tbl$potential)
+
+## Describing observed links
+link_stats <- df_full_referrals %>%
+  distinct(doctor, specialist,        # one row per realised link
+           doc_group, spec_group,
+           doc_sex,  spec_sex,
+           doc_race, spec_race,
+           dist_miles,
+           doc_med_school, spec_med_school,
+           doc_grad_year, spec_grad_year) 
+
+pct_same_practice <- mean(link_stats$doc_group == link_stats$spec_group, na.rm = TRUE)
+pct_same_gender   <- mean(link_stats$doc_sex   == link_stats$spec_sex, na.rm = TRUE)
+pct_same_race     <- mean(link_stats$doc_race  == link_stats$spec_race, na.rm = TRUE)
+pct_same_school   <- mean(link_stats$doc_med_school  == link_stats$spec_med_school, na.rm = TRUE)
+mean_gradyear     <- mean(abs(link_stats$doc_grad_year - link_stats$spec_grad_year), na.rm = TRUE)
+mean_distance     <- mean(link_stats$dist_miles, na.rm = TRUE)
+
+summary_tbl <- tibble(
+  metric  = c("Same practice",
+              "Same gender",
+              "Same race",
+              "Same medical school",
+              "Mean distance (miles)",
+              "Mean experience (years)"),
+  value   = c(scales::percent(pct_same_practice, accuracy = .1),
+              scales::percent(pct_same_gender,   accuracy = .1),
+              scales::percent(pct_same_race,     accuracy = .1),
+              scales::percent(pct_same_school,   accuracy = .1),
+              round(mean_distance, 1),
+              round(mean_gradyear, 1))
+)
+
+network_density
+summary_tbl
+
+## Describing observed and unobserved links
+link_summary <- function(df) {
+  df %>%
+    summarise(
+      "Same practice"    = mean(same_prac,     na.rm = TRUE),
+      "Same gender"      = mean(same_sex,      na.rm = TRUE),
+      "Same race"        = mean(same_race,     na.rm = TRUE),
+      "Same school"      = mean(same_school,   na.rm = TRUE),
+      "Distance (miles)" = mean(dist_miles,    na.rm = TRUE),
+      "Experience (yr)"  = mean(diff_gradyear, na.rm = TRUE)
+    )
+}
+
+tab_links <- bind_rows(
+  df_logit %>%                    # established links
+    filter(referral == 1) %>%
+    link_summary() %>%
+    mutate(link = "Established links"),
+  df_logit %>%                    # non–links in the choice set
+    filter(referral == 0) %>%
+    link_summary() %>%
+    mutate(link = "Non–established links")
+) %>%
+  pivot_longer(-link, names_to = "stat") %>%
+  pivot_wider(names_from = link, values_from = value) %>%
+  rename(Statistic = stat) %>%
+  mutate(across(`Established links`:`Non–established links`,
+                ~ ifelse(Statistic %in% c("Distance (miles)", "Experience (yr)"),
+                         round(.x, 1),                       # numeric, 1-dp
+                         percent(.x, accuracy = 0.1))))      # percent shares
+
+tab_links %>%
+  kable(format   = "latex",
+        booktabs = TRUE,
+        align    = c("l","r","r"),
+        col.names = c("Statistic",
+                      "Established \\ links",
+                      "Non--established \\ links")) %>%
+  kable_styling(latex_options = "hold_position") %>%
+  writeLines("results/link_stats.tex")
