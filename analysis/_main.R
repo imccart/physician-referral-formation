@@ -7,10 +7,18 @@
 
 # Preliminaries -----------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, marginaleffects, knitr, kableExtra, scales)
+pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, marginaleffects, knitr, kableExtra, scales, broom, purrr)
 
 
 # Import data -------------------------------------------------------------
+
+df_pairs <- read_csv("data/input/referrals/ReferralPairs_Large.csv")
+
+# Specialist quality only
+spec_quality <- df_pairs %>%
+  group_by(Specialist_ID) %>%
+  slice(1) %>%
+  select(specialist=Specialist_ID, spec_qual, total_spec_patients)  
 
 ## Referral data for all PCP/specialist pairs
 df_full_referrals  <- read_csv("data/output/df_full_referrals.csv") %>%
@@ -27,7 +35,7 @@ df_initial_referrals <- read_csv("data/output/df_initial_referrals.csv") %>%
 df_logit <- read_csv("data/output/df_logit.csv") %>%
     filter(doc_hrr==spec_hrr) %>%
     mutate(doc_male=(doc_sex=="M"), spec_male=(spec_sex=="M"), 
-           exp_spec=(year-spec_grad_year)/10)
+           exp_spec=(Year-spec_grad_year)/10)
 
 ## Referral choice data for Jochmans (2018) logit
 df_logit_twfe <- read_csv("data/output/df_logit_jochmans.csv") %>%
@@ -37,6 +45,13 @@ df_logit_twfe <- read_csv("data/output/df_logit_jochmans.csv") %>%
 gdf <- st_read("data/input/HRR_ShapeFile.shp") %>%
   filter(!str_starts(HRRCITY, "AK") & !str_starts(HRRCITY, "HI"))
 
+## Referrals by window
+ref_windows <- read_csv("data/output/df_initial_referrals_cuml.csv") %>%
+  filter(doc_hrr==spec_hrr)
+
+## Choice data for Jochmans (2018) by window
+df_logit_windows <- read_csv("data/output/df_logit_windows.csv") %>%
+  filter(doc_hrr==spec_hrr)
 
 # Minor cleanup -----------------------------------------------------------
 

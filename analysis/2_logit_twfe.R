@@ -2,36 +2,36 @@
 # Basline logit (Zeltzer) ------------------------------------------------------------------------------------
 
 logit1 <- feglm(
-  referral ~ same_sex + male_spec + exp_spec | year + doctor,
-  data = df_logit_cond,
+  referral ~ same_sex + spec_male + exp_spec | Year + doctor,
+  data = df_logit,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit2 <- feglm(
-  referral ~ same_sex + male_spec + exp_spec + same_prac + same_zip | year + doctor,
-  data = df_logit_cond,
+  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles | Year + doctor,
+  data = df_logit,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit3 <- feglm(
-  referral ~ same_sex + male_spec + exp_spec + same_prac + same_zip + diff_age + diff_gradyear | year + doctor,
-  data = df_logit_cond,
+  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
+  data = df_logit,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit4 <- feglm(
-  referral ~ same_sex + male_spec + exp_spec + same_prac + same_zip + diff_age + diff_gradyear | year + doctor,
-  data = df_logit_cond %>% filter(!is.na(same_school)),
+  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
+  data = df_logit %>% filter(!is.na(same_school)),
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit5 <- feglm(
-  referral ~ same_sex + male_spec + exp_spec + same_prac + same_zip + diff_age + diff_gradyear + same_school | year + doctor,
-  data = df_logit_cond %>% filter(!is.na(same_school)),
+  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear + same_school | Year + doctor,
+  data = df_logit %>% filter(!is.na(same_school)),
   vcov = "HC1",
   family = binomial(link = "logit")
 )
@@ -48,36 +48,36 @@ mfx_logit5 <- avg_slopes(logit5)
 
 
 logit_race1 <- feglm(
-  referral ~ same_sex + same_race + male_spec + exp_spec | year + doctor,
-  data = df_logit_cond,
+  referral ~ same_sex + same_race + spec_male + exp_spec | Year + doctor,
+  data = df_logit,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_race2 <- feglm(
-  referral ~ same_sex + same_race + male_spec + exp_spec + same_prac + same_zip | year + doctor,
-  data = df_logit_cond,
+  referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles | Year + doctor,
+  data = df_logit,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_race3 <- feglm(
-  referral ~ same_sex + same_race + male_spec + exp_spec + same_prac + same_zip + diff_age + diff_gradyear | year + doctor,
-  data = df_logit_cond,
+  referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
+  data = df_logit,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_race4 <- feglm(
-  referral ~ same_sex + same_race + male_spec + exp_spec + same_prac + same_zip + diff_age + diff_gradyear | year + doctor,
-  data = df_logit_cond %>% filter(!is.na(same_school)),
+  referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
+  data = df_logit %>% filter(!is.na(same_school)),
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_race5 <- feglm(
-  referral ~ same_sex + same_race + male_spec + exp_spec + same_prac + same_zip + diff_age + diff_gradyear + same_school | year + doctor,
-  data = df_logit_cond %>% filter(!is.na(same_school)),
+  referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear + same_school | Year + doctor,
+  data = df_logit %>% filter(!is.na(same_school)),
   vcov = "HC1",
   family = binomial(link = "logit")
 )
@@ -93,28 +93,28 @@ mfx_logit_race5 <- avg_slopes(logit_race5)
 # TWFE Logit -------------------------------------------------------------------------------------------------
 
 logit_twfe1 <- feglm(
-  referral ~ same_sex + same_prac + same_zip + diff_age + diff_gradyear | year,
+  referral ~ same_sex + same_prac + diff_dist + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_twfe2 <- feglm(
-  referral ~ same_sex + same_prac + same_zip + same_race + diff_age + diff_gradyear | year,
+  referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_twfe3 <- feglm(
-  referral ~ same_sex + same_prac + same_zip + same_race + diff_age + diff_gradyear | year,
+  referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
   data = df_logit_twfe %>% filter(!is.na(same_school)),
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_twfe4 <- feglm(
-  referral ~ same_sex + same_prac + same_zip + same_race + diff_age + diff_gradyear + same_school | year,
+  referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear + same_school | year,
   data = df_logit_twfe %>% filter(!is.na(same_school)),
   vcov = "HC1",
   family = binomial(link = "logit")
@@ -143,10 +143,10 @@ models_logit <- list(
 # Custom coefficient labels to match your table rows
 coef_labels <- c(
   "same_sex" = "Same gender",
-  "male_spec" = "Male specialist",   
+  "spec_male" = "Male specialist",   
   "exp_spec" = "Specialist experience (10 years)",
   "same_prac" = "Same practice group",  
-  "same_zip" = "Same zip code",  
+  "dist_miles" = "Distance (miles)",  
   "diff_age" = "Similar age",
   "diff_gradyear" = "Similar experience",
   "same_school" = "Same medical school"
@@ -200,11 +200,11 @@ models_logit_race <- list(
 # Custom coefficient labels to match your table rows
 coef_labels <- c(
   "same_sex" = "Same gender",
-  "male_spec" = "Male specialist",   
+  "spec_male" = "Male specialist",   
   "exp_spec" = "Specialist experience (10 years)",
   "same_prac" = "Same practice group",
   "same_race" = "Same race",
-  "same_zip" = "Same zip code",  
+  "dist_miles" = "Distance (miles)",  
   "diff_age" = "Similar age",
   "diff_gradyear" = "Similar experience",
   "same_school" = "Same medical school"
@@ -260,7 +260,7 @@ coef_labels <- c(
   "same_sex" = "Same gender",
   "same_prac" = "Same practice group",
   "same_race" = "Same race",
-  "same_zip" = "Same zip code",  
+  "diff_dist" = "Differential distance",  
   "diff_age" = "Similar age",
   "diff_gradyear" = "Similar experience",
   "same_school" = "Same medical school"
