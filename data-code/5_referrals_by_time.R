@@ -10,7 +10,7 @@ df_move_dates <- df_movers %>%          # <- already excludes neighbour moves
     n_moves     = n_distinct(year),
     .groups     = "drop"
   ) %>%
-  filter(n_moves == 1)                  # keep single-move PCPs only
+  filter(n_moves == 1)
 
 ## merge movers with ALL referrals
 df_ref_initial_cuml <- df_full_referrals %>%    # every PCP–spec–year row
@@ -104,8 +104,9 @@ add_covars <- function(df) {
 }
 
 ## -- expand & attach referrals for EACH window -----------------
-final_ref_windows <- ref_windows %>%
-  group_by(window, Year, doc_hrr) %>%
+df_ref_windows <- df_full_referrals %>%
+  filter(doc_hrr==spec_hrr) %>%     
+  group_by(Year, doc_hrr) %>%
   summarise(
     combos = list(expand_grid(
       doctor     = unique(doctor),
@@ -113,19 +114,37 @@ final_ref_windows <- ref_windows %>%
     )),
     .groups = "drop"
   ) %>%
-  unnest(combos) %>%                           # all doctor–spec pairs
-  left_join(ref_windows %>%
-              distinct(window, doctor, specialist, Year) %>%
-              mutate(referral = 1L),
-            by = c("window", "doctor", "specialist", "Year")) %>%
-  mutate(referral = coalesce(referral, 0L)) %>%
-  select(-doc_hrr) %>%
-  add_covars()
+  select(Year, combos) %>%      # discard hrr_doc; keep only the list-col
+  unnest(combos)
+
+df_ref_windows <- df_ref_windows %>%
+  inner_join(df_move_dates,
+             by = c("doctor" = "npi")) %>%         # add move_year, origin, dest
+  mutate(years_since_move = Year - move_year) %>%  # 0 = year of move
+  filter(years_since_move >= 0) %>%                # keep move year and after
+  add_covars() %>%
+  filter(origin != spec_hrr) %>%                   # drop referrals back to origin
+  left_join(
+    df_full_referrals %>%                          # only observed referrals
+      distinct(doctor, specialist, Year) %>%
+      mutate(referral = 1L),
+    by = c("doctor", "specialist", "Year")
+  ) %>%
+  mutate(referral = coalesce(referral, 0L))       # convert NA → 0
+
+
+## split into 1- to 5-year “network” windows
+final_ref_windows <- map(1:5, function(k) {
+  df_ref_windows %>%
+    filter(years_since_move <  k) %>%              # <k ⇒ first k years
+    mutate(window = paste0("Up to year ", k))
+}) %>%
+  bind_rows()
 
 write_csv(final_ref_windows, "data/output/df_logit_windows.csv", na = "")
 
 
-# Construc quardruple data for each window ----------------------------
+# Construct quardruple data for each window ----------------------------
 
 covars <- c("same_sex","same_male","same_female",
             "same_race","same_white","same_black","same_asian","same_hisp",
@@ -195,13 +214,13 @@ make_block_win <- function(block) {
 }
 
 ## build quadruple data for every horizon window
-df_logit_windows <- final_ref_windows %>%
+df_jochmans_windows <- final_ref_windows %>%
   group_by(window, Year, doc_hrr) %>%
   group_split() %>%
   map_dfr(make_block_win)
 
 ## attach specialist quality and save
-df_logit_windows <- df_logit_windows %>%
+df_jochmans_windows <- df_jochmans_windows %>%
   ungroup() %>%
   left_join(spec_quality %>%
               rename(spec1_qual           = spec_qual,
@@ -212,4 +231,4 @@ df_logit_windows <- df_logit_windows %>%
                      spec2_total_patients = total_spec_patients),
             by = c("spec2" = "specialist"))
 
-write_csv(df_logit_windows, "data/output/df_logit_jochmans_windows.csv", na = "")
+write_csv(df_jochmans_windows, "data/output/df_jochmans_windows.csv", na = "")

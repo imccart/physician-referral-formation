@@ -152,4 +152,18 @@ source("data-code/1_referrals_full.R")  # full referral data set
 source("data-code/2_referrals_initial.R")  # referral data set among movers
 source("data-code/3_logit.R")  # logistic regression data set
 source("data-code/4_logit_jochmans.R")  # logistic regression data for TWFE (Jochmans, 2018)
+source("data-code/5_referrals_by_time.R")  # logistic regression data for TWFE (Jochmans, 2018)
 
+# Some quick checks ---------------------------------------------------
+old_one_year <- df_logit_final                       # original sample
+new_one_year <- df_logit_windows %>% 
+                 filter(window == "Up to year 1")
+
+bind_rows(
+  tibble(version = "old", n_rows = nrow(old_one_year)),
+  tibble(version = "new", n_rows = nrow(new_one_year))
+)
+
+anti_join(old_one_year, new_one_year,
+          by = c("doc1","spec1","doc2","spec2","year","hrr")) %>%
+  nrow()
