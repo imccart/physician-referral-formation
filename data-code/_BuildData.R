@@ -2,7 +2,7 @@
 ## Title:         Formation of Physician Referral Networks
 ## Author:        Ian McCarthy
 ## Date Created:  1/23/2025
-## Date Edited:   5/28/2025
+## Date Edited:   6/5/2025
 
 
 # Preliminaries -----------------------------------------------------------
@@ -154,9 +154,10 @@ source("data-code/3_logit.R")  # logistic regression data set
 source("data-code/4_logit_jochmans.R")  # logistic regression data for TWFE (Jochmans, 2018)
 source("data-code/5_referrals_by_time.R")  # logistic regression data for TWFE (Jochmans, 2018)
 
+
 # Some quick checks ---------------------------------------------------
-old_one_year <- df_logit_final                       # original sample
-new_one_year <- df_logit_windows %>% 
+old_one_year <- final_ref_movers                       # original sample
+new_one_year <- final_ref_windows %>% 
                  filter(window == "Up to year 1")
 
 bind_rows(
@@ -164,6 +165,6 @@ bind_rows(
   tibble(version = "new", n_rows = nrow(new_one_year))
 )
 
-anti_join(old_one_year, new_one_year,
-          by = c("doc1","spec1","doc2","spec2","year","hrr")) %>%
-  nrow()
+mismatch <- anti_join(old_one_year, new_one_year,
+              by = c("doctor","specialist","Year","doc_hrr")) 
+          

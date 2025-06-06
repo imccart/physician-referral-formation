@@ -14,6 +14,7 @@ df_move_dates <- df_movers %>%          # <- already excludes neighbour moves
 
 ## merge movers with ALL referrals
 df_ref_initial_cuml <- df_full_referrals %>%    # every PCP–spec–year row
+  filter(doc_hrr==spec_hrr) %>%
   inner_join(df_move_dates,
              by = c("doctor" = "npi")) %>%      # add move_year, origin, dest
   filter(origin != spec_hrr) %>%                # drop referrals back to origin
@@ -48,89 +49,11 @@ write.csv(ref_windows, "data/output/df_initial_referrals_cuml.csv", row.names=FA
 
 # Construct logit data analogously ----------------------------------------
 
-## -- helper that adds covariates & build X’s --------------------
-add_covars <- function(df) {
-  df %>%
-    left_join(df_mdppas %>% mutate(across(c(sex, birth, spec, zip, group,
-                                            hrr, hrrcity, hrrstate),
-                                          ~., .names = "doc_{.col}")) %>%
-                select(starts_with("doc_"), npi, year),
-              by = c("doctor" = "npi", "Year" = "year")) %>%
-    left_join(df_mdppas %>% mutate(across(c(sex, birth, spec, zip, group,
-                                            hrr, hrrcity, hrrstate),
-                                          ~., .names = "spec_{.col}")) %>%
-                select(starts_with("spec_"), npi, year),
-              by = c("specialist" = "npi", "Year" = "year")) %>%
-    left_join(df_race  %>% select(npi, spec_race = rf_pred_race),
-              by = c("specialist" = "npi")) %>%
-    left_join(df_race  %>% select(npi, doc_race  = rf_pred_race),
-              by = c("doctor"     = "npi")) %>%
-    left_join(df_phycompare %>%
-                select(npi, doc_grad_year  = grad_year,
-                             doc_med_school = med_school),
-              by = c("doctor"     = "npi")) %>%
-    left_join(df_phycompare %>%
-                select(npi, spec_grad_year = grad_year,
-                             spec_med_school = med_school),
-              by = c("specialist" = "npi")) %>%
-    left_join(zip_ll, by = c("doc_zip"  = "zip")) %>%
-    rename(lat_doc  = lat, lon_doc  = lon) %>%
-    left_join(zip_ll, by = c("spec_zip" = "zip")) %>%
-    rename(lat_spec = lat, lon_spec = lon) %>%
-    mutate(dist_km = geodist::geodist(
-                cbind(lon_doc,  lat_doc),
-                cbind(lon_spec, lat_spec),
-                paired  = TRUE,                # element-wise, not all-pairs
-                measure = "haversine") / 1000,  # convert metres → km
-         dist_miles = dist_km * 0.621371) %>%
-    select(-c(lat_doc, lon_doc, lat_spec, lon_spec, dist_km)) %>%
-    left_join(spec_quality, by = "specialist") %>%
-    mutate(
-      same_sex      = as.integer(doc_sex  == spec_sex),
-      same_male     = as.integer(doc_sex  == "M" & same_sex == 1),
-      same_female   = as.integer(doc_sex  == "F" & same_sex == 1),
-      same_race     = as.integer(doc_race == spec_race),
-      same_black    = as.integer(doc_race == "black"    & same_race == 1),
-      same_asian    = as.integer(doc_race == "asian"    & same_race == 1),
-      same_hisp     = as.integer(doc_race == "hispanic" & same_race == 1),
-      same_white    = as.integer(doc_race == "white"    & same_race == 1),
-      same_school   = as.integer(doc_med_school == spec_med_school),
-      same_prac     = as.integer(doc_group      == spec_group),
-      same_zip      = as.integer(doc_zip        == spec_zip),
-      diff_age      = abs(as.numeric(doc_birth)     - as.numeric(spec_birth)),
-      diff_gradyear = abs(as.numeric(doc_grad_year) - as.numeric(spec_grad_year)),
-      diff_dist     = abs(dist_miles)
-    )
-}
-
-## -- expand & attach referrals for EACH window -----------------
-df_ref_windows <- df_full_referrals %>%
-  filter(doc_hrr==spec_hrr) %>%     
-  group_by(Year, doc_hrr) %>%
-  summarise(
-    combos = list(expand_grid(
-      doctor     = unique(doctor),
-      specialist = unique(specialist)
-    )),
-    .groups = "drop"
-  ) %>%
-  select(Year, combos) %>%      # discard hrr_doc; keep only the list-col
-  unnest(combos)
-
-df_ref_windows <- df_ref_windows %>%
+df_ref_windows <- final_ref_big %>%
   inner_join(df_move_dates,
              by = c("doctor" = "npi")) %>%         # add move_year, origin, dest
   mutate(years_since_move = Year - move_year) %>%  # 0 = year of move
-  filter(years_since_move >= 0) %>%                # keep move year and after
-  add_covars() %>%
-  filter(origin != spec_hrr) %>%                   # drop referrals back to origin
-  left_join(
-    df_full_referrals %>%                          # only observed referrals
-      distinct(doctor, specialist, Year) %>%
-      mutate(referral = 1L),
-    by = c("doctor", "specialist", "Year")
-  ) %>%
-  mutate(referral = coalesce(referral, 0L))       # convert NA → 0
+  filter(years_since_move >= 0)                    # keep move year and after
 
 
 ## split into 1- to 5-year “network” windows

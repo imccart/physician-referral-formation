@@ -42,7 +42,7 @@ hrr_centroids <- gdf %>%
   rename(lon = X, lat = Y)
 
 
-flows <- movers %>% filter(!is.na(origin) & !is.na(destination)) %>% inner_join(df_initial_referrals %>% distinct(doctor), by = "doctor") %>%
+flows <- movers %>% filter(!is.na(origin) & !is.na(destination)) %>%
   group_by(origin, destination) %>%
   summarise(n_movers = n_distinct(doctor), .groups = "drop")
 
