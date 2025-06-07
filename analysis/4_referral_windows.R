@@ -165,7 +165,7 @@ nice_lab <- function(v)
 shape_labs <- sapply(plot_vars, nice_lab, USE.NAMES = FALSE)
 
 ## plot marginal effects vs horizon length
-dodge <- position_dodge(width = .40)
+dodge <- position_dodge(width = .30)
 
 ggplot(mfx_plot,
        aes(x = horizon, y = estimate,
@@ -187,8 +187,8 @@ ggplot(mfx_plot,
                      labels = shape_labs,
                      name   = "Covariate") +
 
-  scale_x_continuous(breaks = 1:5,
-                     labels = paste(1:5, "yr")) +
+  scale_x_continuous(breaks = 1:6,
+                     labels = paste(1:6, "yr")) +
 
   labs(x = "Years since move",
        y = "Average marginal effect") +

@@ -154,17 +154,3 @@ source("data-code/3_logit.R")  # logistic regression data set
 source("data-code/4_logit_jochmans.R")  # logistic regression data for TWFE (Jochmans, 2018)
 source("data-code/5_referrals_by_time.R")  # logistic regression data for TWFE (Jochmans, 2018)
 
-
-# Some quick checks ---------------------------------------------------
-old_one_year <- final_ref_movers                       # original sample
-new_one_year <- final_ref_windows %>% 
-                 filter(window == "Up to year 1")
-
-bind_rows(
-  tibble(version = "old", n_rows = nrow(old_one_year)),
-  tibble(version = "new", n_rows = nrow(new_one_year))
-)
-
-mismatch <- anti_join(old_one_year, new_one_year,
-              by = c("doctor","specialist","Year","doc_hrr")) 
-          

@@ -1,28 +1,35 @@
 # Construct referrals data by time period after move ---------------------------------
 
 ## prep: movers who switch HRR exactly once
-df_move_dates <- df_movers %>%          # <- already excludes neighbour moves
-  group_by(npi) %>%
-  summarise(
-    origin      = first(origin),        # unique because n_unique == 1
-    destination = first(destination),
-    move_year   = first(year),          # year of the unique move
-    n_moves     = n_distinct(year),
-    .groups     = "drop"
-  ) %>%
-  filter(n_moves == 1)
+move_intervals <- df_movers %>%          # one row per (doctor, move_year)
+  arrange(npi, year) %>%                 # chronological within doctor
+  group_by(npi) %>% 
+  mutate(
+    Year_start = year,
+    Year_end   = lead(year, default = 2018 + 1L) - 1L   # up to year before next move
+  ) %>% 
+  ungroup() %>%
+  transmute(
+    doctor    = npi,
+    move_year = Year_start,
+    Year_start,
+    Year_end,
+    origin,
+    destination
+  )
 
 ## merge movers with ALL referrals
 df_ref_initial_cuml <- df_full_referrals %>%    # every PCP–spec–year row
   filter(doc_hrr==spec_hrr) %>%
-  inner_join(df_move_dates,
-             by = c("doctor" = "npi")) %>%      # add move_year, origin, dest
+  inner_join(move_intervals,
+             by = "doctor",
+             relationship="many-to-many") %>%      # add move_year, origin, dest
   filter(origin != spec_hrr) %>%                # drop referrals back to origin
-  mutate(years_since_move = Year - move_year) %>%  # 0 = year of move
-  filter(years_since_move >= 0)                  # keep move year and after
+  filter(Year >= Year_start & Year <= Year_end) %>% 
+  mutate(years_since_move = Year - move_year) 
 
-## split into 1- to 5-year “network” windows
-ref_windows <- map(1:5, function(k) {
+## split into 0- to 5-year “network” windows
+ref_windows <- map(1:6, function(k) {
   df_ref_initial_cuml %>%
     filter(years_since_move >= 0,              # keep moves and after
            years_since_move <  k) %>%          # <k ⇒ first k years
@@ -30,10 +37,6 @@ ref_windows <- map(1:5, function(k) {
 }) %>%
   bind_rows()
 
-#  ref_windows now contains an extra column `window` taking values
-#  "Year0-0", "Year0-1", …, "Year0-4", so you can analyse the
-#  referral network in the 1-, 2-, …, 5-year horizon simply by
-#  filtering on `window`.
 
 ## example: count distinct specialists per PCP in each window
 net_size_by_window <- ref_windows %>%
@@ -50,14 +53,16 @@ write.csv(ref_windows, "data/output/df_initial_referrals_cuml.csv", row.names=FA
 # Construct logit data analogously ----------------------------------------
 
 df_ref_windows <- final_ref_big %>%
-  inner_join(df_move_dates,
-             by = c("doctor" = "npi")) %>%         # add move_year, origin, dest
-  mutate(years_since_move = Year - move_year) %>%  # 0 = year of move
-  filter(years_since_move >= 0)                    # keep move year and after
+  inner_join(move_intervals,
+             by = "doctor",
+             relationship="many-to-many") %>%      # add move_year, origin, dest
+  filter(origin != spec_hrr) %>%                   # drop referrals back to origin
+  filter(Year >= Year_start & Year <= Year_end) %>% 
+  mutate(years_since_move = Year - move_year) 
 
 
-## split into 1- to 5-year “network” windows
-final_ref_windows <- map(1:5, function(k) {
+## split into 1- to 6-year “network” windows
+final_ref_windows <- map(1:6, function(k) {
   df_ref_windows %>%
     filter(years_since_move <  k) %>%              # <k ⇒ first k years
     mutate(window = paste0("Up to year ", k))

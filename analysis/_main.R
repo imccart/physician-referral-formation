@@ -7,7 +7,7 @@
 
 # Preliminaries -----------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, marginaleffects, knitr, kableExtra, scales, broom, purrr)
+pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, marginaleffects, knitr, kableExtra, scales, broom, purrr, matrixStats)
 
 
 # Import data -------------------------------------------------------------
@@ -51,3 +51,4 @@ movers <- df_initial_referrals %>%
     group_by(doctor) %>%
     slice(1) %>%
     select(doctor, origin, destination)
+

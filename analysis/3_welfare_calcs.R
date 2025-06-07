@@ -1,47 +1,64 @@
 # Summarize results in terms of welfare costs -------------------------------------
 
-## extract coefficients from preferred logit model
-covars   <- c("same_sex", "same_prac", "diff_dist",
-              "same_race", "diff_age", "diff_gradyear",
-              "same_school")
+covars <- c("same_sex","same_prac","diff_dist",
+            "same_race","diff_age","diff_gradyear","same_school")
 
-beta_hat <- coef(logit_twfe4)[covars]         
+## baseline probabilities and shortfall ----------------------
+beta_hat <- as.numeric(coef(logit_twfe4)[covars])
 
 quartets <- df_logit_twfe %>%
-  rename(q1=spec1_qual, q2=spec2_qual)
+  transmute(hrr  = hrr,
+            q1       = as.numeric(spec1_qual),
+            q2       = as.numeric(spec2_qual),
+            across(all_of(covars)))
+
+Xmat    <- as.matrix(quartets[, covars])
+p_base  <- plogis(drop(Xmat %*% beta_hat))
+
+q_best     <- pmax(quartets$q1, quartets$q2)
+short_base <- q_best - (p_base * quartets$q1 + (1 - p_base) * quartets$q2)
+
+## helper for summary stats
+stat_vec <- function(x)
+  c(mean = mean(x, na.rm=TRUE), sd = sd(x, na.rm=TRUE),
+    q10  = quantile(x, .10, na.rm=TRUE), q25 = quantile(x, .25, na.rm=TRUE),
+    q50  = quantile(x, .50, na.rm=TRUE), q75 = quantile(x, .75, na.rm=TRUE),
+    q90  = quantile(x, .90, na.rm=TRUE))
+
+## 2.  HRR-level gains per covariate -----------------------------
+results <- map_dfr(seq_along(covars), function(j) {
+
+  beta_cf <- beta_hat; beta_cf[j] <- 0                      # shut off one term
+  p_cf    <- plogis(drop(Xmat %*% beta_cf))
+
+  short_cf <- q_best - (p_cf * quartets$q1 + (1 - p_cf) * quartets$q2)
+  delta    <- short_base - short_cf                        # positive ⇒ gain
+
+ hrr_summary <- quartets %>%
+    mutate(delta = delta) %>%
+    filter(.data[[v]] != 0) %>%                          # differential quartets
+    group_by(hrr) %>%
+    summarise(gain = mean(delta * 1000, na.rm = TRUE), .groups = "drop")
+
+  hrr_gain   <- hrr_summary$gain                    # numeric vector
+  n_markets  <- nrow(hrr_summary)                   # HRRs with ≥1 diff. quartet
+
+  tibble(
+    Variable = covars[j],
+    Markets  = n_markets,
+    !!!stat_vec(hrr_gain)                           # splice the named vector
+  )
+}) %>%
+  mutate(across(-c(Variable, Markets),
+                ~ formatC(.x, digits = 5, format = "f")))
+
+## LaTeX export
+welfare_summary <- kable(results,
+      format    = "latex",
+      booktabs  = TRUE,
+      align     = "lrrrrrrrr",
+      col.names = c("Variable","Markets","Mean","SD","P10","P25","P50","P75","P90")) %>%
+  kable_styling(latex_options = "hold_position")
 
 
-## predict choice probabilities with existing coefficient estimates
-Xmat     <- as.matrix(select(quartets, all_of(covars)))   # n × 7
-linpred  <- drop(Xmat %*% beta_hat)
-p_choose <- plogis(linpred)                               # P(referral to spec1)
-
-quartets <- quartets %>%
-  mutate(p       = p_choose,
-         q_best  = pmax(q1, q2),
-         q_exp   = p * q1 + (1 - p) * q2,
-         shortfall = q_best - q_exp)
-
-overall_EQS <- mean(quartets$shortfall, na.rm = TRUE)
-
-## counterfactual: set same practice to 0
-beta_cf <- beta_hat
-beta_cf["same_prac"] <- 0
-
-linpred_cf  <- drop(Xmat %*% beta_cf)
-p_choose_cf <- plogis(linpred_cf)
-
-quartets <- quartets %>%
-  mutate(p_cf      = p_choose_cf,
-         q_exp_cf  = p_cf * q1 + (1 - p_cf) * q2,
-         shortfall_cf = q_best - q_exp_cf)
-
-EQS_nopractice <- mean(quartets$shortfall_cf, na.rm = TRUE)
-
-## summarize results
-cat("Mean quality shortfall (baseline):       ",
-    comma(overall_EQS,  accuracy = .0001), "\n",
-    "Mean quality shortfall (same practice term set to 0): ",
-    comma(EQS_nopractice,    accuracy = .0001), "\n",
-    "Quality cost attributable to intra-practice referrals: ",
-    comma(overall_EQS - EQS_nopractice, accuracy = .0001), "\n")
+writeLines(as.character(welfare_summary), "results/welfare_summary.tex")
