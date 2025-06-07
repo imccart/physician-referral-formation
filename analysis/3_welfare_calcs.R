@@ -36,7 +36,7 @@ results <- map_dfr(seq_along(covars), function(j) {
 
  hrr_summary <- quartets %>%
     mutate(delta = delta) %>%
-    filter(.data[[v]] != 0) %>%                          # differential quartets
+    filter( !!sym(covars[j]) != 0 ) %>%                          # differential quartets
     group_by(hrr) %>%
     summarise(gain = mean(delta * 1000, na.rm = TRUE), .groups = "drop")
 
@@ -50,14 +50,14 @@ results <- map_dfr(seq_along(covars), function(j) {
   )
 }) %>%
   mutate(across(-c(Variable, Markets),
-                ~ formatC(.x, digits = 5, format = "f")))
+                ~ formatC(.x, digits = 3, format = "f")))
 
 ## LaTeX export
 welfare_summary <- kable(results,
       format    = "latex",
       booktabs  = TRUE,
       align     = "lrrrrrrrr",
-      col.names = c("Variable","Markets","Mean","SD","P10","P25","P50","P75","P90")) %>%
+      col.names = c("Variable","Relevant Markets","Mean","SD","P10","P25","P50","P75","P90")) %>%
   kable_styling(latex_options = "hold_position")
 
 

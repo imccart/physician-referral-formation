@@ -111,7 +111,7 @@ table_tex <- tbl_long %>%
                           "Dropped specialists")))
 
 ## 2.  LaTeX export
-col_hdr <- c("Statistic", paste("Year", 1:5))
+col_hdr <- c("Statistic", paste("Year", 1:6))
 
 table_tex %>%
   kable(format = "latex",
