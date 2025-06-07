@@ -52,7 +52,6 @@ link_stats <- ref_windows %>%
            doc_sex,   spec_sex,
            doc_race,  spec_race,
            dist_miles,
-           doc_med_school, spec_med_school,
            doc_grad_year, spec_grad_year) %>%
   mutate(horizon = len_from_window(window)) %>%
   group_by(horizon) %>%
@@ -60,7 +59,6 @@ link_stats <- ref_windows %>%
     pct_same_practice = mean(doc_group == spec_group, na.rm = TRUE),
     pct_same_gender   = mean(doc_sex   == spec_sex,   na.rm = TRUE),
     pct_same_race     = mean(doc_race  == spec_race,  na.rm = TRUE),
-    pct_same_school   = mean(doc_med_school == spec_med_school, na.rm = TRUE),
     mean_distance     = mean(dist_miles, na.rm = TRUE),
     mean_experience   = mean(abs(doc_grad_year - spec_grad_year), na.rm = TRUE),
     .groups = "drop"
@@ -84,7 +82,6 @@ summary_by_win <- link_stats %>%
     `Same practice`         = pct_same_practice,
     `Same gender`           = pct_same_gender,
     `Same race`             = pct_same_race,
-    `Same medical school`   = pct_same_school,
     `Mean distance (miles)` = mean_distance,
     `Mean experience (yrs)` = mean_experience,
     `PCP network size`      = pcp_network_size,
@@ -103,7 +100,6 @@ table_tex <- tbl_long %>%
   arrange(match(Metric, c("Same practice",
                           "Same gender",
                           "Same race",
-                          "Same medical school",
                           "Mean distance (miles)",
                           "Mean experience (yrs)",
                           "PCP network size",

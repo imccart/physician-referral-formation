@@ -234,7 +234,6 @@ link_stats <- df_full_referrals %>%
 pct_same_practice <- mean(link_stats$doc_group == link_stats$spec_group, na.rm = TRUE)
 pct_same_gender   <- mean(link_stats$doc_sex   == link_stats$spec_sex, na.rm = TRUE)
 pct_same_race     <- mean(link_stats$doc_race  == link_stats$spec_race, na.rm = TRUE)
-pct_same_school   <- mean(link_stats$doc_med_school  == link_stats$spec_med_school, na.rm = TRUE)
 mean_gradyear     <- mean(abs(link_stats$doc_grad_year - link_stats$spec_grad_year), na.rm = TRUE)
 mean_distance     <- mean(link_stats$dist_miles, na.rm = TRUE)
 
@@ -248,7 +247,6 @@ summary_tbl <- tibble(
   value   = c(scales::percent(pct_same_practice, accuracy = .1),
               scales::percent(pct_same_gender,   accuracy = .1),
               scales::percent(pct_same_race,     accuracy = .1),
-              scales::percent(pct_same_school,   accuracy = .1),
               round(mean_distance, 1),
               round(mean_gradyear, 1))
 )
@@ -263,7 +261,6 @@ link_summary <- function(df) {
       "Same practice"    = mean(same_prac,     na.rm = TRUE),
       "Same gender"      = mean(same_sex,      na.rm = TRUE),
       "Same race"        = mean(same_race,     na.rm = TRUE),
-      "Same school"      = mean(same_school,   na.rm = TRUE),
       "Distance (miles)" = mean(dist_miles,    na.rm = TRUE),
       "Experience (yr)"  = mean(diff_gradyear, na.rm = TRUE)
     )

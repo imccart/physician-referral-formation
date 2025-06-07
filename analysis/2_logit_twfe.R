@@ -22,29 +22,10 @@ logit3 <- feglm(
   family = binomial(link = "logit")
 )
 
-logit4 <- feglm(
-  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
-  data = df_logit %>% filter(!is.na(same_school)),
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
-logit5 <- feglm(
-  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear + same_school | Year + doctor,
-  data = df_logit %>% filter(!is.na(same_school)),
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
 
 mfx_logit1 <- avg_slopes(logit1)
 mfx_logit2 <- avg_slopes(logit2)
 mfx_logit3 <- avg_slopes(logit3)
-mfx_logit4 <- avg_slopes(logit4)
-mfx_logit5 <- avg_slopes(logit5)
-
-
-
 
 
 logit_race1 <- feglm(
@@ -68,27 +49,10 @@ logit_race3 <- feglm(
   family = binomial(link = "logit")
 )
 
-logit_race4 <- feglm(
-  referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
-  data = df_logit %>% filter(!is.na(same_school)),
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
-logit_race5 <- feglm(
-  referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear + same_school | Year + doctor,
-  data = df_logit %>% filter(!is.na(same_school)),
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
 
 mfx_logit_race1 <- avg_slopes(logit_race1)
 mfx_logit_race2 <- avg_slopes(logit_race2)
 mfx_logit_race3 <- avg_slopes(logit_race3)
-mfx_logit_race4 <- avg_slopes(logit_race4)
-mfx_logit_race5 <- avg_slopes(logit_race5)
-
 
 # TWFE Logit -------------------------------------------------------------------------------------------------
 
@@ -112,6 +76,7 @@ logit_twfe3 <- feglm(
   vcov = "HC1",
   family = binomial(link = "logit")
 )
+
 
 mfx_logit_twfe1 <- avg_slopes(logit_twfe1)
 mfx_logit_twfe2 <- avg_slopes(logit_twfe2)
@@ -141,9 +106,7 @@ link_effect(logit_twfe4, df_logit %>% rename(year=Year), "same_sex")
 models_logit <- list(
   "(1)" = mfx_logit1,
   "(2)" = mfx_logit2,
-  "(3)" = mfx_logit3,
-  "(4)" = mfx_logit4,
-  "(5)" = mfx_logit5
+  "(3)" = mfx_logit3
 )
 
 # Custom coefficient labels to match your table rows
@@ -154,26 +117,21 @@ coef_labels <- c(
   "same_prac" = "Same practice group",  
   "dist_miles" = "Distance (miles)",  
   "diff_age" = "Similar age",
-  "diff_gradyear" = "Similar experience",
-  "same_school" = "Same medical school"
+  "diff_gradyear" = "Similar experience"
 )
 
 # Additional rows for FE indicators and summary stats
 add_rows <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`,~`(4)`, ~`(5)`,
-  "Year FE", "Yes", "Yes", "Yes","Yes", "Yes",
-  "Doctor FE", "Yes", "Yes","Yes","Yes", "Yes",
-  "Specialist FE", "No", "No", "No", "No", "No",
+  ~term, ~`(1)`, ~`(2)`, ~`(3)`,
+  "Year FE", "Yes", "Yes", "Yes",
+  "Doctor FE", "Yes", "Yes","Yes",
+  "Specialist FE", "No", "No", "No",
   "Observations", format(nobs(logit1), big.mark=","), 
                   format(nobs(logit2), big.mark=","), 
                   format(nobs(logit3), big.mark=","), 
-                  format(nobs(logit4), big.mark=","), 
-                  format(nobs(logit5), big.mark=","),
   "Pseudo-$R^2$", format(logit1$pseudo_r2, digits = 2),
                   format(logit2$pseudo_r2, digits = 2),
-                  format(logit3$pseudo_r2, digits = 2),
-                  format(logit4$pseudo_r2, digits = 2),
-                  format(logit5$pseudo_r2, digits = 2)
+                  format(logit3$pseudo_r2, digits = 2)
 )
 
 
@@ -198,9 +156,7 @@ writeLines(as.character(summary_logit), "results/app_logit_mfx.tex")
 models_logit_race <- list(
   "(1)" = mfx_logit_race1,
   "(2)" = mfx_logit_race2,
-  "(3)" = mfx_logit_race3,
-  "(4)" = mfx_logit_race4,
-  "(5)" = mfx_logit_race5
+  "(3)" = mfx_logit_race3
 )
 
 # Custom coefficient labels to match your table rows
@@ -212,26 +168,21 @@ coef_labels <- c(
   "same_race" = "Same race",
   "dist_miles" = "Distance (miles)",  
   "diff_age" = "Similar age",
-  "diff_gradyear" = "Similar experience",
-  "same_school" = "Same medical school"
+  "diff_gradyear" = "Similar experience"
 )
 
 # Additional rows for FE indicators and summary stats
 add_rows <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`,~`(4)`, ~`(5)`,
-  "Year FE", "Yes", "Yes", "Yes","Yes", "Yes",
-  "Doctor FE", "Yes", "Yes","Yes","Yes", "Yes",
-  "Specialist FE", "No", "No", "No", "No", "No",
+  ~term, ~`(1)`, ~`(2)`, ~`(3)`,
+  "Year FE", "Yes", "Yes", "Yes",
+  "Doctor FE", "Yes", "Yes","Yes",
+  "Specialist FE", "No", "No", "No",
   "Observations", format(nobs(logit_race1), big.mark=","), 
                   format(nobs(logit_race2), big.mark=","), 
                   format(nobs(logit_race3), big.mark=","), 
-                  format(nobs(logit_race4), big.mark=","), 
-                  format(nobs(logit_race5), big.mark=","),
   "Pseudo-$R^2$", format(logit_race1$pseudo_r2, digits = 2),
                   format(logit_race2$pseudo_r2, digits = 2),
-                  format(logit_race3$pseudo_r2, digits = 2),
-                  format(logit_race4$pseudo_r2, digits = 2),
-                  format(logit_race5$pseudo_r2, digits = 2)
+                  format(logit_race3$pseudo_r2, digits = 2)
 )
 
 
