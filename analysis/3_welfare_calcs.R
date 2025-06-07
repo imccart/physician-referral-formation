@@ -1,10 +1,10 @@
 # Summarize results in terms of welfare costs -------------------------------------
 
 covars <- c("same_sex","same_prac","diff_dist",
-            "same_race","diff_age","diff_gradyear","same_school")
+            "same_race","diff_age","diff_gradyear")
 
 ## baseline probabilities and shortfall ----------------------
-beta_hat <- as.numeric(coef(logit_twfe4)[covars])
+beta_hat <- as.numeric(coef(logit_twfe3)[covars])
 
 quartets <- df_logit_twfe %>%
   transmute(hrr  = hrr,

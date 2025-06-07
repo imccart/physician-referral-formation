@@ -108,7 +108,7 @@ new_cols  <- c("npi", "gender", "med_school", "grad_year",
 years      <- 2013:2018
 pc_files   <- sprintf("data/input/Physician_Compare/%d/%d_Q4.csv", years, years)
 
-df_phycompare <-
+df_pc_full <-
   map2_dfr(pc_files, years, \(file, yr) {
 
     readr::read_csv(
@@ -124,7 +124,7 @@ df_phycompare <-
   })
 
 
-df_phycompare <- df_phycompare %>%
+df_pc_full <- df_pc_full %>%
   distinct() %>%                                     # drop exact duplicate rows
   mutate(across(everything(),
                 ~ na_if(trimws(.x), ""))) %>%        # blank → NA
@@ -135,14 +135,15 @@ df_phycompare <- df_phycompare %>%
   )
 
 
-df_phycompare <- df_phycompare %>%          # object from the previous step
-  arrange(year) %>%                         # ensure earlier years come first
-  group_by(npi) %>%                         
-  slice_tail(n = 1) %>%                     
+df_phycompare <- df_pc_full %>% 
+  distinct(npi) %>%
+  left_join(df_pc_full %>% filter(!is.na(grad_year)) %>%
+            arrange(year) %>% group_by(npi) %>% slice_tail(n=1) %>%
+            select(npi, grad_year) %>% ungroup(), by="npi") %>%
+  left_join(df_pc_full %>% filter(!is.na(med_school) & med_school!="OTHER") %>%
+            arrange(year) %>% group_by(npi) %>% slice_tail(n=1) %>%
+            select(npi, med_school) %>% ungroup(), by="npi") %>%
   ungroup() %>%
-  mutate(
-    med_school = na_if(med_school, "OTHER")
-  ) %>%
   select(npi, grad_year, med_school)
 
 

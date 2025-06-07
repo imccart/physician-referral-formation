@@ -93,14 +93,14 @@ mfx_logit_race5 <- avg_slopes(logit_race5)
 # TWFE Logit -------------------------------------------------------------------------------------------------
 
 logit_twfe1 <- feglm(
-  referral ~ same_sex + same_prac + diff_dist + diff_age + diff_gradyear | year,
+  referral ~ same_sex + same_prac + diff_dist  | year,
   data = df_logit_twfe,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
 
 logit_twfe2 <- feglm(
-  referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
+  referral ~ same_sex + same_prac + diff_dist + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
   vcov = "HC1",
   family = binomial(link = "logit")
@@ -108,23 +108,29 @@ logit_twfe2 <- feglm(
 
 logit_twfe3 <- feglm(
   referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
-  data = df_logit_twfe %>% filter(!is.na(same_school)),
+  data = df_logit_twfe,
   vcov = "HC1",
   family = binomial(link = "logit")
 )
-
-logit_twfe4 <- feglm(
-  referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear + same_school | year,
-  data = df_logit_twfe %>% filter(!is.na(same_school)),
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
 
 mfx_logit_twfe1 <- avg_slopes(logit_twfe1)
 mfx_logit_twfe2 <- avg_slopes(logit_twfe2)
 mfx_logit_twfe3 <- avg_slopes(logit_twfe3)
-mfx_logit_twfe4 <- avg_slopes(logit_twfe4)
+
+
+link_effect <- function(model, data, var){
+  # var is one of the original *_ij covariates, not the quartet contrast
+  data_cf0 <- data
+  data_cf0[[var]] <- 0L
+  data_cf1 <- data
+  data_cf1[[var]] <- 1L
+  p1 <- predict(model, newdata = data_cf1, type = "response")
+  p0 <- predict(model, newdata = data_cf0, type = "response")
+  diff <- mean(p1 - p0, na.rm=TRUE)
+  scales::comma(diff, accuracy = 0.00001)   
+}
+
+link_effect(logit_twfe4, df_logit %>% rename(year=Year), "same_sex")
 
 
 # Summary of Conditional Logit Models -------------------------------------------------------------------------------
@@ -251,8 +257,7 @@ writeLines(as.character(summary_logit_race), "results/app_logit_race_mfx.tex")
 models_twfe <- list(
   "(1)" = mfx_logit_twfe1,
   "(2)" = mfx_logit_twfe2,
-  "(3)" = mfx_logit_twfe3,
-  "(4)" = mfx_logit_twfe4
+  "(3)" = mfx_logit_twfe3
 )
 
 # Custom coefficient labels to match your table rows
@@ -262,24 +267,21 @@ coef_labels <- c(
   "same_race" = "Same race",
   "diff_dist" = "Differential distance",  
   "diff_age" = "Similar age",
-  "diff_gradyear" = "Similar experience",
-  "same_school" = "Same medical school"
+  "diff_gradyear" = "Similar experience"
 )
 
 # Additional rows for FE indicators and summary stats
 add_rows <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`,~`(4)`, 
-  "Year FE", "Yes", "Yes", "Yes","Yes", 
-  "Doctor FE", "Yes", "Yes","Yes","Yes", 
-  "Specialist FE", "Yes", "Yes", "Yes", "Yes",
+  ~term, ~`(1)`, ~`(2)`, ~`(3)`, 
+  "Year FE", "Yes", "Yes", "Yes",
+  "Doctor FE", "Yes", "Yes","Yes",
+  "Specialist FE", "Yes", "Yes", "Yes",
   "Observations", format(nobs(logit_twfe1), big.mark=","), 
                   format(nobs(logit_twfe2), big.mark=","), 
                   format(nobs(logit_twfe3), big.mark=","),
-                  format(nobs(logit_twfe4), big.mark=","),
   "Pseudo-$R^2$", format(logit_twfe1$pseudo_r2, digits = 2),
                   format(logit_twfe2$pseudo_r2, digits = 2),
-                  format(logit_twfe3$pseudo_r2, digits = 2),
-                  format(logit_twfe4$pseudo_r2, digits = 2)
+                  format(logit_twfe3$pseudo_r2, digits = 2)
 )
 
 
