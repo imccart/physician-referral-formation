@@ -1,22 +1,29 @@
-\begin{tabular}{llll}
-\hline
-& (1) & (2) & (3) \\ \hline
-Same gender                        & 0.071   & 0.074   & 0.072   \\
-& (0.026) & (0.025) & (0.025) \\
-Same practice group                & 0.361   & 0.358   & 0.358   \\
-& (0.034) & (0.034) & (0.034) \\
-Same race                          &         &         & 0.031   \\
-&         &         & (0.022) \\
-Differential distance              & -0.013  & -0.013  & -0.013  \\
-& (0.000) & (0.000) & (0.000) \\
-Similar age                        &         & 0.003   & 0.003   \\
-&         & (0.001) & (0.001) \\
-Similar experience                 &         & -0.001  & -0.001  \\
-&         & (0.001) & (0.001) \\
-Year FE                            & Yes     & Yes     & Yes     \\
-Doctor FE                          & Yes     & Yes     & Yes     \\
-Specialist FE                      & Yes     & Yes     & Yes     \\
-Observations                       & 7,155   & 7,066   & 7,064   \\
-Pseudo-\$R\textasciicircum{}2\$ & 0.35    & 0.35    & 0.35    \\
-\hline
+\begin{table}[!h]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+ & (1) & (2) & (3)\\
+\midrule
+Same gender & 0.05118 & 0.05687 & 0.05802\\
+ & (0.01999) & (0.02091) & (0.02169)\\
+Same practice group & 0.31688 & 0.31932 & 0.31922\\
+ & (0.03052) & (0.02988) & (0.02924)\\
+Same race &  &  & 0.02475\\
+\addlinespace
+ &  &  & (0.01785)\\
+Differential distance (+5 miles) & -0.04569 & -0.04852 & -0.05049\\
+ & (0.00169) & (0.00160) & (0.00200)\\
+Similar age (+1 yr) &  & 0.00254 & 0.00267\\
+ &  & (0.00071) & (0.00074)\\
+\addlinespace
+Similar experience (+1 yr) &  & -0.00079 & -0.00086\\
+ &  & (0.00064) & (0.00066)\\
+Year FE & Yes & Yes & Yes\\
+Doctor FE & Yes & Yes & Yes\\
+Specialist FE & Yes & Yes & Yes\\
+\addlinespace
+Observations & 7,155 & 7,066 & 7,064\\
+Pseudo-\$R\textasciicircum{}2\$ & 0.35 & 0.35 & 0.35\\
+\bottomrule
 \end{tabular}
+\end{table}
