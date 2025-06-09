@@ -175,9 +175,10 @@ q75_tbl <- dat %>%
   summarise(q75 = quantile(spec_qual, .75, na.rm=TRUE), .groups="drop")
 
 dat_q <- dat %>% left_join(q75_tbl, by="hrr")
-adv0   <- p0 * (1 - dat_q$spec_qual)
-advC   <- (1 - dat_q$q75)
-delta_C <- (advC - adv0) * 1000
+#adv0   <- p0 * (1 - dat_q$spec_qual)
+#advC   <- (1 - dat_q$q75)
+#delta_C <- (advC - adv0) * 1000
+delta_C <- p0*(dat_q$spec_qual - dat_q$q75) * 1000
 
 C_by_hrr <- dat |>
   mutate(delta = delta_C) |>

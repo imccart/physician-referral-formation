@@ -348,8 +348,8 @@ make_block <- function(var) {
   cell <- function(mod, what) {
     val <- ests[[what]][ests$model == mod]
     if (length(val) == 0 || is.na(val)) return(" ")
-    if (what == "estimate") comma(val, accuracy = 0.00001)
-    else                    paste0("(", comma(val, accuracy = 0.00001), ")")
+    if (what == "estimate") comma(val, accuracy = 0.001)
+    else                    paste0("(", comma(val, accuracy = 0.001), ")")
   }
 
   tibble(
