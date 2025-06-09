@@ -203,7 +203,7 @@ welfare_tbl <- bind_rows(panels_AB, panelC) |>
                       Variable)
   ) |>
   mutate(across(-c(Variable, Panel, Markets),
-                ~ formatC(.x, digits = 5, format = "f"))) |>
+                ~ formatC(.x, digits = 2, format = "f"))) |>
   arrange(match(Panel, panel_order),
           match(Variable, c(unname(nice_lab), "All channels")))
 
