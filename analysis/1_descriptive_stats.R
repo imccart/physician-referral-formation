@@ -238,20 +238,21 @@ mean_gradyear     <- mean(abs(link_stats$doc_grad_year - link_stats$spec_grad_ye
 mean_distance     <- mean(link_stats$dist_miles, na.rm = TRUE)
 
 summary_tbl <- tibble(
-  metric  = c("Same practice",
+  metric  = c("Network density",
+              "Same practice",
               "Same gender",
               "Same race",
               "Mean distance (miles)",
               "Mean experience gap (years)"),
-  value   = c(scales::percent(pct_same_practice, accuracy = .1),
-              scales::percent(pct_same_gender,   accuracy = .1),
-              scales::percent(pct_same_race,     accuracy = .1),
+  value   = c(round(network_density, 3),
+              round(pct_same_practice, 3),
+              round(pct_same_gender, 3),
+              round(pct_same_race, 3),
               round(mean_distance, 1),
               round(mean_gradyear, 1))
 )
 
-network_density
-summary_tbl
+write_csv(summary_tbl, "results/tables/inline_stats.csv")
 
 ## Describing observed and unobserved links
 link_summary <- function(df) {
