@@ -1,0 +1,149 @@
+\documentclass[12pt]{article}
+\usepackage[right=1.0in,left=1.0in,top=1.0in,bottom=1.0in]{geometry}
+\usepackage{hyperref}
+\hypersetup{colorlinks, citecolor=blue, filecolor=blue, linkcolor=blue, urlcolor=blue}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[round]{natbib}
+\usepackage{amsmath,amsthm} 
+\usepackage{engord}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{pdflscape}
+\usepackage{booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.14}
+\pgfplotsset{every axis label/.append style={font=\tiny}}
+\usepackage[labelsep=period]{caption} %% This switches "Table 1: Title" to "Table 1. Title"
+
+\usepackage{amssymb} %% Necessary, just for the \checkmark command  in tables.
+\usepackage{multirow} %% Necessary if we are doing tables in LaTeX
+
+% Math environments
+\newcommand{\m}[1]{\mathbf{#1}}
+\newcommand{\h}[1]{\widehat{#1}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+
+\usepackage{xr}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+\subsubsectionfont{\normalsize}
+
+\newcommand{\specialcell}[2][c]{\begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{ \vspace*{-2.5cm} \hspace*{-0.5cm} Research Ideas on Physicians
+}
+
+\author{Pablo Estrada\thanks{Emory University.
+\href{mailto:pablo.estrada@emory.edu}{pablo.estrada@emory.edu}}
+}
+
+\date{ \vspace*{0.5cm} \today} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\bgroup
+\let\footnoterule\relax
+
+\maketitle
+
+
+
+\section{Quality in Healthcare}
+
+\subsection{Teamwork and Physicians}
+
+\textbf{Chan (2021) [AEJAE]} 
+
+\textbf{Chan and Chen (2022) [WP]} 
+
+\textbf{Silver (2021) [RESTUD]} 
+
+\textbf{Bartel (2014) [AEJAE]} 
+
+\textbf{Epstein (2016) [AJHE]} 
+
+\textbf{Chen (2021) [AER]} studies whether team members' past collaboration creates team-specific human capital and influences current team performance. To estimate the causal effect of past collaboration experience, she uses two strategies. The first one leverages within-proceduralist (surgeon) variation in shared work experience among patients admitted to the hospital through the emergency department (ED). The second one specifies a two-way fixed effects model that includes proceduralist fixed effects, physician fixed effects, and a variable tracking shared work experience. She finds that team performance improves when proceduralists and physicians accumulate experience working with each other. This paper provides the first evidence that, even holding medical technology and the pool of health care providers fixed, reorganizing provider teams based on collaboration histories can significantly improve patient survival.
+
+\textbf{Chan (2016) [JPE]} shows theoretically that teamwork can reduce moral hazard by allowing workers to make use of better information about each other. He uses a natural experiment in which the same emergency department (ED) physicians work in two different organizational systems that differ only in the extent to which physicians manage work together. He finds that physicians perform 11–15 percent faster in the self-managed system than in the nurse-managed system. He provides direct evidence for foot-dragging (appearing busier than you are and keeping patients longer than necessary) by showing that physicians are slower to handle current patients when the expected future workload is higher.
+
+\subsection{Quality in Hospitals and SNFs}
+
+\textbf{Chandra et al (2016) [AER]} investigate empirically whether and to what extent higher performing hospitals tend to attract greater market share. They define hospital performance or ``quality'' as the ability of the hospital to generate good health outcomes, patient beliefs about the hospital’s ability to generate good health outcomes, and patient satisfaction with the hospital experience. In practice, they examine several different hospital quality measures: clinical outcomes (survival and readmission), conformance with processes of care (i.e., adherence to well-established practice guidelines), and ex post measures of patients' satisfaction with their experience (such as whether the room was quiet and whether nurses communicated well).
+
+\textbf{Doyle et al (2019) [RESTAT]} test whether patients treated at hospitals that score higher on commonly used quality measures have better health outcomes. To compare similar patients across hospitals in the same market, we exploit ambulance company preferences as an instrument for hospital choice. The measures of hospital quality they consider are defined across three dimensions: process measures of timely and effective care, self-reported patient experience of care measures, and risk-standardized rates of patient outcomes. These measures are correlated with hospital characteristics. They take the ambulance instrument from Doyle et al (2015) [JPE]. Hull (2020) improves their measure of quality using their instrumental variable. Gowrinsakaran and Town (2003) are the first ones to look at hospital quality.
+
+\textbf{Finkelstein et al (2022) [WP]} construct a measure of patient health to estimate nursing home value added in improving this health measure for about 14,000 nursing homes. They use the estimates to examine heterogeneity in nursing home quality across and within markets. Their finding of substantial heterogeneity in quality across markets suggests that there may be scope to improve the quality of care in low-value-added regions. Moreover, their findings of substantial variation in value added within markets is particularly encouraging, since there are likely more policy levers for encouraging reallocating patients within markets than across them. Cornell et al (2019) [JHE] test whether going to a skilled nursing facility (SNF) with a higher star rating leads to better quality outcomes for a patient.
+
+\subsection{Methods}
+
+\textbf{Bonhomme et al (2022) [JLE]} describe the problems that arise from estimating a statistical model with employer-employee data that quantifies the contribution of workers and firms to earning inequality. This is also called AKM model for Abowd, Kramarz, and Margolis (1999). AKM showed how to estimate worker and firm effects using a fixed-effects (FE) estimator. The resulting estimates can then be used to decompose the variance of log-earnings into the contributions of worker heterogeneity, firm heterogeneity, and sorting of high-wage workers to high-paying firms. The sensitivity of the FE estimator to the incidental parameter problem that arises in the AKM model is often referred as ``limited mobility bias''. They conclude that limited mobility bias is empirically important and existing methods for bias correction perform well even as mobility becomes very limited.
+
+\textbf{Chetty et al (2014) [AER]} looks at how can we measure and improve the quality of teaching in primary schools. They construct value-added (VA) estimates for teachers. They predict each teacher's VA in a given school-year based on the mean test scores of students she taught in other years. They include fluctuations on teacher quality over time. Rothstein (2010) [QJE] has a critical review. Jackson et al (2014) [ARE] surveys the literature.
+
+\textbf{Jackson and Bruegmann (2009) [AEJAE]} estimate a student achievement value-added model with the inclusion of teacher peer attributes as covariates. They define a teacher’s peers to be all other teachers at the same school with students in the same grade. They identify the effect of peers by comparing the changes in the test scores of a teacher's students over time as her peers (and therefore the characteristics of her peers) change within the same school, while controlling for school-specific time shocks. Opper (2019) [AER] also looks at this.
+
+\textbf{Braun and Verdier (2022) [JoE]} proposes an approach to estimate peer effect models with fixed individual effects. They consider identification when the researcher has access to panel data and is willing to assume that homophily originates from time-constant unobserved characteristics, while transitory shocks are exogenous to group membership. For instance, using worker-firm mathed data, their model would account for patterns of sorting of high productivity workers to high productivity firms, common shocks to productivity at the firm level, and social interactions occurring through unobserved worker productivity types, as long as predictive characteristics such as education level or past wages are observed. 
+
+
+
+\clearpage
+
+\section{Care Fragmentation}
+
+In health care, close coordination improves both health outcomes and its efficiency. One specific dimension of fragmentation is the dispersion of care across multiple providers.\footnote{Another important dimension of fragmentation captures information flow disruptions among the providers involved in a patient’s care.} The key challenge to determine the effects of fragmentation of care is to disentangle the endogeneity produced by sicker patients looking for more providers. Therefore, patients may look more fragmented and have worse health outcomes at higher costs.
+
+Baicker and Chandra (2004) mention that one dimension in which the production of health care in different parts of the country
+varies widely is the use of specialists (e.g., cardiologists, gastroenterologist). Coordination failure imposes the externality that each specialist may compromise the quality of care provided by other physicians, which is a negative spillover that may also lead to too much specialization.
+
+Cebull et al. (2008) report that patients with diabetes see a median of eight physicians in five distinct medical practices. Patients with coronary artery diseases see a median of ten physicians in six distinct practices. Moreover, the physician providing the most care is not constant from one year to the next.
+
+Frandsen et al. (2015) [AJMC] use claims data to construct measures of fragmentation. They assigned each patient a fragmentation index based on the care patterns of their primary care provider (PCP). Specifically, for each patient they calculated the fragmentation of their PCP’s other patients, excluding that particular patient. They found that patients of PCPs with high fragmentation had higher rates of preventable hospitalizations. High fragmentation was associated with \$4542 higher healthcare spending.
+
+Agha et al. (2019) [JPubE] find that the causal effects of location on both individual care fragmentation and utilization are positively correlated with regional fragmentation. Conceptually, you can think on two stages. The first stage identifies the causal effects of regions on health outcomes by exploiting the variation of individuals who move between regions. The second stage identifies the contribution of fragmentation to these regional effects by controlling for relevant observable regional characteristics. The main critic is that they do not have a source of quasi-random variation in regional fragmentation that is plausibly orthogonal to other characteristics of regional medical practice.
+
+
+
+\clearpage
+
+\section{Vertical Integration and Referral Patterns}
+
+Waley et al. (2021) [HA] examine the association of PCP's vertical integration status with site of care and Medicare payments for diagnostic tests.
+
+Baker et al. (2016) [JHE] estimate a conditional logit model that specify the probability of a patient choosing a particular hospital as a function of characteristics of the hospital, the physician, and interactions between the two. The SK\&A data contain whether or not the physician is part of a practice that is owned by a hospital, and if s/he is, the name and state of that hospital.
+
+Carlin et al. (2016) [HE] estimate changes in referral patterns for inpatient admissions and outpatient diagnostic imaging as a result of major changes in ownership of physician practices.
+
+Clemens and Gottlieb (2014) [AER] study how changes in physicians' financial incentives influence the quantity, composition, and value of health care they provide. They use e use payment changes to estimate the effect of prices on care provision, the utilization of advanced technologies, and patient health.
+
+Young et al. (2021) [HA] investigate whether hospital-physician integration is associated with inappropriate referrals for MRI. Most patients who received an MRI referral by an employed physician obtained the procedure at the hospital where the referring physician was employed.
+
+Richards et al. (2022) [JHE] employ an event study to quantify how physicians' treatment setting choices and related outcomes respond to being newly acquired by a local hospital or health system. They use detailed physician practice ownership information from 2009 to 2015 linked to the universe of outpatient discharge records in Florida over this same period.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\begin{singlespace}
+\bibliographystyle{aer}
+\bibliography{BibTeX_Library}
+\end{singlespace}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\end{document}

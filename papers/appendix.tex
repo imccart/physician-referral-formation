@@ -1,0 +1,226 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb,amsmath,pgf,setspace,comment,multicol,verbatim,titling,pdflscape,url,booktabs}
+\usepackage[labelfont=bf]{caption}
+\usepackage[left=1in,right=1in,top=1in,bottom=0.75in]{geometry}
+\usepackage[round]{natbib}
+\bibliographystyle{aer}
+\setstretch{1.5}
+
+\setlength{\droptitle}{-50pt}
+\begin{document}
+
+\title{Formation of Physician Referral Networks: Drivers and Potential Consequences \\
+SUPPLEMENTAL APPENDIX}
+\author{%
+  \setlength{\tabcolsep}{2em}           % horizontal gap between columns
+  \renewcommand{\arraystretch}{1}        % line spacing inside cells
+  \begin{tabular}{cc}
+    % -------------- first row ---------------------------------
+    \begin{tabular}[t]{c}
+      Ian M.\ McCarthy \\[-1.5ex]
+      \emph{Emory University} \\[-1.5ex]
+      \emph{NBER}
+    \end{tabular} &
+    \begin{tabular}[t]{c}
+      Shirley Cai \\[-1.5ex]
+      \emph{Emory University}
+    \end{tabular} \\[2.5ex]
+    % -------------- second row --------------------------------
+    \begin{tabular}[t]{c}
+      Pablo Estrada \\[-1.5ex]
+      \emph{Capital One}
+    \end{tabular} &
+    \begin{tabular}[t]{c}
+      Jillian Wilkins \\[-1.5ex]
+      \emph{Emory University}
+    \end{tabular}
+  \end{tabular}}
+
+\date{%
+May 2025 \\
+\textbf{Preliminary and Incomplete}
+}
+\maketitle
+
+\section{Race Predictions}
+\label{sec:race}
+
+% Discussion of NPI sources and predictions
+Our set of physicians is built from the Medicare Data on Provider Practice and Specialty (MDPPAS) and the National Provider Identifier (NPI) dataset from CMS. These combine to over 4 million physicians and other healthcare providers. Additionally, we use a web scraping of physician images from the physician networking service Zocdoc. However in these provided data, reporting race is not always included. To overcome this, we use several prediction methods to assign physician race, each of which will be discussed in detail in this section. 
+
+%Discuss Name Prism 
+Name prism is a publicly-available classification tool to predict race and ethnicity from first and last names designed by Junting Ye and Steven Skiena at Stony Brook University and Yifan Hu, at Amazon. Previous name-based classifiers have been limited to access of only small, unrepresentative sets of names. The Name Prism system was designed through an analysis of 57 million contact lists to overcome this challenge that other name-based nationality classifiers faced. Name Prism relies on the principle of homophily, that people more often associate with individuals of a similar background. They introduce name embeddings, which refers to the syntax of the other names found in the context of one's own name, i.e. their contact list. The Name Prism algorithm then generates a probability a name is a specific nationality based on the names in the training data, the name embeddings of the contact list, their own name prefix/suffix strings, and their own name characters that are of the same language as names in the training data. 
+
+% Discuss WRU 
+The "Who are you", WRU, algorithm is a Bayesian prediction of racial category using surname, first name, middle name, and geolocation. Given this information, this package will predict an individuals race/ethnicity utilizing Bayes rule to calculate the posterior probability of each racial category. This method was built from census data and improved to address two problems in predictions that arose specifically for minorities. The first problem is that the census often reports a count of 0 for minorities, even in locations where members of those groups do reside. Second, many of the surnames for minority individuals are missing. The most recent edition, the fully Bayesian Improved Surname Geocoding (fBISG) methodology described in Imai, Olivella, and Rosenman (2022), addresses these concerns and improves the accuracy of race predictions specifically for racial minorities. 
+
+% Discuss Zocdoc Web Scraping 
+A third prediction method comes from physician pictures from the networking service Zocdoc. We web scraped physician profiles for a user photograph, name, and location. Then for each profile-photo pair, we predicted physician race using the deepface package. This gave us a physicians first and last name, location, and race predictions. We then combined this information with our existing MDPPAS and NPPES data by matching physicians based on first and last name and zip code. In some cases, users would also self report their ethnicity in their profile. These observations became part of our validation sets for later accuracy assessment. 
+
+% Changes to categories 
+Name Prism provides a probability that a given name is asian, api, black, hispanic, white, or other. WRU provides probabilities for asian, black, hispanic, white, or other. The deepface facial recognition used on the Zocdoc web scraping method gave probabilities for asian, black, indian, latino/hispanic, middle eastern, white, or other based on a photo of the individual. For consistency across methods, we consolidate api and asian into asian, rename latino/hispanic to hispanic, and combine indian and middle eastern into other. 
+
+% Random Forest 
+To form an aggregate prediction from these different existing predictions, we trained a random forest classifier using the Ranger package to predict a person's race given the maximum amount of existing predictions from the other methods. The goal was to combine these multiple predictions into a single race prediction for each physician. A random forest was fitted using the combination of predictor variables available. For example, a random forest was fit based on observations that had predictions from deepface, Name Prism, and WRU. This will be referred to as our Full random forest. Then another random forest, Name Based, was fit based on observations that had predictions from Name Based and WRU. The trade off we face between the Full and the Name Based random forest is accuracy and sample size. The Full random forest results in an overall accuracy of 89\% for over 58,000 physicians. This is a higher accuracy but available for a lower sample size than the Name Based model, which has an overall accuracy of 82\% for over 990,000 physicians. 
+
+% Truth Data 
+We have compiled information of a person's true race from three sources: Florida voter files, Texas license data, and reported race from web scraping of Zocdoc profiles. This truth data set allows us to determine the accuracy of each of these methods for our physician sample. The Florida voter files and Texas license data were merged with our physician set and matched based on full name and zip code. This resulted in a set of physicians with their true race, making up our validation set and allowing us to train the random forests. For the Full or Name Based random forests to be worthwhile, we want to see the accuracy of these aggregated predictions be an improvement over any of the existing methods by themselves. As reported in Table \ref{tab:accuracy-methods}, both the Full and Name Based random forests are more accurate overall than the Name Prism or WRU alone. As an aggregation method for comparison, we generated another field, referred to as Same Max, that reported a race if all available methods agreed in their prediction of race. Still, the random forests outperformed this alternative aggregation method in terms of overall accuracy. 
+
+The Full Random forest has a higher overall accuracy than the other methods, however it has a lower level of precision for individual race categories than the Facial prediction alone. Table \ref{tab:ppv-methods} shows the Positive Prediction Value, or precision, of predictions for each race. The higher the precision indicates fewer false positives and therefore a lower likelihood of Type 1 errors. The Full Random Forest and facial recognition alone are similar in precision for Black and White, but the facial recognition is more precise in predicting Asians and Hispanics. The relative lack of precision in predicting Asians by the Full Random Forest is shown in the confusion matrix (Table \ref{tab:conf_full}). The Full Random Forest often misclassified those who are truly Asian into the Other category, as well as incorrectly classifying true Hispanics across Asian, Other, or White. Though the overall accuracy is higher, the Asian and Hispanic groups are less well identified in the Full Random Forest than by the facial recognition method alone. 
+
+The Name Based Random Forest is more precise for all races compared to the individual name prediction methods. This is consistent with its higher overall accuracy as well. The trade off between accuracy and sample size for the Full Random Forest and Name Based Random Forest persists in regards to precision. The Name Based Random Forest has a lower precision for all specified race categories compared to the Full Random Forest. However, the Name Based Random Forest does not utilize the Other category in the same way as the Full Random Forest. With the precision of the Other category at best being 58\% among the other methods, this lack of assigning the Other race could be advantageous for our analysis of referrals. The discrepancy in the number of Other race assigned is driven by the facial recognition method, which is present in the Full Random Forest but not the Name Based. This likely reflects that the facial recognition algorithm allows for more nuanced assignment of race which is not available in the name based methods. These additional categories from the facial recognition method were consolidated into a single category, Other. Another notable difference between these methods predictions is that the Full Random forest has a much larger number of accurately classified Blacks than the Name Based Random Forest. Comparing the diagonal entries of Tables \ref{tab:conf_full} and \ref{tab:conf_name} reveals notable increases in the number of correctly predicted Black and Hispanic physicians by the Full Random Forest, but a larger number of accurately predicted White physicians by the Name Based Random Forest. 
+
+\section{Estimation Sample}
+\label{sec:est-sample}
+
+The quadruple-based conditional logit estimator of \cite{jochmans2018} requires discordant quartets of two PCPs and two specialists, which excludes physicians who do not appear in at least one such quartet. Table \ref{tab:quad-comparison} compares physicians included in the estimation sample to those excluded on key demographic, geographic, and practice characteristics. The two groups are broadly similar across observables, suggesting that selection into the estimation sample is unlikely to compromise the external validity of our results.
+
+\clearpage
+\newpage
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Estimation Sample Comparison}\footnote{Comparison of physicians included in the Jochmans quadruple-based estimation sample versus those excluded. Means are reported for each group.}}
+\label{tab:quad-comparison}
+\input{../results/tables/quad_comparison}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\section{Link-level Conditional Logit}
+Table \ref{tab:linkcl} presents estimates from a conditional logit estimation, analogous to Table 5 in \cite{zeltzer2020}. The dependent variable is a link dummy, set to one if a referral link is present and 0 otherwise, and covariates include demographic concordance, practice and geographic proximity, and year and PCP fixed effects. Following \cite{zeltzer2020}, this analysis does not include specialist fixed effects. 
+
+Many of the estimates are broadly consistent with the results from \cite{zelzer2020}. For example, in both sets of results, organisational proximity dominates---sharing a practice increases the probability of a link by 11–15 percentage points, close to the 30 \% odds–ratio effect (\(\exp(1.346)-1\)) in Table 5 of \cite{zeltzer2020}. Distance enters with the expected negative sign (about –1.2 pp per mile within 50 miles), matching the quadratic distance term in \cite{zeltzer2020}, and experience, medical-school concordance, and specialist sex have only minor effects in both studies. Gender concordance, however, is economically small and imprecise in our data, whereas \cite{zeltzer2020} finds a positive 10 \% odds ratio.  
+
+While the estimator and empirical specification in Table \ref{tab:linkcl} are similar to \cite{zeltzer2020}, there are three key ways in which our analysis still differs. First, we restrict the analysis only to planned and elective orthopedic surgeries. This is a specialty dominated by white males, which may empirically mask any underlying demographic concordance. Second, we limit referrals only to those coming from primary care physicians. Relatedly, we identify the referring physician by the observed frequency of ``evaluation and management'' (E\&M) visits and subsequent visit to an orthopedic specialist, whereas \cite{zeltzer2020} and \cite{sarsons2023} identify the referring physician using the ``Claim Referring Physician NPI Number'' field in the carrier claims data. Among our patient population, we find that the claim referring physician NPI field is missing in one-third of the relevant claims, and it contains the same NPI as the operating physician in nearly two-thirds of the claims where it is populated (see also \cite{pham2009} and \cite{sarsons2023}).
+
+
+\section{Quality Implications}
+\label{sec:welfare}
+
+To assess the quality implications of our estimated referral preferences, we graft an external measure of surgeon performance---surgeon quality as measured by the CMS Comprehensive Care for Joint Replacement Model and the National Quality Forum.\footnote{Surgeon quality derives from mortality, readmissions, and complications. Some complications are identified only in the inpatient stay or only within 30 days, but no outcome measure extends beyond 90 days of discharge.} For each referral determinant, we set its estimated coefficient to zero, recompute referral probabilities using the two-stage predicted index, and calculate the change in expected adverse patient outcomes per 1,000 referrals within each HRR. Positive values indicate fewer expected adverse outcomes when the channel is removed (i.e., a quality improvement); negative values indicate worsening quality.
+
+This exercise parallels earlier work that attaches performance measures to observed physician networks \citep{barnett2012mc, landon_using_2013, zeltzer2020}. Table~\ref{tab:welfare-hrr} summarizes the results. The welfare effects are generally modest. Gender concordance, race concordance, and practice affiliation each produce mean quality changes near zero, reflecting the fact that these characteristics, while influential in forming referral links, do not systematically direct patients toward lower-quality specialists. Geographic distance shows a slightly larger mean effect, but with substantial dispersion across markets. These results suggest that the quality losses from homophily-driven referrals are small on average, though they may matter in specific local markets.
+
+
+\section{Convergence Stability of Two-Stage Estimation}
+\label{sec:convergence}
+
+Our two-stage estimation procedure recovers doctor and specialist fixed effects by estimating a logit model with the Jochmans structural index entered as an offset. Because the referral network is sparse---roughly 75\% of doctor--specialist pairs in the choice set exhibit no referral---many fixed effects are not separately identified, and the second-stage model does not formally converge. To verify that this non-convergence does not affect our results, we run the second-stage estimation at iteration counts of 10, 25, 50, 100, and 250 and compare the resulting average marginal effects.
+
+Table~\ref{tab:convergence} presents the results. Panel~A shows that all six marginal effects are essentially identical from iteration 50 onward, with differences smaller than 0.001 percentage points between iterations 50, 100, and 250. Panel~B confirms that model deviance stabilizes at the same threshold, while the standard deviations of the recovered fixed effects continue to grow---consistent with separated fixed effects diverging to $\pm\infty$ while the informative subset of observations has already stabilized. These results confirm that the non-convergence is benign and that our reported marginal effects (computed at 50 iterations) are numerically stable.
+
+
+\pagebreak
+\bibliography{BibTeX_Library}
+
+
+%%% TABLES AND FIGURES
+
+\clearpage
+\newpage
+\section*{Figures and Tables}
+
+%%% FIGURES
+
+
+%%% TABLES
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Random Forest Accuracy}\footnote{Accuracy rates and sample size are shown for each prediction method. Accuracy is calculated as the number of correct predictions divided by the total number of predictions.}}
+\label{tab:accuracy-methods}
+\input{../results/tables/app_method_accuracy}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Prediction Precision}\footnote{Positive Prediction Value for each race is shown for each prediction method. Positive Prediction Value is calculated as the number of true positive divided by the sum of true positives and false positives. In other words, it is the correct predictions of race $i$ divided by all times race $i$ was predicted.}}
+\label{tab:ppv-methods}
+\input{../results/tables/app_race_accuracy}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Confusion Matrix for Full Random Forest}\footnote{The rows in this matrix represent the true race while columns represent the race predicted by the Full random forest model. Each cell in row $i$ and column $j$ shows the number of observations of true race $i$ that were predicted to be of race $j$.}}
+\label{tab:conf_full}
+\input{../results/tables/app_conf_full}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Confusion Matrix for Name Based Random Forest}\footnote{The rows in this matrix represent the true race while columns represent the race predicted by the Name Based random forest model. Each cell in row $i$ and column $j$ shows the number of observations of true race $i$ that were predicted to be of race $j$.}}
+\label{tab:conf_name}
+\input{../results/tables/app_conf_name}
+\end{minipage}
+\end{table}
+
+
+\clearpage
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Link-level Conditional Logistic Regression}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
+\centerline{%
+    \input{../results/tables/app_logit_race_mfx.tex}
+}
+\label{tab:linkcl}
+\end{minipage}
+\end{table}
+
+
+\clearpage
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Effects on Quality of Patient Care}\footnote{For each referral determinant we set its estimated coefficient to zero, recompute referral probabilities using the two-stage predicted index, and calculate (for each HRR) the change in expected adverse patient outcomes per 1,000 referrals. The columns report the mean, standard deviation, and selected percentiles of the HRR-level quality effect. Positive values indicate fewer expected adverse outcomes when the channel is removed.}}
+\centerline{%
+    \input{../results/tables/welfare_summary.tex}
+}
+\label{tab:welfare-hrr}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Convergence Stability of Two-Stage Estimation}\footnote{Panel A reports average marginal effects from the two-stage procedure at varying second-stage iteration counts. Panel B reports model diagnostics: deviance, standard deviations of recovered doctor and specialist fixed effects, and mean predicted probability. The stability of marginal effects from iteration 50 onward confirms that non-convergence of separated fixed effects does not affect the estimates.}}
+\centerline{%
+    \input{../results/tables/app_convergence.tex}
+}
+\label{tab:convergence}
+\end{minipage}
+\end{table}
+
+
+\end{document}

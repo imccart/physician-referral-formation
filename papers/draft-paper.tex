@@ -1,0 +1,327 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb,amsmath,pgf,setspace,comment,multicol,verbatim,titling,pdflscape,url,booktabs}
+\usepackage[labelfont=bf]{caption}
+\usepackage[left=1in,right=1in,top=1in,bottom=0.75in]{geometry}
+\usepackage[round]{natbib}
+\bibliographystyle{aer}
+\setstretch{1.5}
+
+\setlength{\droptitle}{-50pt}
+
+\begin{document}
+
+\title{Formation of Physician Referral Networks: Drivers and Potential Consequences}
+\author{%
+  \setlength{\tabcolsep}{2em}           % horizontal gap between columns
+  \renewcommand{\arraystretch}{1}        % line spacing inside cells
+  \begin{tabular}{cc}
+    % -------------- first row ---------------------------------
+    \begin{tabular}[t]{c}
+      Ian M.\ McCarthy \\[-1.5ex]
+      \emph{Emory University} \\[-1.5ex]
+      \emph{NBER}
+    \end{tabular} &
+    \begin{tabular}[t]{c}
+      Shirley Cai \\[-1.5ex]
+      \emph{Emory University}
+    \end{tabular} \\[2.5ex]
+    % -------------- second row --------------------------------
+    \begin{tabular}[t]{c}
+      Pablo Estrada \\[-1.5ex]
+      \emph{Capital One}
+    \end{tabular} &
+    \begin{tabular}[t]{c}
+      Jillian Wilkins \\[-1.5ex]
+      \emph{Emory University}
+    \end{tabular}
+  \end{tabular}}
+
+\date{%
+May 2025 \\
+\textbf{Preliminary and Incomplete}
+}
+\maketitle
+
+\vspace{-2ex}
+\begin{abstract}
+\noindent Roughly one‑third of U.S. primary care visits end with a specialist referral, yet little is known about how these referral links are first established. Focusing on primary care physicians (PCPs) who enter or relocate to a new market, we study the determinants of initial PCP–specialist networks using the universe of 2009–2018 Medicare fee‑for‑service claims, focusing on referrals for planned and elective orthopedic surgeries. A reduced‑form network‑formation model with two‑sided fixed effects shows that sharing a common physician practice is overwhelmingly the most dominant factor in forming initial referral links, followed by gender concordance and geographic proximity. An extension into the dynamics of referral links shows that both demographic concordance and organizational affiliation dissipate over time, consistent with newly arrived physicians relying on convenience and familiarity when local information is limited and gradually shifting toward more information‑based matching.
+\singlespacing
+
+\end{abstract}
+
+
+\clearpage
+\newpage
+\section{Introduction}
+\label{sec:intro}
+
+Expert referrals shape the allocation of high‐stakes services in many industries, including finance, law, and healthcare; however, these referrals are often made in the face of significant uncertainty, where one expert may not be fully informed about the quality and skills of other experts in the market. In such settings, access to higher quality services can be facilitated or denied implicitly due to the existing network of the referring experts. Understanding decision making in these contexts remains an important area of research across several disciplines \citep{ching2013}. 
+
+One area where decision making under uncertainty is particularly salient is in referrals from primary care physicians (PCPs) to specialists. When a PCP refers a patient to a specialist, that decision is made under potentially severe information frictions, and yet the referral matters significantly as it fixes the locus of subsequent treatment. The US healthcare system is increasingly reliant on such referrals, with as many as 30\% of visits to PCPs resulting in a referral to a specialist for additional care \citep{wright2022}, a near two-fold increase in referral rates in the last decade \citep{barnett2012aim}, and a heavy reliance on physician recommendations among patients \citep{chernew2021}. The initial referral of PCPs to specialists is therefore a critical step in the healthcare process, as it will determine the subsequent course of treatment for such patients. 
+
+This paper provides some of the first causal evidence on the determinants of initial PCP–specialist referral networks. We exploit a natural experiment created by PCP movers: physicians who locate or relocate to a new geographic market arrive with no local referral ties and must construct or reconstruct their networks from scratch. Using 100\% Medicare fee‐for‐service (FFS) claims from 2009–2018, and focusing on referrals to orthopedic specialists for planned and elective major joint replacements, we estimate a reduced‐form network‐formation model following \cite{jochmans2018} that allows for physician sorting across markets and unobserved (time-invariant) heterogeneity in referring PCPs \textit{and} specialists. 
+
+% Results
+Our estimates suggest a pronounced role for practice affiliation, gender concordance, and geographic proximity in shaping referral patterns. Specifically, we find that practice affiliation increases the likelihood of a referral link by roughly 29 percentage points, dwarfing all other characteristics. Geographic proximity also matters, lowering the probability of a referral link by approximately 3 percentage points per 5 miles. Gender concordance further increases the probability of a referral link by around 4 percentage points, with race, age, and experience having economically small effects.
+
+In supplemental analysis, we gauge the quality implications of these referral preferences by computing counterfactual referral probabilities under which the coefficient on each characteristic is set to zero. These exercises, presented in the supplemental appendix, suggest that the welfare losses attributable to organizational and demographic matching are modest.
+
+
+
+Finally, we extend our analysis by considering broader windows by which to define PCP-specialist referral networks (e.g., one year after relocating, two years, etc.). Practice affiliation and demographic concordance both attenuate as PCPs reside in their new HRR for longer periods, with gender concordance dissipating entirely by the fifth year. Practice affiliation and geographic proximity remain significant factors even at longer horizons, but their effects are attenuated over time. This pattern suggests that newly arrived PCPs rely heavily on organizational convenience and demographic familiarity when local information is limited, gradually shifting toward more information-based matching as they learn the market.
+
+% Contribution 1: Referral networks
+Our analysis contributes to three distinct areas of economics and health policy. First, we contribute to the literature on physician referral networks. This literature typically considers physician networks in the context of shared patients \citep{landon2012, barnett2012mc, landon2018, linde2019}, wherein authors examine social networks of physicians defined as the set of physicians that see the same patients within a designated time period. These studies tend to envision an ``undirected'' physician network, in that the edges (i.e., connections between two physicians) reflect a two-way relationship with patients flowing from one physician to another in both directions. Our analysis more closely aligns with a smaller literature focusing on ``directed'' graphs in which referring physicians such as PCPs are connected to specialists \citep{agha2017, agha2018, zeltzer2020}. This literature typically considers physician networks as an input into healthcare production, while our analysis instead examines network formation itself. 
+
+Our analysis aligns most directly with \cite{zeltzer2020}, who examines gender homophily in specialist referrals. However, our analysis remains distinct from \cite{zeltzer2020} in three key ways: 1) we consider referrals in the context of orthopedic surgery rather than a mix of conditions with perhaps distinct types of provider networks; 2) we focus on a PCP's initial referral network, avoiding the dynamics inherent in the evolution of such referrals over time; and 3) taking advantage of recent advances in the econometrics of networks \citep{jochmans2018, jochmans_fixedeffect_2019}, we are able to allow for a richer set of both PCP and specialist unobserved fixed effects in our analysis. 
+
+% Contribution 2: Referrals as a physician agency problem
+Second, we contribute to the literature on physician agency with regard to referrals. This research extends the traditional role of physician agency to consider the role of physicians not just on the quantity and type of health care used, but also on the location of care \citep{baker2016, lin2025}. In the context of PCPs, the physician's decision-making authority is most salient in the referral process. Indeed, \cite{freedman2015} find that the PCP's recommendation is the most commonly cited reason from a patient in their selection of an oncologist, with similar results documented in \cite{barkowski2018} and \cite{chernew2021}. In an unpublished working paper, \cite{walden2016} examines how hospital acquisitions of primary care practices affect PCP referrals to the hospital. Like \cite{walden2016}, \cite{barkowski2018}, and \cite{chernew2021}, we consider PCP referrals as an important dimension of physician agency; however, rather than taking the PCP's referral network as given, our analysis seeks to determine how such networks are formed.
+
+% Contribution 3: Understanding sources of supply-side variation in healthcare
+Finally, we contribute to the broader study of sources of supply-side variation in healthcare. Overall, hospital and physician services constitute the two largest components of U.S. health expenditures and jointly accounted for nearly \$2 trillion in U.S. health spending in 2019 (52\% of total health expenditures); however, these expenditures are not distributed uniformly across geographic areas \citep{wennberg1973, gottlieb2010, miller2011, wennberg2003}. Rather, expenditures are characterized by areas of very high health care utilization alongside areas of very low utilization, and there is strong empirical evidence that a large share of this geographic variation is not driven by patient preferences \citep{zuckerman2010,finkelstein2016} or by differences in quality of care \citep{skinner1997,baicker2004ha}. Authors estimate that as much as 60\% of residual geographic variation in health care expenditures can be explained by provider behaviors as opposed to patient health care needs \citep{finkelstein2016}, and among this, physician practice style can explain as much as 50\% \citep{molitor2018}. There is also substantial variation in quality and costs across physicians within the same geographic area \citep{cooper2019, epstein2009, moy2020}. 
+
+The conclusion from this literature is that a large share of otherwise unexplained variation in health care expenditures and quality of care is driven by provider behaviors such as physician practice patterns, facilitated by physicians' underlying influence on treatment decisions and location of care. However, policy solutions to remove this variation are elusive and require significant changes in physician behaviors. Our analysis considers referral patterns from PCPs to specialists as an important contributor to these existing inefficiencies. Given the PCP's role as a patient navigator, referral networks are a natural candidate for examining sources of and potential solutions to such variation, for two major reasons: 1) there is ample opportunity to improve patient health and lower health care costs if PCPs can better direct patients to more efficient and higher quality specialists; and 2) exploiting the PCP as a patient navigator offers an arguably more realistic and actionable way to reduce variation in care due to differential provider behaviors.
+
+Ultimately, our focus on PCP referral networks is motivated by the search for practical and actionable health care policy to reduce variation in healthcare quality and utilization. Viewing physician treatment decisions as the source of variation necessarily implies that the solution to minimizing healthcare inefficiencies and improving quality lies in changing how a physician practices medicine. Unfortunately, an established body of research now demonstrates the many barriers to changing physician behaviors in this way \citep{wilensky2016}. This research largely confirms what physicians and other practicing clinicians have long known --- it is very hard to change physician practice patterns. It is only more difficult to affect such change on a large scale, particularly with broad (i.e., non-individualized) healthcare policy. Our analysis instead envisions an opportunity to improve efficiency and quality not by changing what physicians do, but instead by changing which physicians do it. Because redirecting patients is typically easier than altering physicians’ practice styles, refining referral networks offers a low‐cost lever for improving health outcomes and reducing spending. 
+
+% Other things to move around or delete entirely:
+
+% We view inefficiencies in PCP referral networks as an important contributor to the persistent unexplained variation in health care quality and spending. Because of uncertainty about quality \cite{arrow1963}, as well as other informational and market frictions, referring physicians do not systematically send patients to higher quality specialists \cite{kolstad2009, gaynor2016}. 
+
+% Conceptually, we envision PCP-specialist referral networks at a given point in time as a product of: 1) the initial referral network, established as a PCP begins practicing in a new location; and 2) the evolution of this network, which includes potential learning over time and other dynamics shaped by institutional relationships, a PCP's peers, and other factors. In focusing on the initial referral networks, our analysis avoids the dynamic element of network evolution.
+
+
+\section{PCP Referral Networks}
+\label{sec:model}
+
+In the remainder of this section, we discuss the details of our network formation model and its econometric identification.
+
+\subsection{A Model of Network Formation}
+Our analysis follows a conceptual model in which a PCP's decision to initiate a referral relationship with a specialist is a function of three broad factors: 1) similarity in observable characteristics between the PCP and the specialist, denoted by $x_{ij}$; 2) the utility value of unobserved characteristics, denoted $a_{ij}$; and 3) idiosyncratic shocks that affect the formation of a referral link, denoted by $\varepsilon_{ij}$. Note that this setup considers the network formation decision of a PCP, not a given referral, and the outcome of interest is ultimately whether a PCP has any referral relationship with a given specialist. With this setup, a referral link between PCP $i$ and specialist $j$ will exist if the latent utility of such a relationship is positive:
+\begin{equation}\label{eq:referral}
+    y_{ij} = \m{1} \left(x_{ij}'\beta + a_{ij} - \varepsilon_{ij} \geq 0\right).
+\end{equation}
+
+Equation \eqref{eq:referral} is a reduced form representation of the referral network formation decision, where $y_{ij}$ takes the value of 1 if PCP $i$ refers to specialist $j$ and 0 otherwise. The vector of observed characteristics, $x_{ij}$, captures several measures of practice and demographic homophily, including working in the same hospital and practice group, differential years of experience, differential distance between practices, and homophily in gender and race. 
+
+Setting $a_{ij} = \alpha_{i} + \alpha_{j} - g(\xi_{i}, \xi_{j})$ allows for the presence of individual-specific unobserved heterogeneity for both PCPs and specialists, denoted by $\alpha_{i}$ and $\alpha_{j}$, respectively. The unobserved heterogeneity $\alpha_{i}$ reflects, for example, PCPs' productivity, and $\alpha_{j}$ similarly captures specialists' prestige or quality. The terms $\xi_{i}$ and $\xi_{j}$ reflect sorting into local markets, where similar preferences in local markets, denoted by $-g(\xi_{i}, \xi_{j})$, imply that PCP $i$ and specialist $j$ will be more likely to refer to each other.
+
+Lastly, the error term $\varepsilon_{ij}$ captures the idiosyncratic shocks that affect the referral decision. Under the assumption that $\varepsilon_{ij}$ is distributed as a Type I extreme value, the probability of observing a referral from doctor $i$ to specialist $j$ is given by
+\begin{equation}\label{eq:probability}
+    \operatorname{Pr}(y_{ij} = 1 | x_{ij}) = \frac{e^{x_{ij}'\beta + a_{ij}}}{1 + e^{x_{ij}'\beta + a_{ij}}},
+\end{equation}
+therefore describing a network formation model that accounts for unobserved heterogeneity of doctors and specialists. What is more, the model acknowledges the geographical preferences that doctors and specialists have when forming referral networks. 
+
+Link formation based on observed characteristics, $x_{ij}$, and unobserved heterogeneity, $\alpha_{ij}$, describe two distinct features of real world networks: homophily and degree heterogeneity. These modeling choices mirror a large empirical literature on homophily and degree heterogeneity in physician networks.  Homophilous matching on practice environment and personal traits has been documented for patient–sharing ties \citep{barnett2012mc,landon_using_2013} and for gender–concordant referrals \citep{zeltzer2020,sarsons2023}. Degree dispersion---captured here by the PCP- and specialist-specific effects $\alpha_i$ and $\alpha_j$—--also follows that of recent network-formation models such as \cite{jackson2007} and \cite{graham_econometric_2017}. The key parameter of interest in Equation \ref{eq:probability} is $\beta$, which captures the effect of observed characteristics on the referral formation.
+
+
+\subsection{Identification and Estimation}
+\label{sec:empirical}
+
+Our identification strategy follows \cite{jochmans2018} by differencing out the unobserved heterogeneity $\alpha_i$ and $\alpha_j$ to recover the effect of observed characteristics $\beta$. The approach is a natural extension of the conditional logit model from \cite{chamberlain_analysis_1980} and conceptually similar to a difference-in-differences estimation. More specifically, we focus on quadruples $m=1,...,M$, with each quadruple consisting of two PCPs $(i, k)$ and two specialists $(j, l)$, and we compare the difference in referrals between these pairs.
+
+For each quadruple, we transform the outcome $y_{ij}$ and characteristics $x_{ij}$ as
+\begin{align*}
+    \tilde{y}_m & = \frac{(y_{ij} - y_{il}) - (y_{kj} - y_{kl})}{2} \text{ and} \\
+    \tilde{x}_m & = (x_{ij} - x_{il}) - (x_{kj} - x_{kl}).
+\end{align*}
+Under these transformations, identification of $\beta$ in Equation \eqref{eq:probability} derives entirely from $\tilde{y} \in \{-1, 1\}$. In other words, identification of the key parameters of interest comes entirely from discordant pairs wherein two senders (i.e., PCPs) rank the two receivers (i.e., specialists) differently. Conditioning on that discordant event removes the sender and receiver fixed effects and leaves a likelihood that depends solely on the covariate contrasts and the common parameter, $\beta$. Quadruples in which the two PCPs agree---or where one link is missing--—contribute no information for and are therefore discarded.
+
+We can then estimate the parameter of interest $\beta$ by maximizing the log-likelihood function
+\begin{equation}\label{eq:likelihood}
+    L(\beta) = \sum_{m=1}^M 1\{\tilde{y}_m=-1\} \times \log F(\tilde{x}_m'\beta) \ + \ 1\{\tilde{y}_m=1\} \times \log (1-F(\tilde{x}_m'\beta)),
+\end{equation}
+where the transformed outcome $\tilde{y}$ resembles the process of differencing out the fixed effects $\alpha_i$ and $\alpha_j$. For inference, we take into account the dependence between the quadruples of nodes and follow \cite{jochmans_fixedeffect_2019}.
+
+While the Jochmans estimator delivers consistent estimates of $\beta$, it eliminates the fixed effects $\alpha_i$ and $\alpha_j$ and therefore cannot produce predicted referral probabilities directly. To recover the full index $x_{ij}'\beta + \alpha_i + \alpha_j$ needed for marginal-effect and counterfactual calculations, we employ a two-stage procedure. In the first stage, we estimate $\hat{\beta}$ from the quadruple-based conditional logit above. In the second stage, we hold $\hat{\beta}$ fixed and recover the doctor and specialist fixed effects by estimating a logit model with two-way fixed effects and the linear index $x_{ij}'\hat{\beta}$ entered as an offset. Because roughly 75\% of doctor--specialist pairs in the choice set exhibit no referral (a consequence of network sparsity), many fixed effects are not separately identified; however, the marginal effects computed on the non-separated subsample are stable across iteration counts, as we verify in the supplemental appendix.
+
+In addition to our econometric identification strategy developed by \cite{jochmans2018}, we also emphasize that established PCP-specialist links embed years of accumulated learning and habit formation. An analysis that pools all referrals may therefore conflate \emph{initial link formation} with the subsequent evolution of relationships, ultimately introducing potential bias in our estimate of $\beta$. To remove this source of bias, we focus on the initial referral decision. 
+
+Focusing on physicians at the moment they enter a new HRR (e.g., PCP ``movers'') lets us observe referral choices made before such path dependence arises and isolates the forces---geographic proximity and social similarity---that govern where and how initial links form. The analytic sample of interest is therefore PCPs that moved to a non-contiguous state in the previous year. Under the assumption that PCPs do not move to a different HRR to refer to specialists based on observed clinical factors or the quality of available specialists in that market, this approach eliminates preferences on sorting, denoted by $-g(\xi_i, \xi_j)$ in Equation \eqref{eq:probability}, from the referral decisions.
+
+
+%%% DATA AND SUMMARY
+
+\section{Data and Descriptive Statistics}
+\label{sec:data}
+
+Our analysis is based on planned and elective inpatient stays for major joint replacement among Medicare fee-for-service (FFS) beneficiaries aged 65+ during 2009–2018. Procedures, outcomes, and referral claims are drawn from the 100 percent Medicare Part A and B files. Data on physician characteristics come from CMS Physician Compare, the Medicare Data on Provider Practice and Specialty (MD-PPAS), and the National Plan and Provider Enumeration System (NPPES). Demographic data from Physician Compare are first available in 2012; however, we rely on those data for time-invariant physician characteristics such as year of medical school graduation.\footnote{CMS Physician Compare also includes data on which medical school a physician attended; however, these data are sparse and we exclude medical school from our analysis.} As such, our time frame is relatively unaffected by the late arrival of Physician Compare data.
+
+From the Medicare FFS claims data, eligible planned and elective orthopedic surgeries are identified by Diagnosis Related Group (DRG) codes 461, 462, 469, 470, 480–489, and 507–511, yielding 4.53 million total admissions. Focusing on PCP-specialist \textit{referrals}, we keep only cases in which (i) the operation is performed by an orthopedic surgeon (per MD-PPAS specialty codes) and (ii) a referring PCP can be inferred, as per \cite{pham2009} and \cite{agha2017}, as the primary care physician with the highest number of office-based E\&M visits in the twelve months before surgery, provided the patient saw that PCP at least twice. We further limit to PCPs with at least 10 referrals to orthopedic surgery from 2009 through 2018, and similarly to specialists with at least 10 orthopedic surgeries over the same time period. This leaves 2.94 million admissions. Using the physician's national provider identification (NPI) number, our full referral data consist of approximately 725,000 PCP-specialist pairs, just under 78,000 unique PCPs, and around 14,400 unique specialists. 
+
+We flag a PCP as a \textit{mover} in the first year they practice in a new HRR. For every calendar year, we build a two-year window $\{t-1,t\}$, extract each doctor's HRR in the MD-PPAS panel, and keep those whose HRR in year $t-1$ differs from the HRR in year $t$. To exclude cosmetic boundary shifts, we remove cases in which the origin and destination HRRs are geographic neighbors, identified from the Dartmouth Atlas HRR shapefile and its contiguity matrix. We further drop PCPs who register more than one HRR change inside the window, so every retained observation reflects a single, non-contiguous relocation. Repeating this procedure for each window produces annual cohorts of ``new movers.''
+
+Collectively from 2009-2018, we identify 1,690 total PCP movers. Figure \ref{fig:map-movers} reflects the origin and destination HRRs for our resulting PCP movers. For visual clarity, we restrict the figure to a subset of the most common origins (top 20) and destinations (top 10). A key takeaway from the figure is that movers are not isolated to or from a single region of the U.S.
+
+As discussed in Section \ref{sec:model}, our primary variables of interest consist of physician demographics, training, and practice characteristics. Since our analysis ultimately conditions on both PCP and specialist fixed effects, our key practice characteristic is geographic proximity, measured as the distance between zipcode centroids of the PCP's primary practice location and that of the specialist. These data are available from MD-PPAS. We construct the differential age as well as years since medical school graduation as a measure of similarity in medical experience. These data come from CMS Physician Compare. We also construct measures of gender homophily, again from data in MD-PPAS.
+
+Because physician race is not publicly available on a national scale, we impute physicians’ race by combining three complementary classifiers. First, we obtain name–based probabilities from NamePrism and from the WRU Bayesian surname-geocoding algorithm; second, we scrape profile photos from Zocdoc and use the DeepFace network to generate image-based probabilities. After aligning category labels across methods, we aggregate the separate predictions with a random-forest ensemble: a ``Full'' model (using all three sources) attains 89\% accuracy for approximately 58,000 physicians, while a ``Name-based'' model (names only) reaches 82\% accuracy for nearly 1 million physicians. Accuracy is assessed against verified race information drawn from Florida voter files, Texas medical-license records, and self-reported Zocdoc profiles. Full implementation details and accuracy are discussed in the supplemental appendix.
+
+\subsection{Describing PCP Referral Networks}
+\label{sec:desc-networks}
+
+Our referral data are summarized in Table \ref{tab:desc}, with Panel A presenting information on PCPs and Panel B presenting information on specialists. The columns in Table \ref{tab:desc} denote the full referral dataset (column 1) and when restricting only to PCP movers (column 2). As shown in Panel A of Table \ref{tab:desc}, an average PCP in our data refers to a median of 2 distinct specialists located on average 11.6 miles away, is 53 years old, is male in 73\% of cases, and is white in 81\% of cases; movers are slightly younger (48 years), less male-dominated (63 percent), and slightly less likely to be white (78\%). Not surprisingly, movers also refer to a smaller set of specialists immediately after their move.
+
+From Panel B, specialists receive referrals from a median of 8 unique PCPs in the full data.\footnote{We present summary statistics for incoming referrals among PCP movers for completeness; however, recall that these numbers reflect only the referrals received from PCP movers. This restriction is relatively uninformative for measures of network degree, which is inherently a small subset of all referrals a specialists receives over a given time period, particularly since markets do not tend to absorb more than one or two PCP movers per year.} Specialist age and distance between practices are similar in the full referral data versus when limiting to PCP movers; however, we see some potentially interesting differences with regard to distance, gender, and race. In particular, specialists receiving referrals from PCP movers are more likely to be white (92\% versus 89.5\%) and slightly more likely to be male (98.1\% versus 97.6\%) compared to the full referral data. This is despite the fact that PCP movers are actually less likely to be white males compared to the population of PCPs in the data. 
+
+For our network formation model and subsequent estimation, a PCP is assumed to construct their referral network as a subset of all possible specialists in their HRR. Referral counts for planned and elective orthopedic surgery among any given PCP-specialist pair are on average small. As such, we effectively ignore the intensive margin of counts of referrals per pair. Rather, PCP-specialist links are defined as any observed referrals between a given PCP and specialist, conditional on aggregate volume requirements discussed previously.
+
+Figure \ref{fig:network-degree} presents the histogram of network size (or degree) for PCPs and specialists. We focus on the full set of referrals since specialist in-degree is relatively uninformative when limiting to PCP movers. From the left panel of Figure \ref{fig:network-degree}, we see that PCPs typically refer to only a handful of specialists in their HRR, with 50\% of PCPs sending patients to three or fewer distinct specialists and fewer than 5\% of PCPs referring to more than ten specialists. Specialists face slightly more dispersion in incoming links. Specifically, while the median specialist receives referrals from 8 PCPs, the right tail stretches well beyond twenty, indicating the presence of ``hub'' specialists who dominate local referral flows.
+
+Figure \ref{fig:network-degree} reflects a relatively sparse network of PCP referrals, where the observed links represent 3.7\% of all potential PCP–specialist pairs within each HRR-year cell. Among the full set of referrals (both movers and non-movers), 7.6\%  of referral links occur between PCPs who share a practice identifier with the specialist, 73\% share the same gender, and 76\% share the same race. The mean distance between observed PCP-specialist referral links is 13.1 miles, with a mean differential experience (years since graduation) of 11 years.
+
+Table~\ref{tab:referral-statistics} contrasts observable concordance between PCPs and specialists for pairs that exchange referrals (``established links'') with pairs in the same HRR--year choice set without observed referrals (``non–established links'').  Links are markedly more local: 17.3\% of linked pairs share a practice identifier, compared with 2.9\% of non–links, and their average office‐to‐office distance is striking (11 vs.40 miles).  By contrast, demographic homophily is relatively similar across groups, with gender concordance at roughly 65\% and 62\% among established and non-established links, respectively, and race concordance at about 74\% and 69\%. Experience gaps are negligible. 
+
+Collectively, Table \ref{tab:referral-statistics} suggests that organizational proximity and geography dominate the extensive‐margin decision to form a link; however, our quadruple-based estimator need not replicate those unconditional patterns. Recall that identification in \cite{jochmans2018} framework comes only from discordant quadruples—--cases in which two PCPs disagree over which of two equally available specialists they favor. Quadruples in which both PCPs unanimously prefer the same specialist (e.g., because that specialist matches their own demographic profile) are concordant and therefore drop out of the likelihood. Conversely, discordant pairs may involve specialists who are already well-matched on geography and organizational ties; in that narrower comparison set, gender or race similarity may exert more or less additional influence, or even tilt the relative choice in the opposite direction.
+
+\section{Determinants of PCP Referral Networks}
+\label{sec:results}
+
+Table~\ref{tab:logit_twfe} summarizes the two-stage estimation results from the model in Section \ref{sec:empirical}. Columns (1)--(3) report the structural coefficients (in log-odds) from the Jochmans estimator across three specifications, while columns (4)--(6) present the corresponding average marginal effects computed from the recovered fixed effects in the second stage. We focus our discussion on the marginal effects.
+
+We find that organizational affiliation is the strongest predictor of referral choice. Specifically, when a specialist belongs to the same practice group as the referring PCP, the probability that she is chosen increases by approximately 29 percentage points, whereas additional distance between the two practices lowers that probability by roughly 3 percentage points per 5 miles. Demographic concordance also matters, with gender concordance increasing the probability of a referral by around 4 percentage points and racial concordance by about 2 percentage points. Similarity in age and experience yield economically negligible effects.
+
+In the supplemental appendix, we also present conditional logit results analogous to \cite{zeltzer2020}, where we condition on PCP and year fixed effects but not on specialist fixed effects. We refer to these results as ``link-level conditional logit.'' In general, effects are attenuated in the link-level conditional logit model relative to Table \ref{tab:logit_twfe}. We discuss these differences and their practical implications in more detail in the supplemental appendix.
+
+In the supplemental appendix, we assess the quality implications of our estimates by grafting an external measure of surgeon performance---namely, surgeon quality as measured by the CMS Comprehensive Care for Joint Replacement Model and the National Quality Forum---and computing counterfactual referral probabilities when the coefficient on each characteristic is set to zero. These exercises suggest that the welfare losses attributable to organizational and demographic matching are modest, consistent with the relatively small marginal effects for most covariates outside of practice affiliation.
+
+\section{Dynamics of Referral Determinants}
+We extend the baseline analysis by redefining each relocated PCP’s referral network over progressively longer horizons. Rather than limiting the choice set to referrals written in the move year, we rebuild the doctor–specialist matrix to include links recorded within the first two, three, and up to six post-move years. 
+
+Table~\ref{tab:link-dynamics} documents how the composition of PCP referral networks changes as we widen the post-move window from one to six years.  The average network expands rapidly at first—from 1.7 distinct specialists in the move year to 3.4 by year 3—and then tapers, reaching 5.3 specialists by year 6.  Most of this growth comes from adding new contacts: the number of ``new'' specialists falls from 1.7 in year 1 to just 0.6 in year 6, while the count of specialists dropped relative to the previous window rises to roughly one.  Organizational and geographic proximity lose importance over time: within-practice referrals decline from 17~percent to 13~percent, and mean travel distance increases from 11 to 13 miles.  Demographic matching remains nearly constant--—same-gender links fall by only five percentage points and same-race links by two. Average age and experience differences are largely unchanged. These descriptive patterns suggest that newly relocated PCPs initially rely on nearby colleagues in the same practice but gradually diversify toward a wider specialist pool without materially altering demographic concordance.
+
+To examine this more formally, we estimate a new quadruple-based conditional-logit model for every horizon $(k\in\{1,\dots ,6\})$ and compute average marginal effects of the core covariates. This rolling-window exercise allows us to trace how the determinants of specialist selection evolve as physicians accumulate information and contacts in their destination market.
+
+Figure~\ref{fig:mfx-by-window} summarizes the results. Practice affiliation dominates immediately after relocation---sharing a practice group raises the referral probability by roughly 29 percentage points in the move year (as per Table \ref{tab:logit_twfe}), but the effect falls monotonically to roughly 15 percentage points once six years of referrals are considered. Geographic distance retains a persistent role, with the marginal penalty of approximately 3 percentage points per 5 miles throughout. The effects of gender concordance dissipate entirely by the fifth year, falling from around 4 percentage points to near zero.
+
+These patterns imply that newly arrived PCPs initially rely heavily on practice-group ties when their local information set is limited; this reliance wanes slightly as they learn about the broader specialist pool. Social similarity does not substitute for the fading role of organizational convenience. Instead, referral behavior gradually converges toward decisions that depend less on either practice affiliation or demographic concordance, indicating a shift toward more information-based matching over time.
+
+
+%%% DISCUSSION
+
+\section{Discussion}
+\label{sec:discussion}
+
+This paper examines the determinants of initial referral networks between PCPs and orthopedic specialists. Our identification strategy exploits PCP movers in order to isolate the initial referral network from the evolution of such networks over time. We further employ the estimator in \cite{jochmans2018} allowing for both PCP and specialist fixed effects in a quadruple-based conditional logit. We estimate effects using the 100\% Medicare FFS claims data from 2009 through 2018, limited to planned and elective inpatient stays for orthopedic surgery.
+
+We find that practice group affiliation is by far the largest contributor to link formation, with gender concordance and geographic proximity also emerging as relevant factors (Table~\ref{tab:logit_twfe}). Other measures of demographic concordance such as age, experience, and race play at best a limited role. The effects of practice affiliation and gender concordance both attenuate as the post-move horizon widens (Figure~\ref{fig:mfx-by-window}), suggesting that organizational convenience may substitute for information early on, with effects lessening once the PCP accumulates experience with specialists in their new market. Gender concordance dissipates entirely by the fifth year, while practice affiliation and geographic proximity remain significant even at longer horizons.
+
+While we employ a different identification strategy and a richer econometric specification, allowing for both PCP and specialist fixed effects, our baseline results for practice affiliation and gender concordance are not too dissimilar from \cite{zeltzer2020}, albeit with slightly smaller magnitudes. Our estimates by referral window, however, depict a declining role of gender concordance over time, consistent with information frictions rather than deep preferences driving demographic homophily in referral formation.
+
+We conclude with three policy implications. First, while increasing horizontal integration of physician practices can have large negative consequences with regard to competitiveness and physician pricing \citep{koch2021}, our results suggest that, insomuch as mergers alter physician referrals, the quality implications of such referral changes are likely minor. Second, our results uncover the role of geographic proximity as a mediator for potential bias in referral patterns. If such biases were extended to the entire pool of specialists in an HRR, the quality of care consequences could be large; however, when limited to narrow geographic subset of specialists, preferences for demographic homophily have less opportunity to negatively affect patient care. Finally, while demographic similarity plays a small but meaningful role in PCPs' \textit{initial} referral networks, these effects appear to dissipate over time. Identifying the determinants of such network evolution over time remains an important area of future research.
+
+
+
+%%% BIBLIOGRAPHY
+
+\pagebreak
+\bibliography{BibTeX_Library}
+
+
+
+%%% Figures and Tables
+
+\clearpage
+\newpage
+\section*{Figures and Tables}
+
+%%% FIGURES
+\begin{figure}[h]
+\centering
+\begin{minipage}[h]{6in}
+\caption[caption]{PCP Movers by Origin and Destination\footnote{Map of PCP movers, with arrows depicting the direction of the move. Data are limited to the top 20 origin HRRs and the top 10 destination HRRs.}}
+\centerline{%
+    \includegraphics{../results/figures/fig_movers.png}
+}
+\label{fig:map-movers}
+\end{minipage}
+\end{figure}
+
+\newpage
+\begin{figure}[h]
+\centering
+\begin{minipage}[h]{6in}
+\caption[caption]{Network Degree for PCP-Specialist Referrals\footnote{Histogram of PCP's out-degree (number of distinct specialists they refer to) and specialists’ in-degree (number of distinct referring PCPs) in the full referral panel. Counts are pooled across all years; each bar aggregates physicians with the indicated degree, with values above 20 collapsed into the ``$>$20'' bin.}}
+\centerline{%
+    \includegraphics{../results/figures/fig_degree.png}
+}
+\label{fig:network-degree}
+\end{minipage}
+\end{figure}
+
+
+\newpage
+\begin{figure}[h]
+\centering
+\begin{minipage}[h]{6in}
+\caption[caption]{Effects by Referral Window\footnote{Average marginal effects from separate two-stage estimates for each referral window (one through six years post-relocation). Stage 1 estimates structural coefficients via the \cite{jochmans2018} quadruple-based estimator; Stage 2 recovers doctor and specialist fixed effects. For binary covariates, the effect is the change in predicted referral probability when the indicator switches from 0 to 1; for distance, the effect corresponds to a 5-mile increase. Vertical bands are 95\% confidence intervals based on delta-method standard errors.}}
+\centerline{%
+    \includegraphics{../results/figures/mfx_by_window.png}
+}
+\label{fig:mfx-by-window}
+\end{minipage}
+\end{figure}
+
+
+%%% TABLES
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{PCP and Specialist Summary Statistics}\footnote{Panel A (B) reports summary statistics for doctors who send (receive) at least one referral over our time period. ``All referrals'' denotes the complete set of referrals for orthopedic surgery, while ``New movers'' restricts the sample to PCPs observed in the year they first move to a new HRR. Network size is measured as out-degree for doctors and in-degree for specialists; age is calculated from year of birth; gender and race shares are proportions of male, White, Black, Hispanic physicians, respectively. Observation counts correspond to the number of distinct physicians in each category.}}
+\centerline{%
+     \input{../results/tables/desc.tex}
+}
+\label{tab:desc}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Referral Network Summary Statistics}\footnote{Descriptive statistics for referral networks of PCP movers. ``Established links'' are PCP–specialist pairs for which at least one referral is observed, and ``Non-established links'' are pairs that lie in the same HRR–year choice set but exhibit no referrals. Percentages report the share of pairs matching on the indicated attribute, distance (miles) is the straight-line distance between ZIP-code centroids of the PCP and specialist practices, and experience (yr) is the absolute gap between their graduation years. All statistics are averages over the analytic sample after excluding rows with missing covariates.}}
+\centerline{%
+     \input{../results/tables/link_stats.tex}
+}
+\label{tab:referral-statistics}
+\end{minipage}
+\end{table}
+
+\clearpage
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Two-Stage Logistic Regression with Two-Way Fixed Effects}\footnote{Two-stage estimation results. Columns (1)--(3) report structural coefficients (log-odds) from the \cite{jochmans2018} quadruple-based estimator with standard errors clustered by HRR. Columns (4)--(6) report average marginal effects computed via first-difference using fixed effects recovered in the second stage, with delta-method standard errors. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates (same gender, same practice, same race), the marginal effect is the change in predicted probability when the indicator switches from 0 to 1.}}
+\centerline{%
+    \input{../results/tables/logit_twfe_mfx.tex}
+}
+\label{tab:logit_twfe}
+\end{minipage}
+\end{table}
+
+
+\clearpage
+\newpage
+\begin{table}
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Network Summary Statistics by Referral Window}\footnote{Descriptive statistics for referral networks of PCP movers. ``Established links'' are PCP–specialist pairs for which at least one referral is observed, and ``Non-established links'' are pairs that lie in the same HRR–year choice set but exhibit no referrals. Percentages report the share of pairs matching on the indicated attribute, distance (miles) is the straight-line distance between ZIP-code centroids of the PCP and specialist practices, and experience (yr) is the absolute gap between their graduation years. All statistics are averages over the analytic sample after excluding rows with missing covariates.}}
+\centerline{%
+     \input{../results/tables/link_stats_by_window.tex}
+}
+\label{tab:link-dynamics}
+\end{minipage}
+\end{table}
+
+
+%%% END
+
+\end{document}
