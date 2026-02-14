@@ -64,10 +64,10 @@ summary_logit_race <- modelsummary(
   stars = FALSE,
   gof_omit = ".*",
   add_rows = add_rows,
-  output = "latex_tabular"
-)
-
-writeLines(as.character(summary_logit_race), "results/tables/app_logit_race_mfx.tex")
+  output = "kableExtra"
+) %>%
+  kableExtra::kable_styling(latex_options = "hold_position") %>%
+  save_kable("results/tables/app_logit_race_mfx.tex")
 
 
 
