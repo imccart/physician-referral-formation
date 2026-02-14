@@ -284,11 +284,13 @@ tab_links <- bind_rows(
                          percent(.x, accuracy = 0.1))))      # percent shares
 
 tab_links %>%
+  mutate(across(everything(), ~ gsub("%", "\\\\%", .x))) %>%
   kable(format   = "latex",
         booktabs = TRUE,
         linesep  = "",
         align    = c("l","r","r"),
+        escape   = FALSE,
         col.names = c("Statistic",
-                      "Established \\ links",
-                      "Non--established \\ links")) %>%
+                      "\\shortstack[r]{Established \\\\ links}",
+                      "\\shortstack[r]{Non--established \\\\ links}")) %>%
   writeLines("results/tables/link_stats.tex")
