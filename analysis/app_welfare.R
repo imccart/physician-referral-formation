@@ -87,8 +87,6 @@ latex_welfare <- welfare_out %>%
         linesep  = "",
         align    = "lclrrrrrr",
         col.names = c("Variable", "Markets",
-                      "Mean", "SD", "P10", "P25", "P50", "P75", "P90")) %>%
-  kable_styling(latex_options = "hold_position")
+                      "Mean", "SD", "P10", "P25", "P50", "P75", "P90"))
 
-writeLines(as.character(latex_welfare),
-           "results/tables/welfare_summary.tex")
+writeLines(as.character(latex_welfare), "results/tables/welfare_summary.tex")

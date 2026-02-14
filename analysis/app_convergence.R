@@ -131,7 +131,6 @@ kable(full_table,
   add_header_above(c(" " = 1, "Maximum iterations" = 5)) %>%
   pack_rows("Panel A: Average marginal effects", 1, nrow(mfx_table)) %>%
   pack_rows("Panel B: Diagnostics", nrow(mfx_table) + 2, nrow(full_table)) %>%
-  kable_styling(latex_options = "hold_position") %>%
   save_kable("results/tables/app_convergence.tex")
 
 message("Saved: results/tables/app_convergence.tex")

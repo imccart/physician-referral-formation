@@ -165,7 +165,6 @@ table_tex %>%
   kable(format   = "latex", booktabs = TRUE, linesep = "",
         col.names = c(" ", "All referrals", "PCP movers"),
         align     = c("l","r","r")) %>%
-  kable_styling(latex_options = "hold_position") %>%
   group_rows("Panel A. Doctors (any outgoing referrals)", 1, 10) %>%
   group_rows("Panel B. Specialists (any incoming referrals)", 11, 20) %>%
   writeLines("results/tables/desc.tex")
@@ -292,5 +291,4 @@ tab_links %>%
         col.names = c("Statistic",
                       "Established \\ links",
                       "Non--established \\ links")) %>%
-  kable_styling(latex_options = "hold_position") %>%
   writeLines("results/tables/link_stats.tex")

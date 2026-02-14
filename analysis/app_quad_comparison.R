@@ -101,7 +101,6 @@ quad_tex <- sum_table %>%
     digits   = 2,
     na       = ""
   ) %>%
-  kable_styling(latex_options = c("hold_position")) %>%
   row_spec(11, extra_latex_after = "\\midrule")
 
 writeLines(quad_tex, "results/tables/quad_comparison.tex")
