@@ -2,7 +2,7 @@
 ## Title:         Formation of Physician Referral Networks
 ## Author:        Ian McCarthy
 ## Date Created:  5/20/2025
-## Date Edited:   6/5/2025
+## Date Edited:   2/13/2026
 
 
 # Preliminaries -----------------------------------------------------------
@@ -51,4 +51,13 @@ movers <- df_initial_referrals %>%
     group_by(doctor) %>%
     slice(1) %>%
     select(doctor, origin, destination)
+
+
+# Run analysis scripts -----------------------------------------------------
+
+source("analysis/1_descriptive_stats.R")
+source("analysis/2_logit_twfe.R")
+source("analysis/3_welfare_calcs.R")
+source("analysis/4_referral_windows.R")
+source("analysis/5_quad_comparison.R")
 

@@ -87,7 +87,7 @@ mover_plot <- ggplot() +
   theme_void() +
   theme(legend.position = "right")
 
-ggsave("results/fig_movers.png",
+ggsave("results/figures/fig_movers.png",
        plot   = mover_plot,
        width  = 6,       # inches
        height = 4,       # inches
@@ -168,7 +168,7 @@ table_tex %>%
   kable_styling(latex_options = "hold_position") %>%
   group_rows("Panel A. Doctors (any outgoing referrals)", 1, 10) %>%
   group_rows("Panel B. Specialists (any incoming referrals)", 11, 20) %>%
-  writeLines("results/desc.tex")
+  writeLines("results/tables/desc.tex")
 
 
 ## Distribution of network size
@@ -201,7 +201,7 @@ p <- ggplot(deg_plot, aes(deg_bin, n)) +
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
-ggsave("results/fig_degree.png",
+ggsave("results/figures/fig_degree.png",
        plot   = p,
        width  = 6,       # inches
        height = 3.5,     # inches
@@ -241,9 +241,8 @@ summary_tbl <- tibble(
   metric  = c("Same practice",
               "Same gender",
               "Same race",
-              "Same medical school",
               "Mean distance (miles)",
-              "Mean experience (years)"),
+              "Mean experience gap (years)"),
   value   = c(scales::percent(pct_same_practice, accuracy = .1),
               scales::percent(pct_same_gender,   accuracy = .1),
               scales::percent(pct_same_race,     accuracy = .1),
@@ -292,4 +291,4 @@ tab_links %>%
                       "Established \\ links",
                       "Non--established \\ links")) %>%
   kable_styling(latex_options = "hold_position") %>%
-  writeLines("results/link_stats.tex")
+  writeLines("results/tables/link_stats.tex")

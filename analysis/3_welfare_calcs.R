@@ -62,7 +62,7 @@ welfare_summary <- kable(results,
   kable_styling(latex_options = "hold_position")
 
 
-writeLines(as.character(welfare_summary), "results/welfare_summary_quadruple.tex")
+writeLines(as.character(welfare_summary), "results/tables/welfare_summary_quadruple.tex")
 
 
 
@@ -227,4 +227,4 @@ latex_welfare <- welfare_tbl |>
   pack_rows("Panel C. Aggregate effect vs 75th-pct benchmark", n_A+n_B+1, n_A+n_B+n_C)
 
 writeLines(as.character(latex_welfare),
-           "results/welfare_summary.tex")
+           "results/tables/welfare_summary.tex")

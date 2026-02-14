@@ -1,82 +1,5 @@
 
-# Basline logit (Zeltzer) ---------------------------------------------------
-
-logit1 <- feglm(
-  referral ~ same_sex + spec_male + exp_spec | Year + doctor,
-  data = df_logit,
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
-logit2 <- feglm(
-  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles | Year + doctor,
-  data = df_logit,
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
-logit3 <- feglm(
-  referral ~ same_sex + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
-  data = df_logit,
-  vcov = "HC1",
-  family = binomial(link = "logit")
-)
-
-mfx_logit1 <- avg_slopes(logit1)
-mfx_logit2 <- avg_slopes(logit2)
-mfx_logit3 <- avg_slopes(logit3)
-
-
-# Organize models into a list
-models_logit <- list(
-  "(1)" = mfx_logit1,
-  "(2)" = mfx_logit2,
-  "(3)" = mfx_logit3
-)
-
-# Custom coefficient labels to match your table rows
-coef_labels <- c(
-  "same_sex" = "Same gender",
-  "spec_male" = "Male specialist",   
-  "exp_spec" = "Specialist experience (10 years)",
-  "same_prac" = "Same practice group",  
-  "dist_miles" = "Distance (miles)",  
-  "diff_age" = "Similar age",
-  "diff_gradyear" = "Similar experience"
-)
-
-# Additional rows for FE indicators and summary stats
-add_rows <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`,
-  "Year FE", "Yes", "Yes", "Yes",
-  "Doctor FE", "Yes", "Yes","Yes",
-  "Specialist FE", "No", "No", "No",
-  "Observations", format(nobs(logit1), big.mark=","), 
-                  format(nobs(logit2), big.mark=","), 
-                  format(nobs(logit3), big.mark=","), 
-  "Pseudo-$R^2$", format(logit1$pseudo_r2, digits = 2),
-                  format(logit2$pseudo_r2, digits = 2),
-                  format(logit3$pseudo_r2, digits = 2)
-)
-
-
-# Create the LaTeX table
-options(modelsummary_format_numeric_latex = "plain")
-summary_logit <- modelsummary(
-  models_logit,
-  coef_map = coef_labels,
-  stars = FALSE,
-  gof_omit = ".*",
-  add_rows = add_rows,
-  output = "latex_tabular"
-)
-
-writeLines(as.character(summary_logit), "results/app_logit_mfx.tex")
-
-
-
-
-# Basline logit with race ---------------------------------------------------
+# Baseline logit with race (Zeltzer) ----------------------------------------
 
 logit_race1 <- feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec | Year + doctor,
@@ -149,7 +72,7 @@ summary_logit_race <- modelsummary(
   output = "latex_tabular"
 )
 
-writeLines(as.character(summary_logit_race), "results/app_logit_race_mfx.tex")
+writeLines(as.character(summary_logit_race), "results/tables/app_logit_race_mfx.tex")
 
 
 
@@ -176,59 +99,7 @@ logit_twfe3 <- feglm(
   family = binomial(link = "logit")
 )
 
-## approximate MFX for the Jochmans logit models
-mfx_logit_twfe1 <- avg_slopes(logit_twfe1)
-mfx_logit_twfe2 <- avg_slopes(logit_twfe2)
-mfx_logit_twfe3 <- avg_slopes(logit_twfe3)
-
-## Organize models into a list for approximate calculation of marginal effects
-models_twfe <- list(
-  "(1)" = mfx_logit_twfe1,
-  "(2)" = mfx_logit_twfe2,
-  "(3)" = mfx_logit_twfe3
-)
-
-# Custom coefficient labels to match your table rows
-coef_labels <- c(
-  "same_sex" = "Same gender",
-  "same_prac" = "Same practice group",
-  "same_race" = "Same race",
-  "diff_dist" = "Differential distance",  
-  "diff_age" = "Similar age",
-  "diff_gradyear" = "Similar experience"
-)
-
-# Additional rows for FE indicators and summary stats
-add_rows <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`, 
-  "Year FE", "Yes", "Yes", "Yes",
-  "Doctor FE", "Yes", "Yes","Yes",
-  "Specialist FE", "Yes", "Yes", "Yes",
-  "Observations", format(nobs(logit_twfe1), big.mark=","), 
-                  format(nobs(logit_twfe2), big.mark=","), 
-                  format(nobs(logit_twfe3), big.mark=","),
-  "Pseudo-$R^2$", format(logit_twfe1$pseudo_r2, digits = 2),
-                  format(logit_twfe2$pseudo_r2, digits = 2),
-                  format(logit_twfe3$pseudo_r2, digits = 2)
-)
-
-
-# Create the LaTeX table
-options(modelsummary_format_numeric_latex = "plain")
-summary_twfe <- modelsummary(
-  models_twfe,
-  coef_map = coef_labels,
-  stars = FALSE,
-  gof_omit = ".*",
-  add_rows = add_rows,
-  output = "latex_tabular"
-)
-
-writeLines(as.character(summary_twfe), "results/logit_twfe_mfx_alt.tex")
-
-
-
-## manual MFX for Jochmans logit models
+## Manual MFX for Jochmans logit models
 specs <- list(
   `(1)` = list(
       model      = logit_twfe1,
@@ -393,4 +264,4 @@ kable(table_out,
       align      = c("l", rep("r", 3)),
       col.names  = c("", "(1)", "(2)", "(3)")) %>%
   kable_styling(latex_options = "hold_position") %>%
-  save_kable("results/logit_twfe_mfx.tex")
+  save_kable("results/tables/logit_twfe_mfx.tex")

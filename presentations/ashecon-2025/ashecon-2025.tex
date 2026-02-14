@@ -1,0 +1,204 @@
+\documentclass{beamer}
+
+\usepackage{booktabs}
+\usepackage{xcolor,colortbl}
+
+% Define overlay-aware row highlighter
+\newcommand<>{\hlrow}[1]{\alt#2{\rowcolor{yellow!20}#1}{#1}}
+\newcommand<>{\graytextrow}[1]{\alt#2{\color{gray}#1}{#1}}
+
+% Optional: define \sym if needed
+\newcommand{\sym}[1]{\ifmmode^{#1}\else\(^{#1}\)\fi}
+
+% Define overlay-aware focus bullet
+\newcommand<>{\focusitem}[1]{\alt#2{#1}{\textcolor{gray}{#1}}}
+
+\setbeameroption{hide notes}
+\usetheme{Malmoe}
+\usecolortheme[RGB={101, 56, 25}]{structure}
+
+\setbeamertemplate{itemize items}[default]
+\setbeamertemplate{itemize subitem}[circle]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amssymb,amsmath,amsfonts,amsthm}
+\usepackage{graphicx, tikz}
+\usetikzlibrary{calc}
+\usepackage{todonotes}
+\usepackage{xkeyval}
+\presetkeys{todonotes}{inline}{}
+
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\V}{\mathrm{V}}
+\newcommand{\C}{\mathrm{Cov}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+
+\newcommand{\bit}{\begin{itemize}}
+\newcommand{\eit}{\end{itemize}}
+\newcommand{\benu}{\begin{enumerate}}
+\newcommand{\eenu}{\end{enumerate}}
+
+\definecolor{themebrown}{RGB}{101, 56, 25}
+
+\title[Formation of Referral Networks \hspace{0.5cm} \insertframenumber]{Formation of Physician Referral Networks: Drivers and Consequences}
+\author[McCarthy et al.]{Ian McCarthy\inst{1} \and Shirley Cai\inst{1} \\ \and Pablo Estrada\inst{2} \and Jillian Wilkins\inst{1}}
+\institute[]{\inst{1} Emory University \and \inst{2} Capital One}
+\date[]{ASHEcon \\ \small{June 2025}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Motivation}
+\bit
+  \item Initial PCP-specialist referrals shape downstream care
+  \item Patients are increasingly reliant on referrals
+  \item Most literature studies established networks; we study how those networks are \emph{formed}
+\eit
+\end{frame}
+
+\begin{frame}{Empirical Setup}
+\bit
+  \item Medicare FFS data 2009--2018; elective orthopedic surgery referrals
+  \item PCP defined by plurality of E\&M visits in prior year
+  \item We focus on PCP movers to isolate initial referral decisions
+  \item Network formation: any referral link within HRR in year of move 
+\eit
+\end{frame}
+
+\begin{frame}{PCP Movers}
+\centerline{%
+    \includegraphics[scale=.75]{figures/fig_movers.png}
+}
+\end{frame}
+
+
+\begin{frame}{Network Structure}
+\bit
+  \item Average PCP refers to 2--3 orthopedic specialists per year (1-2 for movers)
+  \item Median specialist receives referrals from 8 PCPs  
+\eit
+\end{frame}
+
+
+\begin{frame}{Data Summary}
+\begin{table}
+     \input{tables/link_stats.tex}
+\end{table}
+\end{frame}
+
+
+\begin{frame}{Estimation Strategy}
+\bit
+  \item Reduced-form network formation model (Jochmans 2018):
+  \begin{align*}
+  & u_{ij} = x_{ij}'\beta + \alpha_{i} + \alpha_{j} - \varepsilon_{ij} \\
+  & \Pr(y_{ij} = 1 | x_{ij}) = \frac{\exp(x_{ij}'\beta + \alpha_{i} + \alpha_{j})}{1 + \exp(x_{ij}'\beta + \alpha_{i} + \alpha_{j})}
+  \end{align*}
+  \item Quadruple-based estimator eliminates two-sided fixed effects
+\eit
+\end{frame}
+
+\begin{frame}{Estimation Strategy}
+\bit
+  \item For each quadruple $(i,k;j,l)$, transform outcome and covariates:
+  \[
+    \tilde{y}_m = \frac{(y_{ij} - y_{il}) - (y_{kj} - y_{kl})}{2}, \quad
+    \tilde{x}_m = (x_{ij} - x_{il}) - (x_{kj} - x_{kl})
+  \]
+  \item Identification of $\beta$ comes entirely from discordant comparisons ($\tilde{y}_m \in \{-1,1\}$):
+    \bit
+      \item Two senders rank two receivers differently
+      \item Sender and receiver fixed effects cancel
+      \item $\implies$ Non-discordant quadruples yield no identifying variation and are excluded
+    \eit
+  \item Log-likelihood
+  \[
+    L(\beta) = \sum_{m=1}^M \mathbf{1}\{\tilde{y}_m = -1\} \log F(\tilde{x}_m'\beta) + 
+    \mathbf{1}\{\tilde{y}_m = 1\} \log (1 - F(\tilde{x}_m'\beta))
+  \]
+\eit
+\end{frame}
+
+
+\begin{frame}{Determinants of Referral Links}
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Covariate & Effect (\%) & SE \\
+\hline
+Same practice group & +32.0 & (3.0) \\
+Same gender & +5.8 & (2.2) \\
+Same race & +2.5 & (1.8) \\
+Distance (+5 mi) & $-$5.0 & (0.2) \\
+Age diff (+1 yr) & +0.3 & (0.1) \\
+Experience diff (+1 yr) & $-$0.1 & (0.1) \\
+\hline
+\end{tabular}
+\end{center}
+\medskip
+\bit
+  \item Practice ties dominate; distance and gender also matter
+  \item Other demographic concordance effects small
+  \item Insensitive to inclusion/exclusion of age, experience, or race
+\eit
+\end{frame}
+
+\begin{frame}{Quality Implications of Referral Choices}
+\bit
+  \item Attach surgeon quality measures to referral links
+  \item Quality measured using the CMS Comprehensive Care for Joint Replacement measures
+  \item Evaluate change in expected adverse outcomes per 1,000 patients if a covariate is neutralized
+\eit
+\end{frame}
+
+\begin{frame}{Quality Implications of Referral Choices}
+\begin{center}
+\footnotesize
+\begin{tabular}{lrrrrrr}
+& Mean & SD & P25 & P50 & P75 \\
+\hline
+\multicolumn{6}{l}{\textbf{Panel A. Relative to 75th-pct specialist}}\\
+\hline\hline
+\hspace{1em}\hlrow<1>{Practice group} & 0.86 & 1.68 & 0.00 & 0.21 & 0.91 \\
+\hspace{1em}\hlrow<2>{Gender} & 1.57 & 1.29 & 0.75 & 1.36 & 2.12 \\
+\hspace{1em}\hlrow<2>{Race} & 0.74 & 0.59 & 0.41 & 0.63 & 0.95 \\
+\hspace{1em}\hlrow<2>{Age} & 1.34 & 0.95 & 0.73 & 1.13 & 1.76 \\
+\hspace{1em}\hlrow<2>{Experience} & -0.46 & 0.31 & -0.62 & -0.40 & -0.26 \\
+\hspace{1em}\hlrow<3>{Distance} & -12.15 & 6.99 & -17.38 & -11.79 & -6.51 \\
+\hline
+\multicolumn{6}{l}{\textbf{Panel B. Aggregate effect vs 75th-pct benchmark}}\\
+\hline\hline
+\hspace{1em}\hlrow<4>{All channels} & -11.83 & 7.76 & -15.80 & -10.20 & -6.60 \\
+\end{tabular}
+\end{center}
+
+\bit
+  \item<1-> \focusitem<1>{Preference for practice affiliation has little effect on quality}
+  \item<2-> \focusitem<2>{Demographic homophily has minor quality effects at most}
+  \item<3-> \focusitem<3>{Distance as mediating effect}
+  \item<4-> \focusitem<4>{Practice, geographic, and demographic homophily collectively lowers quality}
+\eit
+
+\end{frame}
+
+
+\begin{frame}{Dynamics of Referral Determinants}
+\begin{center}
+\includegraphics[scale=0.7]{figures/mfx_by_window.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Conclusions}
+\bit
+  \item Initial referral networks shaped by practice ties and geographic proximity
+  \item Demographic homophily plays a smaller initial role, but gender homophily still important
+  \item Over time, practice ties, proximity, and demographic similarity effects attenuate, and effects of gender homophily dissipate entirely
+  \item Reliance on practice affiliation has limited effects on patient quality
+  \item Preference of nearby specialists may mediate effects of other potential biases
+\eit
+\end{frame}
+
+\end{document}
