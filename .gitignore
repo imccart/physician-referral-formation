@@ -1,6 +1,5 @@
 data/*
 archive/*
-papers/*
 scratch/*
 *.rds
 *.RData
