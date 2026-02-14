@@ -8,6 +8,7 @@
 # Preliminaries -----------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, marginaleffects, knitr, kableExtra, scales, broom, purrr, matrixStats)
+options(modelsummary_factory_default = "kableExtra")
 
 
 # Import data -------------------------------------------------------------
@@ -29,8 +30,10 @@ df_initial_referrals <- read_csv("data/output/df_initial_referrals.csv")
 
 ## Referral "choice" data for standard logit
 df_logit <- read_csv("data/output/df_logit_movers.csv") %>%
-    mutate(doc_male=(doc_sex=="M"), spec_male=(spec_sex=="M"), 
-           exp_spec=(Year-spec_grad_year)/10)
+    mutate(doc_male=(doc_sex=="M"), spec_male=(spec_sex=="M"),
+           exp_spec=(Year-spec_grad_year)/10,
+           doctor = as.factor(doctor),
+           specialist = as.factor(specialist))
 
 ## Referral choice data for Jochmans (2018) logit
 df_logit_twfe <- read_csv("data/output/df_jochmans.csv")
@@ -45,6 +48,16 @@ ref_windows <- read_csv("data/output/df_initial_referrals_cuml.csv")
 ## Choice data for Jochmans (2018) by window
 df_logit_windows <- read_csv("data/output/df_jochmans_windows.csv")
 
+## Standard choice-set data by window (for two-stage per-window estimation)
+df_choiceset_windows <- read_csv(
+  "data/output/df_logit_windows.csv",
+  col_select = c(Year, doctor, specialist, referral,
+                 same_sex, same_race, same_prac, diff_dist,
+                 diff_age, diff_gradyear, doc_hrr, spec_qual, window)
+) %>%
+  mutate(doctor    = as.factor(doctor),
+         specialist = as.factor(specialist))
+
 # Minor cleanup -----------------------------------------------------------
 
 movers <- df_initial_referrals %>%
@@ -57,7 +70,10 @@ movers <- df_initial_referrals %>%
 
 source("analysis/1_descriptive_stats.R")
 source("analysis/2_logit_twfe.R")
-source("analysis/3_welfare_calcs.R")
-source("analysis/4_referral_windows.R")
-source("analysis/5_quad_comparison.R")
+source("analysis/3_referral_windows.R")
 
+# Appendix scripts ---------------------------------------------------------
+
+source("analysis/app_quad_comparison.R")
+source("analysis/app_welfare.R")
+source("analysis/app_convergence.R")

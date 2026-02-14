@@ -1,3 +1,8 @@
 data/*
 archive/*
 papers/*
+scratch/*
+*.rds
+*.RData
+.Rhistory
+.Rproj.user

@@ -190,7 +190,7 @@ deg_plot <- deg_all %>%
   mutate(deg_bin = if_else(deg > 20, ">20", as.character(deg))) %>%
   mutate(deg_bin = factor(deg_bin,
                           levels = c(as.character(0:20), ">20"))) %>%
-  count(side, deg_bin)
+  dplyr::count(side, deg_bin)
 
 p <- ggplot(deg_plot, aes(deg_bin, n)) +
   geom_col(fill = "grey60") +

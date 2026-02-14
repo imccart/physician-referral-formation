@@ -1,24 +1,24 @@
 
-# Baseline logit with race (Zeltzer) ----------------------------------------
+# Baseline logit with race (Zeltzer-style, doctor FE only) -------------------
 
-logit_race1 <- feglm(
+logit_race1 <- fixest::feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec | Year + doctor,
   data = df_logit,
-  vcov = "HC1",
+  vcov = ~doctor,
   family = binomial(link = "logit")
 )
 
-logit_race2 <- feglm(
+logit_race2 <- fixest::feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles | Year + doctor,
   data = df_logit,
-  vcov = "HC1",
+  vcov = ~doctor,
   family = binomial(link = "logit")
 )
 
-logit_race3 <- feglm(
+logit_race3 <- fixest::feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
   data = df_logit,
-  vcov = "HC1",
+  vcov = ~doctor,
   family = binomial(link = "logit")
 )
 
@@ -27,41 +27,36 @@ mfx_logit_race1 <- avg_slopes(logit_race1)
 mfx_logit_race2 <- avg_slopes(logit_race2)
 mfx_logit_race3 <- avg_slopes(logit_race3)
 
-# Organize models into a list
 models_logit_race <- list(
   "(1)" = mfx_logit_race1,
   "(2)" = mfx_logit_race2,
   "(3)" = mfx_logit_race3
 )
 
-# Custom coefficient labels to match your table rows
 coef_labels <- c(
   "same_sex" = "Same gender",
-  "spec_male" = "Male specialist",   
+  "spec_male" = "Male specialist",
   "exp_spec" = "Specialist experience (10 years)",
   "same_prac" = "Same practice group",
   "same_race" = "Same race",
-  "dist_miles" = "Distance (miles)",  
+  "dist_miles" = "Distance (miles)",
   "diff_age" = "Similar age",
   "diff_gradyear" = "Similar experience"
 )
 
-# Additional rows for FE indicators and summary stats
 add_rows <- tribble(
   ~term, ~`(1)`, ~`(2)`, ~`(3)`,
   "Year FE", "Yes", "Yes", "Yes",
   "Doctor FE", "Yes", "Yes","Yes",
   "Specialist FE", "No", "No", "No",
-  "Observations", format(nobs(logit_race1), big.mark=","), 
-                  format(nobs(logit_race2), big.mark=","), 
-                  format(nobs(logit_race3), big.mark=","), 
+  "Observations", format(nobs(logit_race1), big.mark=","),
+                  format(nobs(logit_race2), big.mark=","),
+                  format(nobs(logit_race3), big.mark=","),
   "Pseudo-$R^2$", format(logit_race1$pseudo_r2, digits = 2),
                   format(logit_race2$pseudo_r2, digits = 2),
                   format(logit_race3$pseudo_r2, digits = 2)
 )
 
-
-# Create the LaTeX table
 options(modelsummary_format_numeric_latex = "plain")
 summary_logit_race <- modelsummary(
   models_logit_race,
@@ -76,192 +71,247 @@ writeLines(as.character(summary_logit_race), "results/tables/app_logit_race_mfx.
 
 
 
-# Jochmans Logit ---------------------------------------------------
+# Two-stage estimation: Jochmans β + FE recovery ----------------------------
+# Stage 1: Jochmans quartet estimator → consistent β (FEs eliminated via differencing)
+# Stage 2: Hold β fixed as offset, recover doctor + specialist FEs via fixest
+# MFX: first-difference using full predicted probabilities (Xβ + α_i + γ_j)
 
-logit_twfe1 <- feglm(
-  referral ~ same_sex + same_prac + diff_dist  | year,
+covars <- c("same_sex", "same_prac", "diff_dist",
+            "same_race", "diff_age", "diff_gradyear")
+
+## Stage 1: Jochmans β (three specifications) ----
+
+message("Stage 1: Jochmans quartet estimation...")
+
+logit_twfe1 <- fixest::feglm(
+  referral ~ same_sex + same_prac + diff_dist | year,
   data = df_logit_twfe,
-  vcov = "HC1",
-  family = binomial(link = "logit")
+  vcov = ~hrr,
+  family = binomial("logit")
 )
 
-logit_twfe2 <- feglm(
+logit_twfe2 <- fixest::feglm(
   referral ~ same_sex + same_prac + diff_dist + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
-  vcov = "HC1",
-  family = binomial(link = "logit")
+  vcov = ~hrr,
+  family = binomial("logit")
 )
 
-logit_twfe3 <- feglm(
+logit_twfe3 <- fixest::feglm(
   referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
-  vcov = "HC1",
-  family = binomial(link = "logit")
+  vcov = ~hrr,
+  family = binomial("logit")
 )
 
-## Manual MFX for Jochmans logit models
-specs <- list(
-  `(1)` = list(
-      model      = logit_twfe1,
-      binary     = c("same_sex", "same_prac"),
-      continuous = c(diff_dist  =  5)   # + 5 miles
-  ),
-  `(2)` = list(
-      model      = logit_twfe2,
-      binary     = c("same_sex", "same_prac"),
-      continuous = c(diff_age  =  1,
-                     diff_dist = 5,
-                     diff_gradyear = 1)
-  ),
-  `(3)` = list(
-      model      = logit_twfe3,
-      binary     = c("same_sex", "same_prac", "same_race"),
-      continuous = c(diff_age  = 1,
-                     diff_dist = 5,
-                     diff_gradyear = 1)
+
+## Stage 2: FE recovery with offset ----
+
+message("Stage 2: FE recovery...")
+
+# Prep: complete cases on covariates
+Xmat <- as.matrix(df_logit[, covars])
+na_mask <- complete.cases(Xmat)
+dat_fe <- df_logit[na_mask, ]
+
+# Helper: recover FEs for a given Jochmans model
+recover_fes <- function(joch_model, spec_covars) {
+  beta <- coef(joch_model)[spec_covars]
+  Xbeta <- drop(as.matrix(dat_fe[, spec_covars]) %*% beta)
+  dat_tmp <- dat_fe %>% mutate(.Xbeta = Xbeta)
+
+  fe_mod <- fixest::feglm(
+    referral ~ 1 | doctor + specialist,
+    data = dat_tmp,
+    offset = ~.Xbeta,
+    family = binomial("logit"),
+    glm.iter = 50
   )
-)
 
-## compute average first–difference and SE for ONE variable
-link_effect <- function(model, data, var, delta, binary = TRUE) {
+  fes <- fixef(fe_mod)
+  doc_fe  <- fes$doctor[as.character(dat_fe$doctor)]
+  spec_fe <- fes$specialist[as.character(dat_fe$specialist)]
+  eta     <- Xbeta + doc_fe + spec_fe
+  valid   <- !is.na(eta)
 
-  beta <- coef(model)
-  keep <- names(beta)
-
-  build_X <- function(d) {
-    mm <- model.matrix(delete.response(terms(model)), d)
-    mm[, keep, drop = FALSE]              # ensure conformable
-  }
-
-  # counterfactual data frames
-  data_cf1 <- data
-  data_cf0 <- data
-
-  if (binary) {
-    data_cf1[[var]] <- 1L
-    data_cf0[[var]] <- 0L
-  } else {
-    data_cf1[[var]] <- data_cf1[[var]] + delta
-  }
-
-  X1 <- build_X(data_cf1)
-  X0 <- build_X(data_cf0)
-
-  eta1 <- drop(X1 %*% beta)
-  eta0 <- drop(X0 %*% beta)
-  p1   <- plogis(eta1)
-  p0   <- plogis(eta0)
-
-  dp <- mean(p1 - p0, na.rm = TRUE)
-
-  # delta-method gradient (see Jochmans 2018 appendix)
-  grad_i <- (p1 * (1 - p1)) * X1 - (p0 * (1 - p0)) * X0
-  g_bar  <- colMeans(grad_i)
-
-  se <- sqrt( t(g_bar) %*% vcov(model, type = "HC1") %*% g_bar )
-
-  tibble(term      = var,
-         estimate  = dp,
-         std.error = as.numeric(se))
+  list(beta = beta, eta = eta, valid = valid, n_valid = sum(valid),
+       fe_mod = fe_mod, fes = fes)
 }
 
-## Loop over models and covariates
-effects_twfe <- imap_dfr(specs, function(info, label) {
-  mod   <- info$model
-  dat   <- df_logit %>% rename(year = Year)  # supply the estimation data
-  # binary variables
-  eff_bin <- map_dfr(
-    info$binary,
-    link_effect,
-    model  = mod,
-    data   = dat,
-    delta  = 1,
-    binary = TRUE
-  )
+covars1 <- c("same_sex", "same_prac", "diff_dist")
+covars2 <- c("same_sex", "same_prac", "diff_dist", "diff_age", "diff_gradyear")
+covars3 <- covars
 
-  # continuous covariates
-  eff_con <- imap_dfr(
-    info$continuous,
-    ~ link_effect(
-        model  = mod,
-        data   = dat,
-        var    = .y,
-        delta  = .x,
-        binary = FALSE
-      )
-  )
+stage2_1 <- recover_fes(logit_twfe1, covars1)
+stage2_2 <- recover_fes(logit_twfe2, covars2)
+stage2_3 <- recover_fes(logit_twfe3, covars3)
 
-  bind_rows(eff_bin, eff_con) %>%
-    mutate(model = label)
-})
+message("  Spec 1: ", stage2_1$n_valid, " valid obs")
+message("  Spec 2: ", stage2_2$n_valid, " valid obs")
+message("  Spec 3: ", stage2_3$n_valid, " valid obs")
 
+
+## MFX via first-difference + delta-method SEs ----
+
+message("Computing MFX with delta-method SEs...")
+
+compute_mfx <- function(stage2, joch_model, spec_covars) {
+  beta  <- stage2$beta
+  eta   <- stage2$eta[stage2$valid]
+  dat_v <- dat_fe[stage2$valid, ]
+  V     <- vcov(joch_model, type = "HC1")
+  # Subset vcov to spec_covars (Jochmans model may have year FEs in vcov)
+  V <- V[spec_covars, spec_covars]
+
+  map_dfr(spec_covars, function(v) {
+    is_bin <- v %in% c("same_sex", "same_prac", "same_race")
+    delta  <- if (v == "diff_dist") 5 else 1
+
+    if (is_bin) {
+      eta1 <- eta - beta[v] * dat_v[[v]] + beta[v]
+      eta0 <- eta - beta[v] * dat_v[[v]]
+    } else {
+      eta1 <- eta + beta[v] * delta
+      eta0 <- eta
+    }
+
+    p1 <- plogis(eta1)
+    p0 <- plogis(eta0)
+    dp <- mean(p1 - p0)
+
+    # Delta-method gradient: ∂MFX/∂β_k
+    # For each obs i: ∂(p1_i - p0_i)/∂β_k
+    grad_i <- matrix(0, nrow = length(eta), ncol = length(spec_covars))
+    colnames(grad_i) <- spec_covars
+
+    for (k in spec_covars) {
+      if (is_bin) {
+        # η1 = η - β_v*x_v + β_v*1, η0 = η - β_v*x_v + β_v*0
+        # ∂η1/∂β_k = x_k (from η) + I(k==v)*(1 - x_v) - I(k==v is already in the derivative)
+        # More carefully: η1 = Σ_{j≠v} β_j*x_j + β_v*1 + α + γ
+        # ∂η1/∂β_k = x_k if k≠v, 1 if k==v
+        # ∂η0/∂β_k = x_k if k≠v, 0 if k==v
+        deta1_dk <- if (k == v) rep(1, length(eta)) else dat_v[[k]]
+        deta0_dk <- if (k == v) rep(0, length(eta)) else dat_v[[k]]
+      } else {
+        # η1 = η + β_v*delta, η0 = η
+        # ∂η1/∂β_k = x_k + I(k==v)*delta
+        # ∂η0/∂β_k = x_k
+        deta1_dk <- dat_v[[k]] + if (k == v) delta else 0
+        deta0_dk <- dat_v[[k]]
+      }
+      grad_i[, k] <- (p1 * (1 - p1)) * deta1_dk - (p0 * (1 - p0)) * deta0_dk
+    }
+
+    g_bar <- colMeans(grad_i)
+    se <- sqrt(as.numeric(t(g_bar) %*% V %*% g_bar))
+
+    tibble(term = v, estimate = dp, std.error = se)
+  })
+}
+
+mfx1 <- compute_mfx(stage2_1, logit_twfe1, covars1)
+mfx2 <- compute_mfx(stage2_2, logit_twfe2, covars2)
+mfx3 <- compute_mfx(stage2_3, logit_twfe3, covars3)
+
+
+## Build combined table: structural β + MFX ----
 
 coef_labels <- c(
-  same_sex       = "Same gender",
-  same_prac      = "Same practice group",
-  same_race      = "Same race",
-  diff_dist      = "Differential distance (+5 miles)",
-  diff_age       = "Similar age (+1 yr)",
-  diff_gradyear  = "Similar experience (+1 yr)"
+  same_sex      = "Same gender",
+  same_prac     = "Same practice group",
+  same_race     = "Same race",
+  diff_dist     = "Distance",
+  diff_age      = "Age difference",
+  diff_gradyear = "Experience difference"
 )
 
-vars_order <- names(coef_labels)            # preserve this order
+vars_order <- names(coef_labels)
 
-make_block <- function(var) {
+# Helper: format a cell
+fmt_est <- function(x) { if (is.na(x) || length(x) == 0) " " else comma(x, accuracy = 0.001) }
+fmt_se  <- function(x) { if (is.na(x) || length(x) == 0) " " else paste0("(", comma(x, accuracy = 0.001), ")") }
 
+# Build β panel
+beta_block <- function(var) {
   lbl <- coef_labels[[var]]
-
-  # pull estimates & SEs (may be empty if var not in that model)
-  ests <- effects_twfe %>%
-            filter(term == var) %>%
-            select(model, estimate, std.error)
-
-  cell <- function(mod, what) {
-    val <- ests[[what]][ests$model == mod]
-    if (length(val) == 0 || is.na(val)) return(" ")
-    if (what == "estimate") comma(val, accuracy = 0.001)
-    else                    paste0("(", comma(val, accuracy = 0.001), ")")
+  get_b <- function(mod) {
+    b <- coef(mod)
+    if (var %in% names(b)) b[[var]] else NA_real_
+  }
+  get_se <- function(mod) {
+    s <- sqrt(diag(vcov(mod, vcov = ~hrr)))
+    if (var %in% names(s)) s[[var]] else NA_real_
   }
 
-  tibble(
-    term   = lbl,
-    `(1)`  = cell("(1)", "estimate"),
-    `(2)`  = cell("(2)", "estimate"),
-    `(3)`  = cell("(3)", "estimate")
-  ) %>%
+  tibble(term = lbl,
+         `(1)` = fmt_est(get_b(logit_twfe1)),
+         `(2)` = fmt_est(get_b(logit_twfe2)),
+         `(3)` = fmt_est(get_b(logit_twfe3))) %>%
   bind_rows(
-    tibble(
-      term   = "",                        # indent SE row
-      `(1)`  = cell("(1)", "std.error"),
-      `(2)`  = cell("(2)", "std.error"),
-      `(3)`  = cell("(3)", "std.error")
-    )
+    tibble(term = "",
+           `(1)` = fmt_se(get_se(logit_twfe1)),
+           `(2)` = fmt_se(get_se(logit_twfe2)),
+           `(3)` = fmt_se(get_se(logit_twfe3)))
   )
 }
 
-table_body <- lapply(vars_order, make_block) %>% bind_rows()
+# Build MFX panel
+mfx_block <- function(var) {
+  lbl <- coef_labels[[var]]
+  get_val <- function(mfx_df, what) {
+    row <- mfx_df %>% filter(term == var)
+    if (nrow(row) == 0) NA_real_ else row[[what]]
+  }
 
-add_rows <- tribble(
-  ~term,            ~`(1)`, ~`(2)`, ~`(3)`,
-  "Year FE",        "Yes",  "Yes",  "Yes",
-  "Doctor FE",      "Yes",  "Yes",  "Yes",
-  "Specialist FE",  "Yes",  "Yes",  "Yes",
-  "Observations",
-        format(nobs(logit_twfe1), big.mark = ","),
-        format(nobs(logit_twfe2), big.mark = ","),
-        format(nobs(logit_twfe3), big.mark = ","),
-  "Pseudo-$R^2$",
-        format(logit_twfe1$pseudo_r2, digits = 2),
-        format(logit_twfe2$pseudo_r2, digits = 2),
-        format(logit_twfe3$pseudo_r2, digits = 2)
+  tibble(term = lbl,
+         `(4)` = fmt_est(get_val(mfx1, "estimate")),
+         `(5)` = fmt_est(get_val(mfx2, "estimate")),
+         `(6)` = fmt_est(get_val(mfx3, "estimate"))) %>%
+  bind_rows(
+    tibble(term = "",
+           `(4)` = fmt_se(get_val(mfx1, "std.error")),
+           `(5)` = fmt_se(get_val(mfx2, "std.error")),
+           `(6)` = fmt_se(get_val(mfx3, "std.error")))
+  )
+}
+
+beta_body <- lapply(vars_order, beta_block) %>% bind_rows()
+mfx_body  <- lapply(vars_order, mfx_block) %>% bind_rows()
+
+# Merge panels side by side
+table_body <- bind_cols(beta_body, mfx_body %>% select(-term))
+
+# Footer rows
+n_joch  <- format(nobs(logit_twfe3), big.mark = ",")
+n_stage2 <- format(stage2_3$n_valid, big.mark = ",")
+
+footer <- tribble(
+  ~term, ~`(1)`, ~`(2)`, ~`(3)`, ~`(4)`, ~`(5)`, ~`(6)`,
+  "Year FE",        "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
+  "Doctor FE",      "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
+  "Specialist FE",  "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
+  "Quartet obs",
+    format(nobs(logit_twfe1), big.mark = ","),
+    format(nobs(logit_twfe2), big.mark = ","),
+    n_joch, " ", " ", " ",
+  "Choice-set obs",
+    " ", " ", " ",
+    format(stage2_1$n_valid, big.mark = ","),
+    format(stage2_2$n_valid, big.mark = ","),
+    n_stage2
 )
 
-table_out <- bind_rows(table_body, add_rows)
+table_out <- bind_rows(table_body, footer)
 
 kable(table_out,
-      format     = "latex",
-      booktabs   = TRUE,
-      align      = c("l", rep("r", 3)),
-      col.names  = c("", "(1)", "(2)", "(3)")) %>%
+      format    = "latex",
+      booktabs  = TRUE,
+      align     = c("l", rep("r", 6)),
+      col.names = c("", "(1)", "(2)", "(3)", "(4)", "(5)", "(6)")) %>%
   kable_styling(latex_options = "hold_position") %>%
+  add_header_above(c(" " = 1,
+                     "Structural $\\\\beta$ (log-odds)" = 3,
+                     "Avg. marginal effects" = 3),
+                   escape = FALSE) %>%
   save_kable("results/tables/logit_twfe_mfx.tex")

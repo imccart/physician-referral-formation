@@ -1,26 +1,36 @@
-\begin{tabular}{llll}
-\hline
-& (1) & (2) & (3) \\ \hline
-Same gender                        & 0.003   & 0.005   & 0.004   \\
+\begin{table}
+\centering
+\begin{tblr}[         %% tabularray outer open
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]},
+hline{2}={1-4}{solid, black, 0.05em},
+hline{1}={1-4}{solid, black, 0.08em},
+hline{23}={1-4}{solid, black, 0.08em},
+column{2-4}={}{halign=c},
+column{1}={}{halign=l},
+}                     %% tabularray inner close
+& (1) & (2) & (3) \\
+Same gender & 0.003 & 0.005 & 0.004 \\
 & (0.004) & (0.005) & (0.005) \\
-Male specialist                    & 0.008   & 0.009   & 0.009   \\
+Male specialist & 0.008 & 0.009 & 0.009 \\
 & (0.004) & (0.004) & (0.004) \\
-Specialist experience (10 years)   & 0.000   & 0.001   & 0.001   \\
+Specialist experience (10 years) & 0.000 & 0.001 & 0.001 \\
 & (0.001) & (0.001) & (0.001) \\
-Same practice group                &         & 0.058   & 0.058   \\
-&         & (0.010) & (0.010) \\
-Same race                          & 0.007   & 0.006   & 0.006   \\
+Same practice group &  & 0.058 & 0.058 \\
+&  & (0.011) & (0.011) \\
+Same race & 0.007 & 0.006 & 0.006 \\
 & (0.002) & (0.002) & (0.002) \\
-Distance (miles)                   &         & -0.002  & -0.002  \\
-&         & (0.000) & (0.000) \\
-Similar age                        &         &         & 0.000   \\
-&         &         & (0.000) \\
-Similar experience                 &         &         & 0.000   \\
-&         &         & (0.000) \\
-Year FE                            & Yes     & Yes     & Yes     \\
-Doctor FE                          & Yes     & Yes     & Yes     \\
-Specialist FE                      & No      & No      & No      \\
-Observations                       & 98,772  & 96,661  & 96,294  \\
-Pseudo-\$R\textasciicircum{}2\$ & -0.0097 & 0.13    & 0.14    \\
-\hline
-\end{tabular}
+Distance (miles) &  & -0.002 & -0.002 \\
+&  & (0.000) & (0.000) \\
+Similar age &  &  & 0.000 \\
+&  &  & (0.000) \\
+Similar experience &  &  & 0.000 \\
+&  &  & (0.000) \\
+Year FE & Yes & Yes & Yes \\
+Doctor FE & Yes & Yes & Yes \\
+Specialist FE & No & No & No \\
+Observations & 98,772 & 96,661 & 96,294 \\
+Pseudo-\$R\textasciicircum{}2\$ & -0.0097 & 0.13 & 0.14 \\
+\end{tblr}
+\end{table}

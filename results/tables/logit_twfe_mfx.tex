@@ -1,29 +1,31 @@
 \begin{table}[!h]
 \centering
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
- & (1) & (2) & (3)\\
+\multicolumn{1}{c}{ } & \multicolumn{3}{c}{Structural $\beta$ (log-odds)} & \multicolumn{3}{c}{Avg. marginal effects} \\
+\cmidrule(l{3pt}r{3pt}){2-4} \cmidrule(l{3pt}r{3pt}){5-7}
+ & (1) & (2) & (3) & (4) & (5) & (6)\\
 \midrule
-Same gender & 0.051 & 0.057 & 0.058\\
- & (0.020) & (0.021) & (0.022)\\
-Same practice group & 0.317 & 0.319 & 0.319\\
- & (0.031) & (0.030) & (0.029)\\
-Same race &  &  & 0.025\\
+Same gender & 0.455 & 0.478 & 0.471 & 0.037 & 0.039 & 0.038\\
+ & (0.189) & (0.180) & (0.176) & (0.021) & (0.021) & (0.023)\\
+Same practice group & 2.325 & 2.329 & 2.326 & 0.285 & 0.286 & 0.285\\
+ & (0.440) & (0.430) & (0.431) & (0.067) & (0.067) & (0.078)\\
+Same race &  &  & 0.201 &  &  & 0.016\\
 \addlinespace
- &  &  & (0.018)\\
-Differential distance (+5 miles) & -0.046 & -0.049 & -0.050\\
- & (0.002) & (0.002) & (0.002)\\
-Similar age (+1 yr) &  & 0.003 & 0.003\\
- &  & (0.001) & (0.001)\\
+ &  &  & (0.354) &  &  & (0.032)\\
+Distance & -0.086 & -0.086 & -0.086 & -0.032 & -0.032 & -0.032\\
+ & (0.025) & (0.025) & (0.025) & (0.002) & (0.003) & (0.006)\\
+Age difference &  & 0.021 & 0.021 &  & 0.002 & 0.002\\
+ &  & (0.019) & (0.019) &  & (0.002) & (0.002)\\
 \addlinespace
-Similar experience (+1 yr) &  & -0.001 & -0.001\\
- &  & (0.001) & (0.001)\\
-Year FE & Yes & Yes & Yes\\
-Doctor FE & Yes & Yes & Yes\\
-Specialist FE & Yes & Yes & Yes\\
+Experience difference &  & -0.007 & -0.007 &  & -0.001 & -0.001\\
+ &  & (0.020) & (0.020) &  & (0.002) & (0.002)\\
+Year FE & Yes & Yes & Yes & Yes & Yes & Yes\\
+Doctor FE & Yes & Yes & Yes & Yes & Yes & Yes\\
+Specialist FE & Yes & Yes & Yes & Yes & Yes & Yes\\
 \addlinespace
-Observations & 7,155 & 7,066 & 7,064\\
-Pseudo-\$R\textasciicircum{}2\$ & 0.35 & 0.35 & 0.35\\
+Quartet obs & 7,155 & 7,066 & 7,064 &  &  & \\
+Choice-set obs &  &  &  & 21,660 & 21,660 & 21,660\\
 \bottomrule
 \end{tabular}
 \end{table}

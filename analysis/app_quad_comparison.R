@@ -33,7 +33,7 @@ referral_counts <- df_initial_referrals %>%
   summarise(deg = n_distinct(specialist), .groups = "drop")
 
 df_doctor_wide <- df_initial_referrals %>%
-  select(doctor, starts_with("doc_"), total_pcp_patients, Year, num_ref, spec_qual) %>%
+  select(doctor, starts_with("doc_"), total_pcp_patients, Year, spec_qual) %>%
   rename_with(~ gsub("^doc_", "", .x), .cols = starts_with("doc_")) %>%
   rename(npi = doctor, total_patients = total_pcp_patients, qual = spec_qual) %>%
   distinct(npi, .keep_all = TRUE)
