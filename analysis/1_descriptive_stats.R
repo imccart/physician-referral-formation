@@ -162,7 +162,7 @@ table_tex <- table_long %>%
 table_tex %>%
   mutate(across(where(is.double), ~ round(.x, 3))) %>%   # light rounding
   select(-panel) %>%
-  kable(format   = "latex", booktabs = TRUE,
+  kable(format   = "latex", booktabs = TRUE, linesep = "",
         col.names = c(" ", "All referrals", "PCP movers"),
         align     = c("l","r","r")) %>%
   kable_styling(latex_options = "hold_position") %>%
@@ -286,6 +286,7 @@ tab_links <- bind_rows(
 tab_links %>%
   kable(format   = "latex",
         booktabs = TRUE,
+        linesep  = "",
         align    = c("l","r","r"),
         col.names = c("Statistic",
                       "Established \\ links",

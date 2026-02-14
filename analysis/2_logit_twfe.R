@@ -67,6 +67,7 @@ summary_logit_race <- modelsummary(
   output = "kableExtra"
 ) %>%
   kableExtra::kable_styling(latex_options = "hold_position") %>%
+  row_spec(19, extra_latex_after = "\\midrule") %>%
   save_kable("results/tables/app_logit_race_mfx.tex")
 
 
@@ -307,6 +308,7 @@ table_out <- bind_rows(table_body, footer)
 kable(table_out,
       format    = "latex",
       booktabs  = TRUE,
+      linesep   = "",
       align     = c("l", rep("r", 6)),
       col.names = c("", "(1)", "(2)", "(3)", "(4)", "(5)", "(6)")) %>%
   kable_styling(latex_options = "hold_position") %>%
@@ -314,4 +316,6 @@ kable(table_out,
                      "Structural $\\\\beta$ (log-odds)" = 3,
                      "Avg. marginal effects" = 3),
                    escape = FALSE) %>%
+  row_spec(12, extra_latex_after = "\\midrule") %>%
+  row_spec(15, extra_latex_after = "\\midrule") %>%
   save_kable("results/tables/logit_twfe_mfx.tex")

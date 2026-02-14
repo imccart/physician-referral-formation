@@ -84,6 +84,7 @@ welfare_out <- welfare_rows %>%
 latex_welfare <- welfare_out %>%
   kable(format   = "latex",
         booktabs = TRUE,
+        linesep  = "",
         align    = "lclrrrrrr",
         col.names = c("Variable", "Markets",
                       "Mean", "SD", "P10", "P25", "P50", "P75", "P90")) %>%
