@@ -30,6 +30,9 @@ scratch/*
 # Compiled PDFs
 *.pdf
 
+# Referee reports (internal, not for repo)
+results/refreport_*
+
 # OS files
 .DS_Store
 Thumbs.db
