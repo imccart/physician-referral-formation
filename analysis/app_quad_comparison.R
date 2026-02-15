@@ -95,12 +95,15 @@ sum_table <- make_summary(df_providers) %>%
 
 quad_tex <- sum_table %>%
   kable(
-    format   = "latex",
-    booktabs = TRUE,
-    linesep  = "",
-    digits   = 2,
-    na       = ""
+    format    = "latex",
+    booktabs  = TRUE,
+    linesep   = "",
+    digits    = 2,
+    na        = "",
+    col.names = c(" ", "Included", "Excluded", "Included", "Excluded")
   ) %>%
-  row_spec(11, extra_latex_after = "\\midrule")
+  add_header_above(c(" " = 1, "PCPs" = 2, "Specialists" = 2)) %>%
+  row_spec(5, extra_latex_after = "\\addlinespace") %>%
+  row_spec(10, extra_latex_after = "\\addlinespace")
 
-writeLines(quad_tex, "results/tables/quad_comparison.tex")
+writeLines(as.character(quad_tex), "results/tables/quad_comparison.tex")

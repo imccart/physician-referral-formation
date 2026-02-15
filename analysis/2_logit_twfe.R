@@ -33,40 +33,64 @@ models_logit_race <- list(
   "(3)" = mfx_logit_race3
 )
 
-coef_labels <- c(
-  "same_sex" = "Same gender",
-  "spec_male" = "Male specialist",
-  "exp_spec" = "Specialist experience (10 years)",
-  "same_prac" = "Same practice group",
-  "same_race" = "Same race",
-  "dist_miles" = "Distance (miles)",
-  "diff_age" = "Similar age",
-  "diff_gradyear" = "Similar experience"
-)
+## Extract MFX estimates and SEs into a table
+fmt_num <- function(x) {
+  s <- sprintf("%.3f", abs(x))
+  if (x < 0) paste0("$-$", s) else s
+}
 
-add_rows <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`,
+extract_mfx <- function(mfx_obj, terms) {
+  df <- as.data.frame(mfx_obj)
+  out <- setNames(rep("", length(terms)), terms)
+  se  <- setNames(rep("", length(terms)), terms)
+  for (v in terms) {
+    row <- df[df$term == v, ]
+    if (nrow(row) == 1) {
+      out[v] <- fmt_num(row$estimate)
+      se[v]  <- paste0("(", sprintf("%.3f", row$std.error), ")")
+    }
+  }
+  list(est = out, se = se)
+}
+
+mfx_terms <- c("same_sex", "spec_male", "exp_spec", "same_prac",
+               "same_race", "dist_miles", "diff_age", "diff_gradyear")
+mfx_labels <- c("Same gender", "Male specialist", "Specialist experience (10 years)",
+                "Same practice group", "Same race", "Distance (miles)",
+                "Similar age", "Similar experience")
+
+m1 <- extract_mfx(mfx_logit_race1, mfx_terms)
+m2 <- extract_mfx(mfx_logit_race2, mfx_terms)
+m3 <- extract_mfx(mfx_logit_race3, mfx_terms)
+
+## Build rows: coefficient estimate, then SE
+tbl_rows <- map_dfr(seq_along(mfx_terms), function(i) {
+  bind_rows(
+    tibble(` ` = mfx_labels[i], `(1)` = m1$est[i], `(2)` = m2$est[i], `(3)` = m3$est[i]),
+    tibble(` ` = "",             `(1)` = m1$se[i],  `(2)` = m2$se[i],  `(3)` = m3$se[i])
+  )
+})
+
+## Add footer rows
+footer <- tribble(
+  ~` `, ~`(1)`, ~`(2)`, ~`(3)`,
   "Year FE", "Yes", "Yes", "Yes",
-  "Doctor FE", "Yes", "Yes","Yes",
+  "Doctor FE", "Yes", "Yes", "Yes",
   "Specialist FE", "No", "No", "No",
   "Observations", format(nobs(logit_race1), big.mark=","),
                   format(nobs(logit_race2), big.mark=","),
                   format(nobs(logit_race3), big.mark=","),
-  "Pseudo-$R^2$", format(logit_race1$pseudo_r2, digits = 2),
-                  format(logit_race2$pseudo_r2, digits = 2),
-                  format(logit_race3$pseudo_r2, digits = 2)
+  "Pseudo-$R^2$", gsub("-", "$-$", format(logit_race1$pseudo_r2, digits = 2)),
+                  gsub("-", "$-$", format(logit_race2$pseudo_r2, digits = 2)),
+                  gsub("-", "$-$", format(logit_race3$pseudo_r2, digits = 2))
 )
 
-options(modelsummary_format_numeric_latex = "plain")
-summary_logit_race <- modelsummary(
-  models_logit_race,
-  coef_map = coef_labels,
-  stars = FALSE,
-  gof_omit = ".*",
-  add_rows = add_rows,
-  output = "kableExtra"
-) %>%
-  row_spec(19, extra_latex_after = "\\midrule") %>%
+tbl_all <- bind_rows(tbl_rows, footer)
+
+kable(tbl_all, format = "latex", booktabs = TRUE, escape = FALSE, linesep = "",
+      align = c("l", "r", "r", "r")) %>%
+  row_spec(nrow(tbl_rows), extra_latex_after = "\\midrule") %>%
+  row_spec(nrow(tbl_rows) + 3, extra_latex_after = "\\midrule") %>%
   save_kable("results/tables/app_logit_race_mfx.tex")
 
 
@@ -229,8 +253,8 @@ coef_labels <- c(
 vars_order <- names(coef_labels)
 
 # Helper: format a cell
-fmt_est <- function(x) { if (is.na(x) || length(x) == 0) " " else comma(x, accuracy = 0.001) }
-fmt_se  <- function(x) { if (is.na(x) || length(x) == 0) " " else paste0("(", comma(x, accuracy = 0.001), ")") }
+fmt_est <- function(x) { if (is.na(x) || length(x) == 0) " " else gsub("-", "$-$", comma(x, accuracy = 0.001)) }
+fmt_se  <- function(x) { if (is.na(x) || length(x) == 0) " " else paste0("(", comma(abs(x), accuracy = 0.001), ")") }
 
 # Build β panel
 beta_block <- function(var) {

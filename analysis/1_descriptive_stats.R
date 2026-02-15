@@ -1,7 +1,8 @@
 ## Descriptive Statistics
 
 # Overall sample size and relevant counts ----------------------------
-df_full_referrals %>% group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
+full_counts <- df_full_referrals %>%
+  group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
   summarise(
     n_physicians = n_distinct(doctor),
     n_specialists = n_distinct(specialist),
@@ -14,7 +15,8 @@ df_full_referrals %>%
   summarise(total_patients = sum(total_spec_patients))
 
 
-df_initial_referrals %>% group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
+mover_counts <- df_initial_referrals %>%
+  group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
   summarise(
     n_physicians = n_distinct(doctor),
     n_specialists = n_distinct(specialist),
@@ -154,13 +156,24 @@ table_long <- bind_rows(
   spec_move %>% mutate(sample = "Movers", panel = "Specialists")
 )
 
+## Define logical row order and integer-valued stats
+row_order <- c("Mean Age", "Percent Male", "Percent White", "Percent Black",
+               "Percent Hispanic", "Mean Distance (mi)",
+               "Network Degree (Mean)", "Network Degree (Median)",
+               "Network Degree (SD)", "Observations")
+int_stats <- c("Observations", "Network Degree (Median)")
+
 table_tex <- table_long %>%
   pivot_longer(-c(sample, panel), names_to = "stat") %>%
   pivot_wider(names_from = sample, values_from = value) %>%
+  mutate(stat = factor(stat, levels = row_order)) %>%
   arrange(match(panel, c("Doctors","Specialists")), stat)
 
 table_tex %>%
-  mutate(across(where(is.double), ~ round(.x, 3))) %>%   # light rounding
+  mutate(across(c(Full, Movers), ~ case_when(
+    stat %in% int_stats ~ formatC(round(.x), format = "d", big.mark = ","),
+    TRUE ~ formatC(round(.x, 3), format = "f", digits = 3)
+  ))) %>%
   select(-panel) %>%
   kable(format   = "latex", booktabs = TRUE, linesep = "",
         col.names = c(" ", "All referrals", "PCP movers"),
@@ -238,17 +251,25 @@ mean_distance     <- mean(link_stats$dist_miles, na.rm = TRUE)
 
 summary_tbl <- tibble(
   metric  = c("Network density",
-              "Same practice",
+              "Same practice group",
               "Same gender",
               "Same race",
               "Mean distance (miles)",
-              "Mean experience gap (years)"),
+              "Mean experience gap (years)",
+              "PCP-specialist pairs",
+              "Unique PCPs",
+              "Unique specialists",
+              "PCP movers"),
   value   = c(round(network_density, 3),
               round(pct_same_practice, 3),
               round(pct_same_gender, 3),
               round(pct_same_race, 3),
               round(mean_distance, 1),
-              round(mean_gradyear, 1))
+              round(mean_gradyear, 1),
+              full_counts$n_pairs,
+              full_counts$n_physicians,
+              full_counts$n_specialists,
+              mover_counts$n_physicians)
 )
 
 write_csv(summary_tbl, "results/tables/inline_stats.csv")
@@ -257,7 +278,7 @@ write_csv(summary_tbl, "results/tables/inline_stats.csv")
 link_summary <- function(df) {
   df %>%
     summarise(
-      "Same practice"    = mean(same_prac,     na.rm = TRUE),
+      "Same practice group"    = mean(same_prac,     na.rm = TRUE),
       "Same gender"      = mean(same_sex,      na.rm = TRUE),
       "Same race"        = mean(same_race,     na.rm = TRUE),
       "Distance (miles)" = mean(dist_miles,    na.rm = TRUE),
@@ -290,7 +311,106 @@ tab_links %>%
         linesep  = "",
         align    = c("l","r","r"),
         escape   = FALSE,
-        col.names = c("Statistic",
+        col.names = c(" ",
                       "\\shortstack[r]{Established \\\\ links}",
                       "\\shortstack[r]{Non--established \\\\ links}")) %>%
   writeLines("results/tables/link_stats.tex")
+
+
+# Link statistics by referral window (Table 4) ----------------------------
+
+## Matching stats on distinct links per cumulative window
+win_links <- ref_windows %>%
+  distinct(window, doctor, specialist,
+           doc_group, spec_group,
+           doc_sex, spec_sex,
+           doc_race, spec_race,
+           dist_miles,
+           doc_grad_year, spec_grad_year) %>%
+  mutate(k = as.integer(sub("Up to year ", "", window)))
+
+win_match <- win_links %>%
+  group_by(k) %>%
+  summarise(
+    `Same practice group`   = mean(doc_group == spec_group, na.rm = TRUE),
+    `Same gender`           = mean(doc_sex == spec_sex, na.rm = TRUE),
+    `Same race`             = mean(doc_race == spec_race, na.rm = TRUE),
+    `Mean distance (miles)` = mean(dist_miles, na.rm = TRUE),
+    `Mean experience (yrs)` = mean(abs(doc_grad_year - spec_grad_year), na.rm = TRUE),
+    .groups = "drop"
+  )
+
+## Cumulative network size per window
+cuml_size <- win_links %>%
+  group_by(k, doctor) %>%
+  summarise(n_specs = n_distinct(specialist), .groups = "drop") %>%
+  group_by(k) %>%
+  summarise(`PCP network size` = mean(n_specs), .groups = "drop")
+
+## Network dynamics: new and dropped specialists
+## Per-PCP cumulative growth for "new"; year-specific anti-join for "dropped"
+yr_specs <- ref_windows %>%
+  distinct(doctor, specialist, years_since_move)
+
+cuml_per_pcp <- win_links %>%
+  group_by(k, doctor) %>%
+  summarise(n_specs = n_distinct(specialist), .groups = "drop")
+
+## New: cumulative growth per PCP, averaged over PCPs in both consecutive windows
+new_stats <- map_dfr(2:6, function(kk) {
+  prev <- cuml_per_pcp %>% filter(k == kk - 1) %>% select(doctor, n_prev = n_specs)
+  curr <- cuml_per_pcp %>% filter(k == kk) %>% select(doctor, n_curr = n_specs)
+  both <- inner_join(prev, curr, by = "doctor") %>%
+    mutate(new = n_curr - n_prev)
+  tibble(k = kk, `New specialists` = mean(both$new))
+})
+yr1_new <- cuml_per_pcp %>% filter(k == 1) %>%
+  summarise(`New specialists` = mean(n_specs)) %>%
+  mutate(k = 1L)
+new_stats <- bind_rows(yr1_new, new_stats)
+
+## Dropped: specialists in year k-1 but not year k, for PCPs in both years
+dropped_stats <- map_dfr(1:5, function(y) {
+  prev <- yr_specs %>% filter(years_since_move == y - 1) %>% select(doctor, specialist)
+  curr <- yr_specs %>% filter(years_since_move == y) %>% select(doctor, specialist)
+  both_docs <- intersect(unique(prev$doctor), unique(curr$doctor))
+
+  dropped_per_doc <- prev %>%
+    filter(doctor %in% both_docs) %>%
+    anti_join(curr, by = c("doctor", "specialist")) %>%
+    dplyr::count(doctor, name = "dropped")
+
+  all_both <- tibble(doctor = both_docs) %>%
+    left_join(dropped_per_doc, by = "doctor") %>%
+    mutate(dropped = replace_na(dropped, 0L))
+
+  tibble(k = y + 1L, `Dropped specialists` = mean(all_both$dropped))
+})
+dropped_stats <- bind_rows(tibble(k = 1L, `Dropped specialists` = 0), dropped_stats)
+
+dynamics <- new_stats %>% left_join(dropped_stats, by = "k")
+
+## Combine and reshape for LaTeX
+all_stats <- win_match %>%
+  left_join(cuml_size, by = "k") %>%
+  left_join(dynamics, by = "k") %>%
+  pivot_longer(-k, names_to = "Statistic") %>%
+  mutate(value = case_when(
+    Statistic %in% c("Same practice group", "Same gender", "Same race") ~
+      percent(value, accuracy = 0.1),
+    TRUE ~ as.character(round(value, 1))
+  )) %>%
+  pivot_wider(names_from = k, values_from = value) %>%
+  mutate(Statistic = factor(Statistic, levels = c(
+    "Same practice group", "Same gender", "Same race",
+    "Mean distance (miles)", "Mean experience (yrs)",
+    "PCP network size", "New specialists", "Dropped specialists"
+  ))) %>%
+  arrange(Statistic) %>%
+  mutate(Statistic = as.character(Statistic))
+
+all_stats %>%
+  kable(format = "latex", booktabs = TRUE, linesep = "",
+        align = c("l", rep("r", 6)),
+        col.names = c(" ", paste("Year", 1:6))) %>%
+  writeLines("results/tables/link_stats_by_window.tex")

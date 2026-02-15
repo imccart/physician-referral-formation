@@ -79,7 +79,7 @@ welfare_rows <- imap_dfr(covars, function(v, idx) {
 ## Format and export ----
 welfare_out <- welfare_rows %>%
   mutate(across(-c(Variable, Markets),
-                ~ formatC(.x, digits = 2, format = "f")))
+                ~ gsub("-", "$-$", formatC(.x, digits = 2, format = "f"))))
 
 latex_welfare <- welfare_out %>%
   kable(format   = "latex",
@@ -87,6 +87,7 @@ latex_welfare <- welfare_out %>%
         linesep  = "",
         align    = "lclrrrrrr",
         col.names = c("Variable", "Markets",
-                      "Mean", "SD", "P10", "P25", "P50", "P75", "P90"))
+                      "Mean", "SD", "P10", "P25", "P50", "P75", "P90")) %>%
+  row_spec(5, extra_latex_after = "\\addlinespace")
 
 writeLines(as.character(latex_welfare), "results/tables/welfare_summary.tex")

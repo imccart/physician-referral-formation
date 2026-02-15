@@ -114,12 +114,28 @@ diag_rows <- tribble(
     diag_table$mean_phat[4], diag_table$mean_phat[5]
 )
 
+# Helper: format large numbers in scientific notation for LaTeX
+fmt_diag <- function(x) {
+  sapply(x, function(val) {
+    if (is.na(val)) return("")
+    if (abs(val) >= 1e6) {
+      exp_val <- floor(log10(abs(val)))
+      mantissa <- val / 10^exp_val
+      paste0("$", formatC(mantissa, digits = 2, format = "f"),
+             " \\times 10^{", exp_val, "}$")
+    } else {
+      gsub("-", "$-$", formatC(val, digits = 2, format = "f"))
+    }
+  })
+}
+
 # Combine and format
 full_table <- bind_rows(
-  mfx_table %>% mutate(across(-variable, ~ formatC(.x, digits = 4, format = "f"))),
+  mfx_table %>% mutate(across(-variable,
+                               ~ gsub("-", "$-$", formatC(.x, digits = 4, format = "f")))),
   tibble(variable = "", iter_10 = "", iter_25 = "", iter_50 = "",
          iter_100 = "", iter_250 = ""),
-  diag_rows %>% mutate(across(-variable, ~ formatC(.x, digits = 2, format = "f")))
+  diag_rows %>% mutate(across(-variable, fmt_diag))
 )
 
 kable(full_table,

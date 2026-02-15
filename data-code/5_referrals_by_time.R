@@ -3,11 +3,11 @@
 ## prep: movers who switch HRR exactly once
 move_intervals <- df_movers %>%          # one row per (doctor, move_year)
   arrange(npi, year) %>%                 # chronological within doctor
-  group_by(npi) %>% 
+  group_by(npi) %>%
   mutate(
     Year_start = year,
     Year_end   = lead(year, default = 2018 + 1L) - 1L   # up to year before next move
-  ) %>% 
+  ) %>%
   ungroup() %>%
   transmute(
     doctor    = npi,
@@ -25,10 +25,10 @@ df_ref_initial_cuml <- df_full_referrals %>%    # every PCP–spec–year row
              by = "doctor",
              relationship="many-to-many") %>%      # add move_year, origin, dest
   filter(origin != spec_hrr) %>%                # drop referrals back to origin
-  filter(Year >= Year_start & Year <= Year_end) %>% 
-  mutate(years_since_move = Year - move_year) 
+  filter(Year >= Year_start & Year <= Year_end) %>%
+  mutate(years_since_move = Year - move_year)
 
-## split into 0- to 5-year “network” windows
+## split into 0- to 5-year "network" windows
 ref_windows <- map(1:6, function(k) {
   df_ref_initial_cuml %>%
     filter(years_since_move >= 0,              # keep moves and after
@@ -57,11 +57,11 @@ df_ref_windows <- final_ref_big %>%
              by = "doctor",
              relationship="many-to-many") %>%      # add move_year, origin, dest
   filter(origin != spec_hrr) %>%                   # drop referrals back to origin
-  filter(Year >= Year_start & Year <= Year_end) %>% 
-  mutate(years_since_move = Year - move_year) 
+  filter(Year >= Year_start & Year <= Year_end) %>%
+  mutate(years_since_move = Year - move_year)
 
 
-## split into 1- to 6-year “network” windows
+## split into 1- to 6-year "network" windows
 final_ref_windows <- map(1:6, function(k) {
   df_ref_windows %>%
     filter(years_since_move <  k) %>%              # <k ⇒ first k years

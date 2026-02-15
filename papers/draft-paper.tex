@@ -37,8 +37,7 @@
   \end{tabular}}
 
 \date{%
-May 2025 \\
-\textbf{Preliminary and Incomplete}
+February 2026
 }
 \maketitle
 
@@ -51,7 +50,6 @@ May 2025 \\
 
 
 \clearpage
-\newpage
 \section{Introduction}
 \label{sec:intro}
 
@@ -169,9 +167,9 @@ For our network formation model and subsequent estimation, a PCP is assumed to c
 
 Figure \ref{fig:network-degree} presents the histogram of network size (or degree) for PCPs and specialists. We focus on the full set of referrals since specialist in-degree is relatively uninformative when limiting to PCP movers. From the left panel of Figure \ref{fig:network-degree}, we see that PCPs typically refer to only a handful of specialists in their HRR, with 50\% of PCPs sending patients to two or fewer distinct specialists and fewer than 5\% of PCPs referring to more than ten specialists. Specialists face slightly more dispersion in incoming links. Specifically, while the median specialist receives referrals from 8 PCPs, the right tail stretches well beyond twenty, indicating the presence of ``hub'' specialists who dominate local referral flows.
 
-Figure \ref{fig:network-degree} reflects a relatively sparse network of PCP referrals, where the observed links represent 3.7\% of all potential PCP–specialist pairs within each HRR-year cell. Among the full set of referrals (both movers and non-movers), 7.6\%  of referral links occur between PCPs who share a practice identifier with the specialist, 73\% share the same gender, and 76\% share the same race. The mean distance between observed PCP-specialist referral links is 13.1 miles, with a mean differential experience (years since graduation) of 11 years.
+Figure \ref{fig:network-degree} reflects a relatively sparse network of PCP referrals, where the observed links represent 3.7\% of all potential PCP–specialist pairs within each HRR-year cell. Among the full set of referrals (both movers and non-movers), 7.6\%  of referral links occur between PCPs who share a practice group with the specialist, 73\% share the same gender, and 76\% share the same race. The mean distance between observed PCP-specialist referral links is 13.1 miles, with a mean differential experience (years since graduation) of 11 years.
 
-Table~\ref{tab:referral-statistics} contrasts observable concordance between PCPs and specialists for pairs that exchange referrals (``established links'') with pairs in the same HRR--year choice set without observed referrals (``non–established links'').  Links are markedly more local: 17.3\% of linked pairs share a practice identifier, compared with 2.9\% of non–links, and their average office‐to‐office distance is striking (11 vs.40 miles).  By contrast, demographic homophily is relatively similar across groups, with gender concordance at roughly 65\% and 62\% among established and non-established links, respectively, and race concordance at about 74\% and 69\%. Experience gaps are negligible. 
+Table~\ref{tab:referral-statistics} contrasts observable concordance between PCPs and specialists for pairs that exchange referrals (``established links'') with pairs in the same HRR--year choice set without observed referrals (``non–established links'').  Links are markedly more local: 17.3\% of linked pairs share a practice group, compared with 2.9\% of non–links, and their average office‐to‐office distance is striking (11 vs.40 miles).  By contrast, demographic homophily is relatively similar across groups, with gender concordance at roughly 65\% and 62\% among established and non-established links, respectively, and race concordance at about 74\% and 69\%. Experience gaps are negligible. 
 
 Collectively, Table \ref{tab:referral-statistics} suggests that organizational proximity and geography dominate the extensive‐margin decision to form a link; however, our quadruple-based estimator need not replicate those unconditional patterns. Recall that identification in the \cite{jochmans2018} framework comes only from discordant quadruples, i.e., cases in which two PCPs disagree over which of two equally available specialists they favor. Quadruples in which both PCPs unanimously prefer the same specialist (e.g., because that specialist matches their own demographic profile) are concordant and therefore drop out of the likelihood. Conversely, discordant pairs may involve specialists who are already well matched on geography and organizational ties; in that narrower comparison set, gender or race similarity may exert more or less additional influence, or even tilt the relative choice in the opposite direction.
 
@@ -189,7 +187,7 @@ We also assess the quality implications of our estimates by grafting an external
 \section{Dynamics of Referral Determinants}
 We extend the baseline analysis by redefining each relocated PCP’s referral network over progressively longer horizons. Rather than limiting the choice set to referrals written in the move year, we rebuild the doctor–specialist matrix to include links recorded within the first two, three, and up to six post-move years. 
 
-Table~\ref{tab:link-dynamics} documents how the composition of PCP referral networks changes as we widen the post-move window from one to six years.  The average network expands rapidly at first, from 1.7 distinct specialists in the move year to 3.4 by year 3, and then tapers, reaching 5.3 specialists by year 6.  Most of this growth comes from adding new contacts: the number of ``new'' specialists falls from 1.7 in year 1 to just 0.6 in year 6, while the count of specialists dropped relative to the previous window rises to roughly one.  Organizational and geographic proximity lose importance over time: within-practice referrals decline from 17~percent to 13~percent, and mean travel distance increases from 11 to 13 miles.  Demographic matching remains nearly constant: same-gender links fall by only five percentage points and same-race links by two. Average age and experience differences are largely unchanged. These descriptive patterns suggest that newly relocated PCPs initially rely on nearby colleagues in the same practice but gradually diversify toward a wider specialist pool without materially altering demographic concordance.
+Table~\ref{tab:link-dynamics} documents how the composition of PCP referral networks changes as we widen the post-move window from one to six years.  The average network expands rapidly at first, from 1.7 distinct specialists in the move year to 3.4 by year 3, and then tapers, reaching 5.3 specialists by year 6.  Most of this growth comes from adding new contacts: the number of ``new'' specialists falls from 1.7 in year 1 to 0.5 in year 6, while the count of specialists dropped relative to the previous window climbs steadily, reaching 1.7 by year 6.  Organizational and geographic proximity lose importance over time: within-practice referrals decline from 17~percent to 13~percent, and mean travel distance increases from 11 to 13 miles.  Demographic matching remains nearly constant: same-gender links fall by only five percentage points and same-race links by two. Average age and experience differences are largely unchanged. These descriptive patterns suggest that newly relocated PCPs initially rely on nearby colleagues in the same practice but gradually diversify toward a wider specialist pool without materially altering demographic concordance.
 
 To examine this more formally, we estimate a new quadruple-based conditional-logit model for every horizon $(k\in\{1,\dots ,6\})$ and compute average marginal effects of the core covariates. This rolling-window exercise allows us to trace how the determinants of specialist selection evolve as physicians accumulate information and contacts in their destination market.
 
@@ -223,7 +221,6 @@ We conclude with three policy implications. First, while increasing horizontal i
 %%% Figures and Tables
 
 \clearpage
-\newpage
 \section*{Figures and Tables}
 
 %%% FIGURES
@@ -279,7 +276,6 @@ We conclude with three policy implications. First, while increasing horizontal i
 \end{table}
 
 \clearpage
-\newpage
 \begin{table}
 \centering
 \footnotesize
@@ -293,7 +289,6 @@ We conclude with three policy implications. First, while increasing horizontal i
 \end{table}
 
 \clearpage
-\newpage
 \begin{table}
 \centering
 \footnotesize
@@ -308,7 +303,6 @@ We conclude with three policy implications. First, while increasing horizontal i
 
 
 \clearpage
-\newpage
 \begin{table}
 \centering
 \footnotesize
