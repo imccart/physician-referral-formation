@@ -91,5 +91,5 @@ df_jochmans <- df_jochmans %>%
   left_join(spec_quality %>% rename(spec1_qual=spec_qual, spec1_total_patients=total_spec_patients), by = c("spec1"="specialist")) %>%
   left_join(spec_quality %>% rename(spec2_qual=spec_qual, spec2_total_patients=total_spec_patients), by = c("spec2"="specialist"))
 
-write_csv(df_jochmans, "data/output/df_jochmans.csv", na = "")
+write_csv(df_jochmans, sprintf("data/output/df_jochmans_%s.csv", current_specialty), na = "")
 

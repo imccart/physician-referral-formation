@@ -91,7 +91,7 @@ kable(tbl_all, format = "latex", booktabs = TRUE, escape = FALSE, linesep = "",
       align = c("l", "r", "r", "r")) %>%
   row_spec(nrow(tbl_rows), extra_latex_after = "\\midrule") %>%
   row_spec(nrow(tbl_rows) + 3, extra_latex_after = "\\midrule") %>%
-  save_kable("results/tables/app_logit_race_mfx.tex")
+  save_kable(sprintf("results/tables/app_logit_race_mfx_%s.tex", current_specialty))
 
 
 
@@ -340,4 +340,4 @@ kable(table_out,
                    escape = FALSE) %>%
   row_spec(12, extra_latex_after = "\\midrule") %>%
   row_spec(15, extra_latex_after = "\\midrule") %>%
-  save_kable("results/tables/logit_twfe_mfx.tex")
+  save_kable(sprintf("results/tables/logit_twfe_mfx_%s.tex", current_specialty))

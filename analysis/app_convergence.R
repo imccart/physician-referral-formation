@@ -147,6 +147,6 @@ kable(full_table,
   add_header_above(c(" " = 1, "Maximum iterations" = 5)) %>%
   pack_rows("Panel A: Average marginal effects", 1, nrow(mfx_table)) %>%
   pack_rows("Panel B: Diagnostics", nrow(mfx_table) + 2, nrow(full_table)) %>%
-  save_kable("results/tables/app_convergence.tex")
+  save_kable(sprintf("results/tables/app_convergence_%s.tex", current_specialty))
 
-message("Saved: results/tables/app_convergence.tex")
+message(sprintf("Saved: results/tables/app_convergence_%s.tex", current_specialty))

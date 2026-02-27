@@ -47,7 +47,7 @@ net_size_by_window <- ref_windows %>%
 
 print(net_size_by_window)
 
-write.csv(ref_windows, "data/output/df_initial_referrals_cuml.csv", row.names=FALSE)
+write.csv(ref_windows, sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty), row.names=FALSE)
 
 
 # Construct logit data analogously ----------------------------------------
@@ -69,7 +69,7 @@ final_ref_windows <- map(1:6, function(k) {
 }) %>%
   bind_rows()
 
-write_csv(final_ref_windows, "data/output/df_logit_windows.csv", na = "")
+write_csv(final_ref_windows, sprintf("data/output/df_logit_windows_%s.csv", current_specialty), na = "")
 
 
 # Construct quardruple data for each window ----------------------------
@@ -159,4 +159,4 @@ df_jochmans_windows <- df_jochmans_windows %>%
                      spec2_total_patients = total_spec_patients),
             by = c("spec2" = "specialist"))
 
-write_csv(df_jochmans_windows, "data/output/df_jochmans_windows.csv", na = "")
+write_csv(df_jochmans_windows, sprintf("data/output/df_jochmans_windows_%s.csv", current_specialty), na = "")

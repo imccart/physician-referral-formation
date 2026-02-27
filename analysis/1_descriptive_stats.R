@@ -89,7 +89,7 @@ mover_plot <- ggplot() +
   theme_void() +
   theme(legend.position = "right")
 
-ggsave("results/figures/fig_movers.png",
+ggsave(sprintf("results/figures/fig_movers_%s.png", current_specialty),
        plot   = mover_plot,
        width  = 6,       # inches
        height = 4,       # inches
@@ -180,7 +180,7 @@ table_tex %>%
         align     = c("l","r","r")) %>%
   group_rows("Panel A. Doctors (any outgoing referrals)", 1, 10) %>%
   group_rows("Panel B. Specialists (any incoming referrals)", 11, 20) %>%
-  writeLines("results/tables/desc.tex")
+  writeLines(sprintf("results/tables/desc_%s.tex", current_specialty))
 
 
 ## Distribution of network size
@@ -213,7 +213,7 @@ p <- ggplot(deg_plot, aes(deg_bin, n)) +
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
-ggsave("results/figures/fig_degree.png",
+ggsave(sprintf("results/figures/fig_degree_%s.png", current_specialty),
        plot   = p,
        width  = 6,       # inches
        height = 3.5,     # inches
@@ -272,7 +272,7 @@ summary_tbl <- tibble(
               mover_counts$n_physicians)
 )
 
-write_csv(summary_tbl, "results/tables/inline_stats.csv")
+write_csv(summary_tbl, sprintf("results/tables/inline_stats_%s.csv", current_specialty))
 
 ## Describing observed and unobserved links
 link_summary <- function(df) {
@@ -314,7 +314,7 @@ tab_links %>%
         col.names = c(" ",
                       "\\shortstack[r]{Established \\\\ links}",
                       "\\shortstack[r]{Non--established \\\\ links}")) %>%
-  writeLines("results/tables/link_stats.tex")
+  writeLines(sprintf("results/tables/link_stats_%s.tex", current_specialty))
 
 
 # Link statistics by referral window (Table 4) ----------------------------
@@ -413,4 +413,4 @@ all_stats %>%
   kable(format = "latex", booktabs = TRUE, linesep = "",
         align = c("l", rep("r", 6)),
         col.names = c(" ", paste("Year", 1:6))) %>%
-  writeLines("results/tables/link_stats_by_window.tex")
+  writeLines(sprintf("results/tables/link_stats_by_window_%s.tex", current_specialty))

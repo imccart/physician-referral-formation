@@ -176,4 +176,4 @@ ggplot(mfx_plot,
     legend.key            = element_blank()
   )
 
-ggsave("results/figures/mfx_by_window.png", width = 6.5, height = 4, dpi = 300)
+ggsave(sprintf("results/figures/mfx_by_window_%s.png", current_specialty), width = 6.5, height = 4, dpi = 300)

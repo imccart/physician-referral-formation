@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Research project: "Formation of Physician Referral Networks: Drivers and Potential Consequences." Analyzes how PCPs form referral networks with specialists using Medicare data (2009--2018), focusing on physician movers who relocate across Hospital Referral Regions (HRRs).
+Research project: "Formation of Physician Referral Networks: Drivers and Potential Consequences." Analyzes how PCPs form referral networks with specialists using Medicare data (2013--2018, with ortho 2009--2018 as robustness), focusing on physician movers who relocate across Hospital Referral Regions (HRRs).
 
 Paper and appendix live in `papers/`. Presentations live in `presentations/`. The paper tex files reference `../results/tables/` and `../results/figures/` for all generated output. Bibliography uses `BibTeX_Library.bib` and `aer.bst` (copied from `work/administrative/templates/bibliography/`). Overleaf syncs via GitHub. A GitHub Actions guard (`.github/workflows/guard-overleaf.yml`) prevents Overleaf from modifying `data-code/`, `analysis/`, or `results/`.
 
@@ -34,28 +34,45 @@ data/input/  (symlinked, gitignored)  →  data-code/_BuildData.R  →  data/out
                                            papers/*.tex  (refs ../results/)
 ```
 
-### Data construction pipeline (`data-code/`)
+### VRDC SAS pipeline (`data-code/sas/`)
+
+Runs in CMS Virtual Research Data Center. Macro-parameterized for four specialties (ortho, cardio pacemaker, cardioEM, derm).
 
 | Script | Purpose | Key output |
 |--------|---------|------------|
-| `_BuildData.R` | Imports & merges MDPPAS, Physician Compare, referral pairs, race, geography | Environment objects |
-| `1_referrals_full.R` | Builds full PCP-specialist referral dataset | `df_full_referrals.csv` |
-| `2_referrals_initial.R` | Identifies movers (PCPs who changed to non-neighboring HRR) | `df_initial_referrals.csv` |
-| `3_logit.R` | Expands all PCP-specialist pairs into choice sets (0/1) | `df_logit_movers.csv`, `df_logit_all.csv` (12GB) |
-| `4_logit_jochmans.R` | Constructs quartet-structured TWFE data (Jochmans 2018) | `df_jochmans.csv` |
-| `5_referrals_by_time.R` | Creates datasets by years-since-move windows | `df_jochmans_windows.csv` |
+| `0_config.sas` | Global params, library refs, utility macros | Macro variables |
+| `1_anchor_events.sas` | Specialist-patient encounters (DRG or CPT) | `{Prefix}Encounters_{year}`, `{Prefix}Patients_Unique` |
+| `2_carrier_extract.sas` | Carrier E&M claims for anchor patients | `{Prefix}Carrier_{year}` (2012-2018) |
+| `3_pcp_assignment.sas` | 365-day lookback, PCP identification | `{Prefix}PCP_{year}` |
+| `4_specialty_filter.sas` | MDPPAS join: PCP is primary care, specialist matches | `{Prefix}ValidPairs_{year}` |
+| `5_outcomes.sas` | Readmission rate (ortho/cardio) or volume (derm) | `{Prefix}Quality_All` |
+| `6_aggregate_export.sas` | Aggregate to PCP x Specialist x Year, mask, export | `ReferralPairs_Full_*`, `ReferralPairs_Large_*` |
+
+### Data construction pipeline (`data-code/`)
+
+Both `_BuildData.R` and `_main.R` loop over a shared `specialties` config (ortho, cardioem, derm). All per-specialty output files are suffixed `_{specialty}` (e.g., `df_full_referrals_ortho.csv`).
+
+| Script | Purpose | Key output (per specialty) |
+|--------|---------|------------|
+| `_BuildData.R` | Loads shared data (MDPPAS, PhyCompare, race, geography), then loops over specialties | Environment objects |
+| `1_referrals_full.R` | Builds full PCP-specialist referral dataset | `df_full_referrals_{spec}.csv` |
+| `2_referrals_initial.R` | Identifies movers (PCPs who changed to non-neighboring HRR) | `df_initial_referrals_{spec}.csv`, `df_movers_{spec}.csv` |
+| `3_logit.R` | Expands all PCP-specialist pairs into choice sets (0/1) | `df_logit_movers_{spec}.csv` |
+| `4_logit_jochmans.R` | Constructs quartet-structured TWFE data (Jochmans 2018) | `df_jochmans_{spec}.csv` |
+| `5_referrals_by_time.R` | Creates datasets by years-since-move windows | `df_jochmans_windows_{spec}.csv`, `df_logit_windows_{spec}.csv`, `df_initial_referrals_cuml_{spec}.csv` |
 
 ### Analysis pipeline (`analysis/`)
 
-| Script | Purpose | Key output |
+| Script | Purpose | Key output (per specialty) |
 |--------|---------|------------|
-| `_main.R` | Loads processed data, sources analysis + appendix scripts | Environment objects |
-| `1_descriptive_stats.R` | Summary statistics, flow maps | `desc.tex`, `link_stats.tex`, `inline_stats.csv`, `fig_movers.png`, `fig_degree.png` |
-| `2_logit_twfe.R` | Two-stage: Jochmans β + FE recovery → structural β and MFX table | `results/tables/logit_twfe_mfx.tex` |
-| `3_referral_windows.R` | Two-stage MFX by years-since-move window | `results/figures/mfx_by_window.png` |
-| `app_quad_comparison.R` | Balance table: Jochmans sample vs. excluded | `results/tables/quad_comparison.tex` |
-| `app_welfare.R` | Counterfactual welfare using two-stage predicted probabilities | `results/tables/welfare_summary.tex` |
-| `app_convergence.R` | Convergence stability of two-stage estimation | `results/tables/app_convergence.tex` |
+| `_main.R` | Loads per-specialty data, sources analysis + appendix scripts in loop, then sources cross-specialty comparison | Environment objects |
+| `1_descriptive_stats.R` | Summary statistics, flow maps | `desc_{spec}.tex`, `link_stats_{spec}.tex`, `inline_stats_{spec}.csv`, `fig_movers_{spec}.png`, `fig_degree_{spec}.png` |
+| `2_logit_twfe.R` | Two-stage: Jochmans β + FE recovery → structural β and MFX table | `logit_twfe_mfx_{spec}.tex`, `app_logit_race_mfx_{spec}.tex` |
+| `3_referral_windows.R` | Two-stage MFX by years-since-move window | `mfx_by_window_{spec}.png` |
+| `4_cross_specialty.R` | Cross-specialty MFX forest plot and dynamics comparison | `mfx_cross_specialty.png`, `mfx_by_window_cross.png` |
+| `app_quad_comparison.R` | Balance table: Jochmans sample vs. excluded | `quad_comparison_{spec}.tex` |
+| `app_welfare.R` | Counterfactual welfare (ortho only, requires `spec_qual`) | `welfare_summary_{spec}.tex` |
+| `app_convergence.R` | Convergence stability of two-stage estimation | `app_convergence_{spec}.tex` |
 
 ## Key Patterns
 
@@ -75,9 +92,11 @@ data/input/  (symlinked, gitignored)  →  data-code/_BuildData.R  →  data/out
 
 ## Data Notes
 
-- All data is gitignored. External data lives in `data/input/` (symlinks to shared storage). Processed data in `data/output/` (~13GB total).
-- The largest file (`df_logit_all.csv`, 12GB) contains the full choice set for all physicians. The mover-only version (`df_logit_movers.csv`, 31MB) is used for most analysis.
+- All data is gitignored. External data lives in `data/input/` (symlinks to shared storage). Processed data in `data/output/`.
+- Three specialty input files: `REFERRALPAIRS_LARGE_ORTHO.csv` (692K rows), `REFERRALPAIRS_LARGE_CARDIOEM.csv` (2.4M), `REFERRALPAIRS_LARGE_DERM.csv` (2.4M). All share columns `Practice_ID, Specialist_ID, Year, total_pcp_patients, total_spec_patients`. Only ortho has `spec_qual`.
+- `df_logit_all.csv` write was removed (12GB, never read back). The mover-only version (`df_logit_movers_{spec}.csv`) is used for analysis.
 - Geographic matching uses haversine distance between PCP and specialist ZIP centroids.
+- Ortho 2009-2018 robustness (`ReferralPairs_Large.csv`, 1.9M rows) can be run as a fourth specialty entry `ortho_robust`.
 
 ## Static Tables
 
@@ -90,19 +109,20 @@ From `physician-race` repo (`research-data-repo/physician-race/data-code/3_asses
 - `app_conf_name.tex` — confusion matrix, name-based random forest
 
 Now generated by `1_descriptive_stats.R`:
-- `link_stats_by_window.tex` — network summary statistics by referral window (Table 4)
+- `link_stats_by_window_{spec}.tex` — network summary statistics by referral window (Table 4)
 
 ## Last Session
 
-Date: 2026-02-15
+Date: 2026-02-27
 
-- Designed multi-specialty VRDC pipeline for Comment 2 (additional specialties). Full design document in `scratch/multi-specialty-pipeline-notes.md`.
-- **Cardiology decision**: Pacemaker implantation (DRGs 242-244). PCI rejected (~70% emergent), CABG rejected (cardiac surgeon, not cardiologist). Pacemaker is nearly all elective, clear PCP->EP referral, ~200k/year, DRGs stable 2009-2018.
-- **Dermatology decision**: New patient E&M visits (CPT 99201-99205) as anchor event + carrier lookback for PCP. Novel identification strategy (no published precedent). `rfr_physn_npi` rejected as unreliable.
-- **Pipeline architecture**: SAS-only in VRDC (no Stata). Two paths converge: inpatient DRG anchor (ortho, cardio) and carrier CPT anchor (derm), then shared carrier lookback for PCP identification (2-year extraction window, 365-day date filter, most-visited physician with recency tiebreaker).
-- **Literature review**: Documented referral identification validation methods. Key finding: no published validation of `rfr_physn_npi` or carrier lookback against gold standard. Added validation TODO to `physician-learning-and-referrals/referrals-and-learning/CLAUDE.md`.
-- No code changes; design and documentation only. Comment 2 still blocked on VRDC export.
-- **Next steps**: Comment 2 is the priority; other comments wait until multi-specialty results are in. New `scratch/` directory (gitignored) holds design docs.
+- Parameterized R pipeline for multi-specialty analysis (Referee Comment 2). Both `_BuildData.R` and `_main.R` now loop over `specialties` config (ortho, cardioem, derm). All output files suffixed `_{specialty}`.
+- New script `analysis/4_cross_specialty.R` produces MFX forest plot and dynamics comparison across specialties.
+- Removed `df_logit_all.csv` write (12GB, never read back). Renamed `df_ortho_movers` to `df_mover_counts`.
+- `app_welfare.R` conditionally skipped for specialties without `spec_qual` (cardioem, derm).
+- `app_quad_comparison.R` handles missing `spec_qual` column via `any_of()`.
+- **TODO: check back on VRDC export status** for CardioEM and Derm CSVs (ortho already exported).
+- **TODO: check with ResDAC** on DUA status for RIF 2008-2012 carrier files.
+- **TODO**: add ortho 2009-2018 robustness entry (`ortho_robust`) to specialties config after main multi-specialty run.
 
 ## Referee Response Plan (internal review, Feb 2026)
 
@@ -116,24 +136,12 @@ Comment 2 (additional specialties) is highest priority because results may diffe
 - **(b)** Robustness Jochmans spec dropping `same_prac`. Full spec only (not all 3), output 2 columns (structural beta + MFX) → `results/tables/app_robustness_noprac.tex`. New appendix section + paper sentence referencing it.
 - Both additions in existing scripts (`1_descriptive_stats.R`, `2_logit_twfe.R`), no new files.
 
-### Comment 2: External validity — additional specialties (BLOCKED, highest priority)
-- **Blocked on**: VRDC code export (requested, awaiting approval). Existing ortho pipeline code at `physician-learning-and-referrals/referrals-and-learning/data-code/` is outdated and will be replaced.
-- **Design complete** — see `scratch/multi-specialty-pipeline-notes.md` for full pipeline pseudocode, code flags, literature review, and implementation notes.
-- **Specialty decisions**:
-  - **Cardiology**: Pacemaker implantation (DRGs 242, 243, 244). Inpatient anchor, same pipeline structure as ortho. EP coded as "Cardiology" in MDPPAS. PCI/CABG/valve/ablation all rejected (see scratch notes for rationale).
-  - **Dermatology**: New patient E&M visits (CPT 99201-99205) with dermatologist as anchor. Carrier lookback for PCP identification (same logic as ortho/cardio). Novel approach — no published precedent.
-  - Rationale for these three specialties: ortho ~98% male specialists, cardiology ~85% male, dermatology ~50% female — spans the gender spectrum.
-- **Pipeline**: SAS-only in VRDC. Two anchor paths (inpatient DRG for ortho/cardio, carrier CPT for derm) converge into shared carrier lookback (2-year window, 365-day filter) and MDPPAS specialty filters. Output: one CSV per specialty (`ReferralPairs_Ortho.csv`, `ReferralPairs_Cardiology.csv`, `ReferralPairs_Dermatology.csv`).
-- **CMS extract rules**: No raw TIN/EIN (can export masked group ID). Minimum 11 cell count for aggregated statistics.
-- **Once code arrives**:
-  1. Compare updated VRDC code against pipeline pseudocode; flag discrepancies.
-  2. Implement SAS macros parameterized by specialty (DRG/CPT lists, specialty name, table prefix).
-  3. Add `rfr_physn_npi` validation script (concordance with carrier lookback PCP).
-  4. Export three CSVs to `data/input/referrals/`.
-  5. Parameterize `_BuildData.R` and `_main.R` to loop over specialties.
-  6. Run Jochmans + MFX + dynamics for each specialty.
-- **Outputs**: cross-specialty MFX comparison table, possibly cross-specialty dynamics figure. Placement (main paper vs appendix) TBD based on results.
-- **Key concern**: if gender/race effects differ substantially across specialties (e.g., larger gender concordance for dermatology where specialist pool is more diverse), this reshapes the paper's conclusions and affects how we respond to Comments 1, 3, 4.
+### Comment 2: External validity — additional specialties (pipeline ready, BLOCKED on data export)
+- **Status**: R pipeline parameterized for multi-specialty (ortho, cardioem, derm). `_BuildData.R` and `_main.R` loop over specialties config. Cross-specialty comparison figures generated automatically.
+- **Blocked on**: VRDC output request approval for CardioEM and Derm CSVs. Also waiting on ResDAC re: RIF 2008-2012 carrier files.
+- **Specialty rationale**: ortho ~98% male specialists, cardiology ~85% male, dermatology ~50% female — spans the gender spectrum. Design details in `scratch/multi-specialty-pipeline-notes.md`.
+- **Next steps**: receive CSVs → run full pipeline → review cross-specialty results → ortho 2009-2018 robustness.
+- **Key concern**: if gender/race effects differ across specialties, this reshapes conclusions and framing of Comments 1, 3, 4.
 
 ### Comment 3: Dynamics interpretation (high priority)
 - Referee's concern: cumulative windows may show attenuation via "compositional dilution" (denominator grows as new links are added, mechanically pushing shares toward population averages) rather than genuine behavioral change.

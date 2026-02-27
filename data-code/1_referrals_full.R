@@ -27,4 +27,4 @@ df_full_referrals <- df_referrals %>%
   select(-c(lat_doc, lon_doc, lat_spec, lon_spec, dist_km)) %>%
   rename(doctor=Practice_ID, specialist=Specialist_ID)
 
-write_csv(df_full_referrals, "data/output/df_full_referrals.csv", na = "")
+write_csv(df_full_referrals, sprintf("data/output/df_full_referrals_%s.csv", current_specialty), na = "")

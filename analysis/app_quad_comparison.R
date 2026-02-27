@@ -33,9 +33,10 @@ referral_counts <- df_initial_referrals %>%
   summarise(deg = n_distinct(specialist), .groups = "drop")
 
 df_doctor_wide <- df_initial_referrals %>%
-  select(doctor, starts_with("doc_"), total_pcp_patients, Year, spec_qual) %>%
+  select(doctor, starts_with("doc_"), total_pcp_patients, Year, any_of("spec_qual")) %>%
   rename_with(~ gsub("^doc_", "", .x), .cols = starts_with("doc_")) %>%
-  rename(npi = doctor, total_patients = total_pcp_patients, qual = spec_qual) %>%
+  { if ("spec_qual" %in% names(.)) rename(., npi = doctor, total_patients = total_pcp_patients, qual = spec_qual)
+    else rename(., npi = doctor, total_patients = total_pcp_patients) %>% mutate(qual = NA_real_) } %>%
   distinct(npi, .keep_all = TRUE)
 
 df_spec_wide <- df_initial_referrals %>%
@@ -106,4 +107,4 @@ quad_tex <- sum_table %>%
   row_spec(5, extra_latex_after = "\\addlinespace") %>%
   row_spec(10, extra_latex_after = "\\addlinespace")
 
-writeLines(as.character(quad_tex), "results/tables/quad_comparison.tex")
+writeLines(as.character(quad_tex), sprintf("results/tables/quad_comparison_%s.tex", current_specialty))

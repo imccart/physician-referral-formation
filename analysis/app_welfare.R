@@ -90,4 +90,4 @@ latex_welfare <- welfare_out %>%
                       "Mean", "SD", "P10", "P25", "P50", "P75", "P90")) %>%
   row_spec(5, extra_latex_after = "\\addlinespace")
 
-writeLines(as.character(latex_welfare), "results/tables/welfare_summary.tex")
+writeLines(as.character(latex_welfare), sprintf("results/tables/welfare_summary_%s.tex", current_specialty))

@@ -28,9 +28,9 @@ df_ref_initial <-
             by = c("doctor"="npi", "Year" = "year")) %>%
   filter(origin != spec_hrr, doc_hrr==spec_hrr)
 
-df_ortho_movers <- df_ref_initial %>% distinct(doctor, Year) %>% group_by(Year) %>% 
+df_mover_counts <- df_ref_initial %>% distinct(doctor, Year) %>% group_by(Year) %>%
   summarise(n_movers = n(), .groups = "drop")
 
 
-write.csv(df_ortho_movers, "data/output/df_movers.csv", row.names=FALSE)
-write.csv(df_ref_initial, "data/output/df_initial_referrals.csv", row.names=FALSE)
+write.csv(df_mover_counts, sprintf("data/output/df_movers_%s.csv", current_specialty), row.names=FALSE)
+write.csv(df_ref_initial, sprintf("data/output/df_initial_referrals_%s.csv", current_specialty), row.names=FALSE)

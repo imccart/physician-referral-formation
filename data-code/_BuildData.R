@@ -80,15 +80,6 @@ for (year in 2009:2018) {
 
 df_mdppas  <- as_tibble(df_mdppas)
 
-# Referral data
-df_referrals <- read_csv("data/input/referrals/ReferralPairs_Large.csv")
-
-# Specialist quality only
-spec_quality <- df_referrals %>%
-  group_by(Specialist_ID) %>%
-  slice(1) %>%
-  select(specialist=Specialist_ID, spec_qual, total_spec_patients)  
-
 # physician race data
 df_race <- read_csv("data/input/physician-race/final-npi-combined.csv")
 
@@ -147,11 +138,37 @@ df_phycompare <- df_pc_full %>%
   select(npi, grad_year, med_school)
 
 
-# Construct datasets for analysis -------------------------------------
+# Specialty configuration -----------------------------------------------
 
-source("data-code/1_referrals_full.R")  # full referral data set
-source("data-code/2_referrals_initial.R")  # referral data set among movers
-source("data-code/3_logit.R")  # logistic regression data set
-source("data-code/4_logit_jochmans.R")  # logistic regression data for TWFE (Jochmans, 2018)
-source("data-code/5_referrals_by_time.R")  # logistic regression data for TWFE (Jochmans, 2018)
+specialties <- list(
+  ortho    = list(file = "data/input/referrals/REFERRALPAIRS_LARGE_ORTHO.csv",    has_qual = TRUE),
+  cardioem = list(file = "data/input/referrals/REFERRALPAIRS_LARGE_CARDIOEM.csv", has_qual = FALSE),
+  derm     = list(file = "data/input/referrals/REFERRALPAIRS_LARGE_DERM.csv",     has_qual = FALSE)
+)
+
+# Construct datasets for analysis (per specialty) ----------------------
+
+for (current_specialty in names(specialties)) {
+  cfg <- specialties[[current_specialty]]
+  message("=== Building data for: ", current_specialty, " ===")
+
+  df_referrals <- read_csv(cfg$file)
+
+  if (cfg$has_qual) {
+    spec_quality <- df_referrals %>%
+      group_by(Specialist_ID) %>%
+      slice(1) %>%
+      select(specialist = Specialist_ID, spec_qual, total_spec_patients)
+  } else {
+    spec_quality <- tibble(specialist = numeric(), spec_qual = numeric(), total_spec_patients = numeric())
+  }
+
+  source("data-code/1_referrals_full.R")
+  source("data-code/2_referrals_initial.R")
+  source("data-code/3_logit.R")
+  source("data-code/4_logit_jochmans.R")
+  source("data-code/5_referrals_by_time.R")
+
+  message("=== Done: ", current_specialty, " ===\n")
+}
 
