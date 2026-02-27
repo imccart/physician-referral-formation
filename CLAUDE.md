@@ -117,10 +117,11 @@ Date: 2026-02-27
 
 - Parameterized R pipeline for multi-specialty analysis (Referee Comment 2). Both `_BuildData.R` and `_main.R` now loop over `specialties` config (ortho, cardioem, derm). All output files suffixed `_{specialty}`.
 - New script `analysis/4_cross_specialty.R` produces MFX forest plot and dynamics comparison across specialties.
-- Removed `df_logit_all.csv` write (12GB, never read back). Renamed `df_ortho_movers` to `df_mover_counts`.
+- Removed `df_logit_all.csv` write (12GB, never read back). Renamed `df_ortho_movers` to `df_mover_counts`. Deleted obsolete `analysis/3_welfare_calcs.R` and `analysis/4_referral_windows.R`.
 - `app_welfare.R` conditionally skipped for specialties without `spec_qual` (cardioem, derm).
 - `app_quad_comparison.R` handles missing `spec_qual` column via `any_of()`.
-- **TODO: check back on VRDC export status** for CardioEM and Derm CSVs (ortho already exported).
+- All three VRDC exports received (ortho, CardioEM, derm). Pipeline ready to run.
+- **TODO: run full multi-specialty pipeline** (`_BuildData.R` then `_main.R`) and review cross-specialty results. This is the top priority since results determine framing for all other referee comments.
 - **TODO: check with ResDAC** on DUA status for RIF 2008-2012 carrier files.
 - **TODO**: add ortho 2009-2018 robustness entry (`ortho_robust`) to specialties config after main multi-specialty run.
 
@@ -129,18 +130,17 @@ Date: 2026-02-27
 Referee report is at `results/refreport_202602.md`. Four major comments; implementation sequencing below.
 
 ### Sequencing
-Comment 2 (additional specialties) is highest priority because results may differ across specialties, affecting how we frame Comments 1, 3, 4. However, Comment 2 is blocked on VRDC code export. While waiting, Comments 1/3/4 can proceed on ortho-only but may need revision once multi-specialty results are in.
+All VRDC exports received. Comment 2 pipeline is ready to run and is the top priority. Cross-specialty results determine framing for Comments 1, 3, 4. After reviewing multi-specialty MFX, proceed with Comments 3a → 4a → 1a/b → 3b.
 
 ### Comment 1: What does "same practice group" capture? (low priority)
 - **(a)** Compute share of PCP movers whose choice set contains at least one same-practice specialist. Use `df_logit` where `same_prac == 1`, group by doctor, check `any()`. Write to `inline_stats.csv`. Add sentence in paper.
 - **(b)** Robustness Jochmans spec dropping `same_prac`. Full spec only (not all 3), output 2 columns (structural beta + MFX) → `results/tables/app_robustness_noprac.tex`. New appendix section + paper sentence referencing it.
 - Both additions in existing scripts (`1_descriptive_stats.R`, `2_logit_twfe.R`), no new files.
 
-### Comment 2: External validity — additional specialties (pipeline ready, BLOCKED on data export)
-- **Status**: R pipeline parameterized for multi-specialty (ortho, cardioem, derm). `_BuildData.R` and `_main.R` loop over specialties config. Cross-specialty comparison figures generated automatically.
-- **Blocked on**: VRDC output request approval for CardioEM and Derm CSVs. Also waiting on ResDAC re: RIF 2008-2012 carrier files.
+### Comment 2: External validity — additional specialties (READY TO RUN, highest priority)
+- **Status**: All three VRDC exports received. R pipeline parameterized for multi-specialty (ortho, cardioem, derm). `_BuildData.R` and `_main.R` loop over specialties config. Cross-specialty comparison figures generated automatically.
 - **Specialty rationale**: ortho ~98% male specialists, cardiology ~85% male, dermatology ~50% female — spans the gender spectrum. Design details in `scratch/multi-specialty-pipeline-notes.md`.
-- **Next steps**: receive CSVs → run full pipeline → review cross-specialty results → ortho 2009-2018 robustness.
+- **Next steps**: run `_BuildData.R` → run `_main.R` → review cross-specialty MFX → ortho 2009-2018 robustness.
 - **Key concern**: if gender/race effects differ across specialties, this reshapes conclusions and framing of Comments 1, 3, 4.
 
 ### Comment 3: Dynamics interpretation (high priority)
