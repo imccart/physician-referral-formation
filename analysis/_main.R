@@ -6,9 +6,7 @@
 
 
 # Preliminaries -----------------------------------------------------------
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, readr, sf, spdep, ggplot2, modelsummary, fixest, marginaleffects, knitr, kableExtra, scales, broom, purrr)
-options(modelsummary_factory_default = "kableExtra")
+source("0-setup.R")
 
 
 # Shared data -------------------------------------------------------------

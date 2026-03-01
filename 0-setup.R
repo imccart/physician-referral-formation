@@ -1,0 +1,20 @@
+# 0-setup.R — activate renv and load packages
+source("renv/activate.R")
+
+library(tidyverse)
+library(readr)
+library(sf)
+library(spdep)
+library(zipcodeR)
+library(geodist)
+library(ggplot2)
+library(modelsummary)
+library(fixest)
+library(marginaleffects)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(broom)
+library(purrr)
+
+options(modelsummary_factory_default = "kableExtra")

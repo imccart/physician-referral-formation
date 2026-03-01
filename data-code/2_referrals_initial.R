@@ -1,7 +1,7 @@
 # Construct referral data only among movers ---------------------------------
 
 ## Identify movers in MD-PPAS data
-df_movers <- map_dfr(2010:2018, function(yr) {
+df_movers <- map(2013:2018, function(yr) {
 
   df_mdppas %>%                              # cols: npi, hrr, year
     filter(year %in% c(yr - 1, yr)) %>%
@@ -19,7 +19,7 @@ df_movers <- map_dfr(2010:2018, function(yr) {
     ungroup() %>%
     mutate(year = yr) %>%
     select(npi, year, origin, destination)
-})
+}) %>% bind_rows()
 
 ## Merge movers into full data, avoiding referrals back to origin HRR (e.g., splits between origin and destination)
 df_ref_initial <-

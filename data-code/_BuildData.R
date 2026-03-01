@@ -6,8 +6,7 @@
 
 
 # Preliminaries -----------------------------------------------------------
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, readr, sf, spdep, zipcodeR, geodist)
+source("0-setup.R")
 
 # Import data -------------------------------------------------------------
 
@@ -32,14 +31,14 @@ ggplot(data = gdf) +
 
 contig_nb  <- poly2nb(as(gdf, "Spatial"), row.names = gdf$HRRNUM)
 
-neighbor_lookup <- contig_nb |>
-  map(~ as.integer(gdf$HRRNUM[.x])) |>          # indices → HRR codes
+neighbor_lookup <- contig_nb %>%
+  map(~ as.integer(gdf$HRRNUM[.x])) %>%          # indices → HRR codes
   set_names(as.character(gdf$HRRNUM))           # names = HRR codes
 
 ## MDPPAS
 df_mdppas <- data.frame()
 
-for (year in 2009:2018) {
+for (year in 2012:2018) {
   # Read MDPPAS data
   df <- read_csv(sprintf("data/input/MDPPAS/PhysicianData_%d.csv", year), 
                  col_types = cols_only(
@@ -169,6 +168,16 @@ for (current_specialty in names(specialties)) {
   source("data-code/4_logit_jochmans.R")
   source("data-code/5_referrals_by_time.R")
 
+  # Free specialty-specific objects before next iteration
+  rm(list = intersect(ls(), c(
+    "df_referrals", "spec_quality", "cfg",
+    "df_full_referrals", "df_initial_referrals", "df_movers", "df_mover_counts",
+    "final_ref_big", "final_ref_movers", "final_ref_windows",
+    "df_ref_big", "df_ref_windows", "df_ref_initial_cuml",
+    "ref_windows", "move_intervals", "net_size_by_window",
+    "df_jochmans", "df_jochmans_windows"
+  )))
+  gc()
+
   message("=== Done: ", current_specialty, " ===\n")
 }
-

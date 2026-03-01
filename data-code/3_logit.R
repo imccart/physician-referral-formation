@@ -68,6 +68,8 @@ final_ref_big <-
   ) %>%
   left_join(spec_quality, by = "specialist")
 
+rm(df_ref_big); gc()
+
 # Construct logit data set for movers ---------------------------------------------
 
 final_ref_movers <- final_ref_big %>%
@@ -75,6 +77,4 @@ final_ref_movers <- final_ref_big %>%
   filter(origin != spec_hrr)                   # drop referrals back to origin
 
 write.csv(final_ref_movers, sprintf("data/output/df_logit_movers_%s.csv", current_specialty), row.names=FALSE)
-
-
 

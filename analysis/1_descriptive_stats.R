@@ -40,7 +40,7 @@ hrr_centroids <- gdf %>%
   st_point_on_surface() %>%
   st_coordinates() %>%
   as_tibble() %>%
-  bind_cols(hrr = gdf$HRRNUM) |>
+  bind_cols(hrr = gdf$HRRNUM) %>%
   rename(lon = X, lat = Y)
 
 

@@ -4,7 +4,11 @@ scratch/*
 *.rds
 *.RData
 .Rhistory
+.Rprofile
 .Rproj.user
+renv/library/
+renv/staging/
+renv/cellar/
 
 # LaTeX intermediate files
 *.aux
@@ -32,6 +36,9 @@ scratch/*
 
 # Referee reports (internal, not for repo)
 results/refreport_*
+
+# Local setup
+setup_symlinks.bat
 
 # OS files
 .DS_Store

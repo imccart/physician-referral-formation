@@ -48,7 +48,7 @@ net_size_by_window <- ref_windows %>%
 print(net_size_by_window)
 
 write.csv(ref_windows, sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty), row.names=FALSE)
-
+rm(df_ref_initial_cuml, ref_windows); gc()
 
 # Construct logit data analogously ----------------------------------------
 
@@ -70,7 +70,7 @@ final_ref_windows <- map(1:6, function(k) {
   bind_rows()
 
 write_csv(final_ref_windows, sprintf("data/output/df_logit_windows_%s.csv", current_specialty), na = "")
-
+rm(df_ref_windows, final_ref_big, df_full_referrals); gc()
 
 # Construct quardruple data for each window ----------------------------
 
@@ -81,9 +81,10 @@ covars <- c("same_sex","same_male","same_female",
             "doc_hrr","spec_hrr")
 
 ## builder that keeps the window label
+## chunks large grids to avoid OOM (identical results, just computed in pieces)
 make_block_win <- function(block) {
 
-  win <- block$window[1]          # Year0-0 … Year0-4
+  win <- block$window[1]
   yr  <- block$Year[1]
   hr  <- block$doc_hrr[1]
 
@@ -98,54 +99,79 @@ make_block_win <- function(block) {
   doc_pairs  <- t(combn(docs,  2))
   spec_pairs <- t(combn(specs, 2))
 
-  grid <- expand_grid(
-           dp = seq_len(nrow(doc_pairs)),
-           sp = seq_len(nrow(spec_pairs))) |>
-          mutate(i1 = doc_pairs[dp, 1], i2 = doc_pairs[dp, 2],
-                 j1 = spec_pairs[sp, 1], j2 = spec_pairs[sp, 2])
+  n_dp <- nrow(doc_pairs)
+  n_sp <- nrow(spec_pairs)
 
   join_xy <- function(df, d, s, suf) {
-    df |>
+    df %>%
       left_join(look,
-                by = setNames(c("doctor","specialist"), c(d,s))) |>
-      rename(y = referral) |>
-      rename_with(~ paste0(.x, suf), all_of(covars)) |>
+                by = setNames(c("doctor","specialist"), c(d,s))) %>%
+      rename(y = referral) %>%
+      rename_with(~ paste0(.x, suf), all_of(covars)) %>%
       rename("{paste0('y', suf)}" := y)
   }
 
-  grid <- grid |>
-            join_xy("i1","j1","11") |>
-            join_xy("i1","j2","12") |>
-            join_xy("i2","j1","21") |>
-            join_xy("i2","j2","22") |>
-            mutate(dy1 = y11 - y12,
-                   dy2 = y21 - y22,
-                   keep = dy1 * dy2 < 0) |>
-            filter(keep)
+  ## determine chunk size: target ≤ 500K grid rows per chunk
+  chunk_size <- if (n_dp * n_sp > 500000) max(1L, floor(500000 / n_sp)) else n_dp
+  dp_chunks  <- split(seq_len(n_dp), ceiling(seq_len(n_dp) / chunk_size))
 
-  if (nrow(grid) == 0) return(tibble())
+  map(dp_chunks, function(dp_idx) {
+    grid <- expand_grid(dp = dp_idx, sp = seq_len(n_sp)) %>%
+      mutate(i1 = doc_pairs[dp, 1], i2 = doc_pairs[dp, 2],
+             j1 = spec_pairs[sp, 1], j2 = spec_pairs[sp, 2])
 
-  grid <- grid |>
-            mutate(referral = ((dy1 - dy2)/2 + 1)/2)
+    grid <- grid %>%
+      join_xy("i1","j1","11") %>%
+      join_xy("i1","j2","12") %>%
+      join_xy("i2","j1","21") %>%
+      join_xy("i2","j2","22") %>%
+      mutate(dy1 = y11 - y12,
+             dy2 = y21 - y22,
+             keep = dy1 * dy2 < 0) %>%
+      filter(keep)
 
-  for (v in covars) {
-    grid <- grid |>
-      mutate("{v}" :=
-               (get(paste0(v,"11")) - get(paste0(v,"12"))) -
-               (get(paste0(v,"21")) - get(paste0(v,"22"))))
-  }
+    if (nrow(grid) == 0) return(tibble())
 
-  grid |>
-    select(doc1=i1,spec1=j1,doc2=i2,spec2=j2,
-           referral, all_of(covars)) |>
-    mutate(year = yr, hrr = hr, window = win)
+    grid <- grid %>%
+      mutate(referral = ((dy1 - dy2)/2 + 1)/2)
+
+    for (v in covars) {
+      grid <- grid %>%
+        mutate("{v}" :=
+                 (get(paste0(v,"11")) - get(paste0(v,"12"))) -
+                 (get(paste0(v,"21")) - get(paste0(v,"22"))))
+    }
+
+    grid %>%
+      select(doc1=i1, spec1=j1, doc2=i2, spec2=j2,
+             referral, all_of(covars)) %>%
+      mutate(year = yr, hrr = hr, window = win)
+  }) %>% bind_rows()
 }
 
-## build quadruple data for every horizon window
-df_jochmans_windows <- final_ref_windows %>%
-  group_by(window, Year, doc_hrr) %>%
-  group_split() %>%
-  map_dfr(make_block_win)
+## build quadruple data year-by-year and window-by-window to manage memory
+years   <- sort(unique(final_ref_windows$Year))
+windows <- sort(unique(final_ref_windows$window))
+jochmans_windows_list <- list()
+
+for (yr in years) {
+  for (win in windows) {
+    message("  Quartets for year ", yr, ", ", win)
+    yw_result <- final_ref_windows %>%
+      filter(Year == yr, window == win) %>%
+      group_by(doc_hrr) %>%
+      group_split() %>%
+      map(make_block_win) %>%
+      bind_rows()
+    if (nrow(yw_result) > 0) {
+      jochmans_windows_list[[length(jochmans_windows_list) + 1]] <- yw_result
+    }
+    rm(yw_result); gc()
+  }
+}
+
+df_jochmans_windows <- bind_rows(jochmans_windows_list)
+rm(jochmans_windows_list, final_ref_windows); gc()
 
 ## attach specialist quality and save
 df_jochmans_windows <- df_jochmans_windows %>%
