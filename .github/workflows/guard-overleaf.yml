@@ -15,7 +15,7 @@ jobs:
           MSG=$(git log -1 --pretty=%s)
           if echo "$MSG" | grep -qi overleaf; then
             CHANGED=$(git diff --name-only HEAD~1 -- \
-              data-code/ analysis/ results/)
+              code/ results/)
             if [ -n "$CHANGED" ]; then
               echo "::error::Overleaf commit modified protected files:"
               echo "$CHANGED"

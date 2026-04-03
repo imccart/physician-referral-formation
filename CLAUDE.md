@@ -6,37 +6,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Research project: "Formation of Physician Referral Networks: Drivers and Potential Consequences." Analyzes how PCPs form referral networks with specialists using Medicare data (2013--2018, with ortho 2009--2018 as robustness), focusing on physician movers who relocate across Hospital Referral Regions (HRRs).
 
-Paper and appendix live in `papers/`. Presentations live in `presentations/`. The paper tex files reference `../results/tables/` and `../results/figures/` for all generated output. Bibliography uses `BibTeX_Library.bib` and `aer.bst` (copied from `work/administrative/templates/bibliography/`). Overleaf syncs via GitHub. A GitHub Actions guard (`.github/workflows/guard-overleaf.yml`) prevents Overleaf from modifying `data-code/`, `analysis/`, or `results/`.
+Paper and appendix live in `papers/`. The paper tex files reference `../results/tables/` and `../results/figures/` for all generated output. Bibliography uses `BibTeX_Library.bib` and `aer.bst` (copied from `work/administrative/templates/bibliography/`). Overleaf syncs via GitHub. A GitHub Actions guard (`.github/workflows/guard-overleaf.yml`) prevents Overleaf from modifying `code/` or `results/`.
 
 ## Running the Code
 
-**Setup**: `0-setup.R` activates renv and loads all packages. Both orchestrators source it automatically.
+**Setup**: `code/0-setup.R` activates renv and loads all packages. Both orchestrators source it automatically.
 
 **Data construction** (requires large external datasets via symlinks in `data/input/`):
 ```r
-source("data-code/_BuildData.R")   # orchestrates scripts 1-5, outputs to data/output/
+source("code/data-build/_BuildData.R")   # orchestrates scripts 1-5, outputs to data/output/
 ```
 
 **Analysis** (requires processed data in `data/output/`):
 ```r
-source("analysis/_main.R")         # orchestrates scripts 1-3 + appendix scripts
+source("code/analysis/_main.R")         # orchestrates scripts 1-3 + appendix scripts
 ```
 
-There is no Makefile. Scripts are run interactively in R. Each orchestrator (`_BuildData.R`, `_main.R`) sources `0-setup.R` then its subscripts in order. Appendix scripts are prefixed `app_` (no number) and sourced after the main analysis.
+There is no Makefile. Scripts are run interactively in R. Each orchestrator (`_BuildData.R`, `_main.R`) sources `code/0-setup.R` then its subscripts in order. Appendix scripts are prefixed `app_` (no number) and sourced after the main analysis.
 
 ## Architecture
 
 ```
-data/input/  (symlinked, gitignored)  →  data-code/_BuildData.R  →  data/output/ (gitignored)
-                                                                            ↓
-                                          analysis/_main.R  ←───────────────┘
-                                                ↓
-                                           results/tables/*.tex, results/figures/*.png
-                                                ↓
-                                           papers/*.tex  (refs ../results/)
+data/input/  (symlinked, gitignored)  →  code/data-build/_BuildData.R  →  data/output/ (gitignored)
+                                                                                  ↓
+                                              code/analysis/_main.R  ←────────────┘
+                                                      ↓
+                                                 results/tables/*.tex, results/figures/*.png
+                                                      ↓
+                                                 papers/*.tex  (refs ../results/)
 ```
 
-### VRDC SAS pipeline (`data-code/sas/`)
+### VRDC SAS pipeline (`code/data-build/sas/`)
 
 Runs in CMS Virtual Research Data Center. Macro-parameterized for four specialties (ortho, cardio pacemaker, cardioEM, derm).
 
@@ -50,7 +50,7 @@ Runs in CMS Virtual Research Data Center. Macro-parameterized for four specialti
 | `5_outcomes.sas` | Readmission rate (ortho/cardio) or volume (derm) | `{Prefix}Quality_All` |
 | `6_aggregate_export.sas` | Aggregate to PCP x Specialist x Year, mask, export | `ReferralPairs_Full_*`, `ReferralPairs_Large_*` |
 
-### Data construction pipeline (`data-code/`)
+### Data construction pipeline (`code/data-build/`)
 
 Both `_BuildData.R` and `_main.R` loop over a shared `specialties` config (ortho, cardioem, derm). All per-specialty output files are suffixed `_{specialty}` (e.g., `df_full_referrals_ortho.csv`).
 
@@ -63,7 +63,7 @@ Both `_BuildData.R` and `_main.R` loop over a shared `specialties` config (ortho
 | `4_logit_jochmans.R` | Constructs quartet-structured TWFE data (Jochmans 2018) | `df_jochmans_{spec}.csv` |
 | `5_referrals_by_time.R` | Creates datasets by years-since-move windows | `df_jochmans_windows_{spec}.csv`, `df_logit_windows_{spec}.csv`, `df_initial_referrals_cuml_{spec}.csv` |
 
-### Analysis pipeline (`analysis/`)
+### Analysis pipeline (`code/analysis/`)
 
 | Script | Purpose | Key output (per specialty) |
 |--------|---------|------------|
@@ -84,7 +84,7 @@ Both `_BuildData.R` and `_main.R` loop over a shared `specialties` config (ortho
 - **Inline stats**: Any summary statistics referenced in the paper text should be written to a file (e.g., `results/tables/inline_stats.csv`) rather than only printed to the console. This prevents hardcoded numbers from going stale.
 - **Merging**: Extensive `left_join()` chains preserving all observations, then filtering
 - **Core R packages**: `tidyverse`, `fixest`, `marginaleffects`, `modelsummary`, `sf`, `geodist`, `data.table`
-- **data.table for quartet construction**: `make_block` (in `4_logit_jochmans.R`) and `make_block_win` (in `5_referrals_by_time.R`) use data.table internally (`CJ`, `merge`, `setnames`, `rbindlist`, `fwrite`) to avoid vctrs bugs in dplyr/tidyselect. Results convert back to tibble at the end.
+- **data.table for quartet construction**: `make_block` (in `code/data-build/4_logit_jochmans.R`) and `make_block_win` (in `code/data-build/5_referrals_by_time.R`) use data.table internally (`CJ`, `merge`, `setnames`, `rbindlist`, `fwrite`) to avoid vctrs bugs in dplyr/tidyselect. Results convert back to tibble at the end.
 - **No `map_dfr`/`map2_dfr`/`imap_dfr`**: these trigger vctrs bugs with many empty tibbles. Always use `map() %>% bind_rows()` instead.
 
 ## Paper Style
@@ -134,7 +134,7 @@ Comment 2 complete. Dynamics analysis (Comment 3) on hold pending carrier claims
 ### Comment 1: What does "same practice group" capture? (low priority)
 - **(a)** Compute share of PCP movers whose choice set contains at least one same-practice specialist. Use `df_logit` where `same_prac == 1`, group by doctor, check `any()`. Write to `inline_stats.csv`. Add sentence in paper.
 - **(b)** Robustness Jochmans spec dropping `same_prac`. Full spec only (not all 3), output 2 columns (structural beta + MFX) → `results/tables/app_robustness_noprac.tex`. New appendix section + paper sentence referencing it.
-- Both additions in existing scripts (`1_descriptive_stats.R`, `2_logit_twfe.R`), no new files.
+- Both additions in existing scripts (`code/analysis/1_descriptive_stats.R`, `code/analysis/2_logit_twfe.R`), no new files.
 
 ### Comment 2: External validity — additional specialties (COMPLETE)
 - **Status**: Full pipeline complete for all three specialties. All results in `results/tables/` and `results/figures/`.
@@ -143,13 +143,13 @@ Comment 2 complete. Dynamics analysis (Comment 3) on hold pending carrier claims
 
 ### Comment 3: Dynamics interpretation (high priority)
 - Referee's concern: cumulative windows may show attenuation via "compositional dilution" (denominator grows as new links are added, mechanically pushing shares toward population averages) rather than genuine behavioral change.
-- **(a)** Descriptive decomposition: new vs. persisting links. For windows 2–6, split `win_links` (already in `1_descriptive_stats.R` line 323) into persisting (`semi_join` with k-1) and new (`anti_join`). Compute same_prac, same_sex, same_race, mean distance for each group. Output: `results/tables/app_link_decomposition.tex`. Placement TBD (main paper if results are clean, appendix otherwise). **Do this first** — if new links clearly drive attenuation, 3b becomes robustness rather than essential.
-- **(b)** Period-specific (non-cumulative) Jochmans estimation. New data construction in `5_referrals_by_time.R` (period-specific windows + quartet construction via `make_block_win`). New script `analysis/app_period_windows.R` (estimation loop mirroring `3_referral_windows.R`). Output: `results/figures/mfx_by_window_period.png` in appendix. Risk: fewer observations per window → possible convergence failures or noisy estimates in later windows.
+- **(a)** Descriptive decomposition: new vs. persisting links. For windows 2–6, split `win_links` (already in `code/analysis/1_descriptive_stats.R`) into persisting (`semi_join` with k-1) and new (`anti_join`). Compute same_prac, same_sex, same_race, mean distance for each group. Output: `results/tables/app_link_decomposition.tex`. Placement TBD (main paper if results are clean, appendix otherwise). **Do this first** — if new links clearly drive attenuation, 3b becomes robustness rather than essential.
+- **(b)** Period-specific (non-cumulative) Jochmans estimation. New data construction in `code/data-build/5_referrals_by_time.R` (period-specific windows + quartet construction via `make_block_win`). New script `code/analysis/app_period_windows.R` (estimation loop mirroring `3_referral_windows.R`). Output: `results/figures/mfx_by_window_period.png` in appendix. Risk: fewer observations per window → possible convergence failures or noisy estimates in later windows.
 
 ### Comment 4: Sample composition reporting (low priority, low effort)
 - **(a)** Count unique PCPs and specialists in Jochmans quartets: `n_distinct(c(df_logit_twfe$doc1, df_logit_twfe$doc2))` etc. Write to `inline_stats.csv`. Add sentence in paper Section 2.2.
 - **(b)** Compare non-separated subsample (where MFX are computed) vs. full choice set on same_prac, same_sex, same_race, mean distance. Uses `stage2_3$valid` to split `dat_fe`. **Inline text** in convergence appendix section, not a formal table.
-- Both additions in `2_logit_twfe.R`.
+- Both additions in `code/analysis/2_logit_twfe.R`.
 
 ### Other
 - Direct quality regression (does homophily predict lower specialist quality?) — lower priority, not tied to referee comments.

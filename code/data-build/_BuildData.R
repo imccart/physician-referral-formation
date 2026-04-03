@@ -6,7 +6,7 @@
 
 
 # Preliminaries -----------------------------------------------------------
-source("0-setup.R")
+source("code/0-setup.R")
 
 # Import data -------------------------------------------------------------
 
@@ -163,11 +163,11 @@ for (current_specialty in names(specialties)) {
     spec_quality <- tibble(specialist = numeric(), spec_qual = numeric(), total_spec_patients = numeric())
   }
 
-  source("data-code/1_referrals_full.R")
-  source("data-code/2_referrals_initial.R")
-  source("data-code/3_logit.R")
-  source("data-code/4_logit_jochmans.R")
-  source("data-code/5_referrals_by_time.R")
+  source("code/data-build/1_referrals_full.R")
+  source("code/data-build/2_referrals_initial.R")
+  source("code/data-build/3_logit.R")
+  source("code/data-build/4_logit_jochmans.R")
+  source("code/data-build/5_referrals_by_time.R")
 
   # Free specialty-specific objects before next iteration
   rm(list = intersect(ls(), c(

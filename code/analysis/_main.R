@@ -6,7 +6,7 @@
 
 
 # Preliminaries -----------------------------------------------------------
-source("0-setup.R")
+source("code/0-setup.R")
 
 
 # Shared data -------------------------------------------------------------
@@ -88,14 +88,14 @@ for (current_specialty in names(specialties)) {
     select(doctor, origin, destination)
 
   # Run analysis scripts
-  source("analysis/1_descriptive_stats.R")
-  source("analysis/2_logit_twfe.R")
-  source("analysis/3_referral_windows.R")
+  source("code/analysis/1_descriptive_stats.R")
+  source("code/analysis/2_logit_twfe.R")
+  source("code/analysis/3_referral_windows.R")
 
   # Appendix scripts
-  source("analysis/app_quad_comparison.R")
-  if (cfg$has_qual) source("analysis/app_welfare.R")
-  source("analysis/app_convergence.R")
+  source("code/analysis/app_quad_comparison.R")
+  if (cfg$has_qual) source("code/analysis/app_welfare.R")
+  source("code/analysis/app_convergence.R")
 
   # Capture MFX for cross-specialty comparison
   all_mfx[[current_specialty]] <- mfx3 %>% mutate(specialty = current_specialty)
@@ -107,4 +107,4 @@ for (current_specialty in names(specialties)) {
 
 # Cross-specialty comparison -----------------------------------------------
 
-source("analysis/4_cross_specialty.R")
+source("code/analysis/4_cross_specialty.R")
