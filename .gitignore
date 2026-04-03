@@ -38,6 +38,7 @@ renv/cellar/
 results/refreport_*
 
 # Local
+CLAUDE.md
 .claude/
 _emails/
 
