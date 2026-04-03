@@ -99,9 +99,9 @@ years      <- 2013:2018
 pc_files   <- sprintf("data/input/Physician_Compare/%d/%d_Q4.csv", years, years)
 
 df_pc_full <-
-  map2_dfr(pc_files, years, \(file, yr) {
+  map2(pc_files, years, function(file, yr) {
 
-    readr::read_csv(
+    read_csv(
       file,
       col_types = cols(.default = col_character())   # read everything as character
     ) %>%
@@ -111,7 +111,7 @@ df_pc_full <-
         year     = yr,
         zip_code = substr(zip_code, 1, 5)            # 5-digit ZIP
       )
-  })
+  }) %>% bind_rows()
 
 
 df_pc_full <- df_pc_full %>%
@@ -125,15 +125,16 @@ df_pc_full <- df_pc_full %>%
   )
 
 
-df_phycompare <- df_pc_full %>% 
+df_phycompare <- df_pc_full %>%
   distinct(npi) %>%
   left_join(df_pc_full %>% filter(!is.na(grad_year)) %>%
-            arrange(year) %>% group_by(npi) %>% slice_tail(n=1) %>%
-            select(npi, grad_year) %>% ungroup(), by="npi") %>%
-  left_join(df_pc_full %>% filter(!is.na(med_school) & med_school!="OTHER") %>%
-            arrange(year) %>% group_by(npi) %>% slice_tail(n=1) %>%
-            select(npi, med_school) %>% ungroup(), by="npi") %>%
-  ungroup() %>%
+            arrange(year) %>% group_by(npi) %>%
+            summarise(grad_year = last(grad_year), .groups = "drop"),
+            by = "npi") %>%
+  left_join(df_pc_full %>% filter(!is.na(med_school) & med_school != "OTHER") %>%
+            arrange(year) %>% group_by(npi) %>%
+            summarise(med_school = last(med_school), .groups = "drop"),
+            by = "npi") %>%
   select(npi, grad_year, med_school)
 
 

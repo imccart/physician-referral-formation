@@ -8,7 +8,7 @@ covars_w <- c("same_sex", "same_race", "same_prac",
 
 windows <- sort(unique(df_logit_windows$window))
 
-mfx_window <- map_dfr(windows, function(win) {
+mfx_window <- map(windows, function(win) {
   message("Window: ", win)
 
   # Stage 1: Jochmans on quartet data for this window
@@ -69,7 +69,7 @@ mfx_window <- map_dfr(windows, function(win) {
   V <- V[covars_w, covars_w]
 
   # MFX with delta-method SEs (reuses logic from 2_logit_twfe.R)
-  mfx <- map_dfr(covars_w, function(v) {
+  mfx <- map(covars_w, function(v) {
     is_bin <- v %in% c("same_sex", "same_prac", "same_race")
     delta  <- if (v == "diff_dist") 5 else 1
 
@@ -103,11 +103,11 @@ mfx_window <- map_dfr(windows, function(win) {
     se <- sqrt(as.numeric(t(g_bar) %*% V %*% g_bar))
 
     tibble(term = v, estimate = dp, std.error = se)
-  })
+  }) %>% bind_rows()
 
   gc()
   mfx %>% mutate(model = win)
-})
+}) %>% bind_rows()
 
 
 ## Plotting ----

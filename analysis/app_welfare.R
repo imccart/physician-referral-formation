@@ -50,7 +50,7 @@ nice_lab <- c(
 )
 
 ## Welfare by covariate: Δp × (q_j - q̄_i) per HRR ----
-welfare_rows <- imap_dfr(covars, function(v, idx) {
+welfare_rows <- imap(covars, function(v, idx) {
 
   p1 <- counterfactual_prob(v)
 
@@ -74,7 +74,7 @@ welfare_rows <- imap_dfr(covars, function(v, idx) {
     Markets  = nrow(hrr_gains),
     !!!stat_vec(hrr_gains$gain)
   )
-})
+}) %>% bind_rows()
 
 ## Format and export ----
 welfare_out <- welfare_rows %>%

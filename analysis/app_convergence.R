@@ -44,7 +44,7 @@ run_at_iter <- function(max_iter) {
   dat_valid <- dat_fe_test[valid, ]
   eta_valid <- eta[valid]
 
-  mfx <- map_dfr(covars, function(v) {
+  mfx <- map(covars, function(v) {
     is_bin <- v %in% c("same_sex", "same_prac", "same_race")
     delta  <- if (v == "diff_dist") 5 else 1
     if (is_bin) {
@@ -55,7 +55,7 @@ run_at_iter <- function(max_iter) {
       eta0 <- eta_valid
     }
     tibble(variable = v, mfx = mean(plogis(eta1) - plogis(eta0)))
-  })
+  }) %>% bind_rows()
 
   list(iter = max_iter, deviance = deviance(fe_mod), n_valid = sum(valid),
        fe_doc_sd = sd(fes$doctor), fe_spec_sd = sd(fes$specialist),
@@ -84,19 +84,19 @@ nice_lab <- c(
 )
 
 # MFX panel: rows = covariates, columns = iteration counts
-mfx_table <- map_dfr(results, function(r) {
+mfx_table <- map(results, function(r) {
   r$mfx %>% mutate(iter = r$iter)
-}) %>%
+}) %>% bind_rows() %>%
   mutate(variable = nice_lab[variable]) %>%
   pivot_wider(names_from = iter, values_from = mfx,
               names_prefix = "iter_")
 
 # Diagnostics panel: deviance, FE SD, mean p-hat
-diag_table <- map_dfr(results, function(r) {
+diag_table <- map(results, function(r) {
   tibble(iter = r$iter, deviance = r$deviance,
          doc_fe_sd = r$fe_doc_sd, spec_fe_sd = r$fe_spec_sd,
          mean_phat = r$mean_phat)
-})
+}) %>% bind_rows()
 
 diag_rows <- tribble(
   ~variable, ~iter_10, ~iter_25, ~iter_50, ~iter_100, ~iter_250,

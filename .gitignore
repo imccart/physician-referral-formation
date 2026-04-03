@@ -37,8 +37,9 @@ renv/cellar/
 # Referee reports (internal, not for repo)
 results/refreport_*
 
-# Local setup
-setup_symlinks.bat
+# Local
+.claude/
+_emails/
 
 # OS files
 .DS_Store

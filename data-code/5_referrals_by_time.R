@@ -80,8 +80,7 @@ covars <- c("same_sex","same_male","same_female",
             "diff_age","diff_gradyear","diff_dist",
             "doc_hrr","spec_hrr")
 
-## builder that keeps the window label
-## chunks large grids to avoid OOM (identical results, just computed in pieces)
+## data.table implementation — avoids vctrs bugs entirely
 make_block_win <- function(block) {
 
   win <- block$window[1]
@@ -91,10 +90,9 @@ make_block_win <- function(block) {
   docs  <- unique(block$doctor)
   specs <- unique(block$specialist)
 
-  if (length(docs) < 2 || length(specs) < 2) return(tibble())
+  if (length(docs) < 2 || length(specs) < 2) return(data.table())
 
-  look <- block %>%
-    select(doctor, specialist, referral, all_of(covars))
+  look <- as.data.table(block)[, c("doctor", "specialist", "referral", covars), with = FALSE]
 
   doc_pairs  <- t(combn(docs,  2))
   spec_pairs <- t(combn(specs, 2))
@@ -102,87 +100,83 @@ make_block_win <- function(block) {
   n_dp <- nrow(doc_pairs)
   n_sp <- nrow(spec_pairs)
 
-  join_xy <- function(df, d, s, suf) {
-    df %>%
-      left_join(look,
-                by = setNames(c("doctor","specialist"), c(d,s))) %>%
-      rename(y = referral) %>%
-      rename_with(~ paste0(.x, suf), all_of(covars)) %>%
-      rename("{paste0('y', suf)}" := y)
-  }
-
-  ## determine chunk size: target ≤ 500K grid rows per chunk
+  ## chunk large grids to avoid OOM
   chunk_size <- if (n_dp * n_sp > 500000) max(1L, floor(500000 / n_sp)) else n_dp
   dp_chunks  <- split(seq_len(n_dp), ceiling(seq_len(n_dp) / chunk_size))
 
-  map(dp_chunks, function(dp_idx) {
-    grid <- expand_grid(dp = dp_idx, sp = seq_len(n_sp)) %>%
-      mutate(i1 = doc_pairs[dp, 1], i2 = doc_pairs[dp, 2],
-             j1 = spec_pairs[sp, 1], j2 = spec_pairs[sp, 2])
+  results <- lapply(dp_chunks, function(dp_idx) {
+    grid <- CJ(dp = dp_idx, sp = seq_len(n_sp))
+    grid[, c("i1", "i2") := .(doc_pairs[dp, 1], doc_pairs[dp, 2])]
+    grid[, c("j1", "j2") := .(spec_pairs[sp, 1], spec_pairs[sp, 2])]
 
-    grid <- grid %>%
-      join_xy("i1","j1","11") %>%
-      join_xy("i1","j2","12") %>%
-      join_xy("i2","j1","21") %>%
-      join_xy("i2","j2","22") %>%
-      mutate(dy1 = y11 - y12,
-             dy2 = y21 - y22,
-             keep = dy1 * dy2 < 0) %>%
-      filter(keep)
-
-    if (nrow(grid) == 0) return(tibble())
-
-    grid <- grid %>%
-      mutate(referral = ((dy1 - dy2)/2 + 1)/2)
-
-    for (v in covars) {
-      grid <- grid %>%
-        mutate("{v}" :=
-                 (get(paste0(v,"11")) - get(paste0(v,"12"))) -
-                 (get(paste0(v,"21")) - get(paste0(v,"22"))))
+    for (suf in c("11", "12", "21", "22")) {
+      dcol <- paste0("i", substr(suf, 1, 1))
+      scol <- paste0("j", substr(suf, 2, 2))
+      tmp <- copy(look)
+      setnames(tmp, c("doctor", "specialist", "referral", covars),
+               c(dcol, scol, paste0("y", suf), paste0(covars, suf)))
+      grid <- merge(grid, tmp, by = c(dcol, scol), all.x = TRUE)
     }
 
-    grid %>%
-      select(doc1=i1, spec1=j1, doc2=i2, spec2=j2,
-             referral, all_of(covars)) %>%
-      mutate(year = yr, hrr = hr, window = win)
-  }) %>% bind_rows()
+    grid[, dy1 := y11 - y12]
+    grid[, dy2 := y21 - y22]
+    grid <- grid[dy1 * dy2 < 0]
+
+    if (nrow(grid) == 0) return(data.table())
+
+    grid[, referral := ((dy1 - dy2) / 2 + 1) / 2]
+    for (v in covars) {
+      grid[, (v) := get(paste0(v, "11")) - get(paste0(v, "12")) -
+                     get(paste0(v, "21")) + get(paste0(v, "22"))]
+    }
+
+    setnames(grid, c("i1", "j1", "i2", "j2"), c("doc1", "spec1", "doc2", "spec2"))
+    grid[, year := yr]
+    grid[, hrr := hr]
+    grid[, window := win]
+    grid[, c("doc1", "spec1", "doc2", "spec2", "referral", covars, "year", "hrr", "window"), with = FALSE]
+  })
+
+  results <- results[vapply(results, nrow, integer(1)) > 0L]
+  if (length(results) > 0) rbindlist(results) else data.table()
 }
 
-## build quadruple data year-by-year and window-by-window to manage memory
-years   <- sort(unique(final_ref_windows$Year))
-windows <- sort(unique(final_ref_windows$window))
-jochmans_windows_list <- list()
+## build quadruple data year-by-year and window-by-window, writing to disk incrementally
+dt_windows <- as.data.table(final_ref_windows)
+rm(final_ref_windows); gc()
+
+years   <- sort(unique(dt_windows$Year))
+windows <- sort(unique(dt_windows$window))
+out_file <- sprintf("data/output/df_jochmans_windows_%s.csv", current_specialty)
+first_write <- TRUE
 
 for (yr in years) {
   for (win in windows) {
     message("  Quartets for year ", yr, ", ", win)
-    yw_result <- final_ref_windows %>%
-      filter(Year == yr, window == win) %>%
-      group_by(doc_hrr) %>%
-      group_split() %>%
-      map(make_block_win) %>%
-      bind_rows()
-    if (nrow(yw_result) > 0) {
-      jochmans_windows_list[[length(jochmans_windows_list) + 1]] <- yw_result
+    dt_sub <- dt_windows[Year == yr & window == win]
+    groups <- split(dt_sub, by = "doc_hrr")
+    yw_parts <- lapply(groups, make_block_win)
+    yw_parts <- yw_parts[vapply(yw_parts, nrow, integer(1)) > 0L]
+    if (length(yw_parts) > 0) {
+      yw_result <- rbindlist(yw_parts)
+      fwrite(yw_result, out_file, append = !first_write)
+      first_write <- FALSE
+      rm(yw_result)
     }
-    rm(yw_result); gc()
+    rm(dt_sub, groups, yw_parts); gc()
   }
 }
 
-df_jochmans_windows <- bind_rows(jochmans_windows_list)
-rm(jochmans_windows_list, final_ref_windows); gc()
+rm(dt_windows); gc()
 
-## attach specialist quality and save
+## read back, attach specialist quality, and re-save
+df_jochmans_windows <- as_tibble(fread(out_file))
 df_jochmans_windows <- df_jochmans_windows %>%
-  ungroup() %>%
-  left_join(spec_quality %>%
-              rename(spec1_qual           = spec_qual,
-                     spec1_total_patients = total_spec_patients),
+  left_join(spec_quality %>% rename(spec1_qual = spec_qual,
+                                    spec1_total_patients = total_spec_patients),
             by = c("spec1" = "specialist")) %>%
-  left_join(spec_quality %>%
-              rename(spec2_qual           = spec_qual,
-                     spec2_total_patients = total_spec_patients),
+  left_join(spec_quality %>% rename(spec2_qual = spec_qual,
+                                    spec2_total_patients = total_spec_patients),
             by = c("spec2" = "specialist"))
 
-write_csv(df_jochmans_windows, sprintf("data/output/df_jochmans_windows_%s.csv", current_specialty), na = "")
+write_csv(df_jochmans_windows, out_file, na = "")

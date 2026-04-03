@@ -357,20 +357,20 @@ cuml_per_pcp <- win_links %>%
   summarise(n_specs = n_distinct(specialist), .groups = "drop")
 
 ## New: cumulative growth per PCP, averaged over PCPs in both consecutive windows
-new_stats <- map_dfr(2:6, function(kk) {
+new_stats <- map(2:6, function(kk) {
   prev <- cuml_per_pcp %>% filter(k == kk - 1) %>% select(doctor, n_prev = n_specs)
   curr <- cuml_per_pcp %>% filter(k == kk) %>% select(doctor, n_curr = n_specs)
   both <- inner_join(prev, curr, by = "doctor") %>%
     mutate(new = n_curr - n_prev)
   tibble(k = kk, `New specialists` = mean(both$new))
-})
+}) %>% bind_rows()
 yr1_new <- cuml_per_pcp %>% filter(k == 1) %>%
   summarise(`New specialists` = mean(n_specs)) %>%
   mutate(k = 1L)
 new_stats <- bind_rows(yr1_new, new_stats)
 
 ## Dropped: specialists in year k-1 but not year k, for PCPs in both years
-dropped_stats <- map_dfr(1:5, function(y) {
+dropped_stats <- map(1:5, function(y) {
   prev <- yr_specs %>% filter(years_since_move == y - 1) %>% select(doctor, specialist)
   curr <- yr_specs %>% filter(years_since_move == y) %>% select(doctor, specialist)
   both_docs <- intersect(unique(prev$doctor), unique(curr$doctor))
@@ -385,7 +385,7 @@ dropped_stats <- map_dfr(1:5, function(y) {
     mutate(dropped = replace_na(dropped, 0L))
 
   tibble(k = y + 1L, `Dropped specialists` = mean(all_both$dropped))
-})
+}) %>% bind_rows()
 dropped_stats <- bind_rows(tibble(k = 1L, `Dropped specialists` = 0), dropped_stats)
 
 dynamics <- new_stats %>% left_join(dropped_stats, by = "k")

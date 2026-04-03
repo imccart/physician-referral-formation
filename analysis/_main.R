@@ -54,7 +54,7 @@ for (current_specialty in names(specialties)) {
 
   ## Referral "choice" data for standard logit
   df_logit <- read_csv(sprintf("data/output/df_logit_movers_%s.csv", current_specialty)) %>%
-    mutate(doc_male = (doc_sex == "M"), spec_male = (spec_sex == "M"),
+    mutate(doc_male = as.numeric(doc_sex == "M"), spec_male = as.numeric(spec_sex == "M"),
            exp_spec = (Year - spec_grad_year) / 10,
            doctor = as.factor(doctor),
            specialist = as.factor(specialist))

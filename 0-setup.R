@@ -16,5 +16,6 @@ library(kableExtra)
 library(scales)
 library(broom)
 library(purrr)
+library(data.table)
 
 options(modelsummary_factory_default = "kableExtra")

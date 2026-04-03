@@ -23,15 +23,71 @@ logit_race3 <- fixest::feglm(
 )
 
 
-mfx_logit_race1 <- avg_slopes(logit_race1)
-mfx_logit_race2 <- avg_slopes(logit_race2)
-mfx_logit_race3 <- avg_slopes(logit_race3)
+## Manual MFX: first-difference + delta-method SEs (avg_slopes incompatible with feglm FEs)
+compute_mfx_zeltzer <- function(model, data, spec_covars) {
+  beta <- coef(model)[spec_covars]
+  V    <- vcov(model)
+  V    <- V[spec_covars, spec_covars]
 
-models_logit_race <- list(
-  "(1)" = mfx_logit_race1,
-  "(2)" = mfx_logit_race2,
-  "(3)" = mfx_logit_race3
-)
+  # Build eta manually (predict() returns estimation-sample length only)
+  Xmat    <- as.matrix(data[, spec_covars])
+  na_mask <- complete.cases(Xmat)
+  dat_v   <- data[na_mask, ]
+  Xbeta   <- drop(Xmat[na_mask, ] %*% beta)
+
+  fes     <- fixef(model)
+  doc_fe  <- fes$doctor[as.character(dat_v$doctor)]
+  year_fe <- fes$Year[as.character(dat_v$Year)]
+  eta     <- Xbeta + doc_fe + year_fe
+
+  ok    <- !is.na(eta)
+  eta   <- eta[ok]
+  dat_v <- dat_v[ok, ]
+
+  map(spec_covars, function(v) {
+    is_bin <- v %in% c("same_sex", "same_race", "spec_male", "same_prac")
+    delta  <- 1
+
+    if (is_bin) {
+      eta1 <- eta - beta[v] * dat_v[[v]] + beta[v]
+      eta0 <- eta - beta[v] * dat_v[[v]]
+    } else {
+      eta1 <- eta + beta[v] * delta
+      eta0 <- eta
+    }
+
+    p1 <- plogis(eta1)
+    p0 <- plogis(eta0)
+    dp <- mean(p1 - p0)
+
+    grad_i <- matrix(0, nrow = length(eta), ncol = length(spec_covars))
+    colnames(grad_i) <- spec_covars
+    for (k in spec_covars) {
+      if (is_bin) {
+        deta1_dk <- if (k == v) rep(1, length(eta)) else dat_v[[k]]
+        deta0_dk <- if (k == v) rep(0, length(eta)) else dat_v[[k]]
+      } else {
+        deta1_dk <- dat_v[[k]] + if (k == v) delta else 0
+        deta0_dk <- dat_v[[k]]
+      }
+      grad_i[, k] <- (p1 * (1 - p1)) * deta1_dk - (p0 * (1 - p0)) * deta0_dk
+    }
+
+    g_bar <- colMeans(grad_i)
+    se <- sqrt(as.numeric(t(g_bar) %*% V %*% g_bar))
+
+    tibble(term = v, estimate = dp, std.error = se)
+  }) %>% bind_rows()
+}
+
+covars_race1 <- c("same_sex", "same_race", "spec_male", "exp_spec")
+covars_race2 <- c("same_sex", "same_race", "spec_male", "exp_spec", "same_prac", "dist_miles")
+covars_race3 <- c("same_sex", "same_race", "spec_male", "exp_spec", "same_prac", "dist_miles",
+                   "diff_age", "diff_gradyear")
+
+mfx_logit_race1 <- compute_mfx_zeltzer(logit_race1, df_logit, covars_race1)
+mfx_logit_race2 <- compute_mfx_zeltzer(logit_race2, df_logit, covars_race2)
+mfx_logit_race3 <- compute_mfx_zeltzer(logit_race3, df_logit, covars_race3)
 
 ## Extract MFX estimates and SEs into a table
 fmt_num <- function(x) {
@@ -64,12 +120,12 @@ m2 <- extract_mfx(mfx_logit_race2, mfx_terms)
 m3 <- extract_mfx(mfx_logit_race3, mfx_terms)
 
 ## Build rows: coefficient estimate, then SE
-tbl_rows <- map_dfr(seq_along(mfx_terms), function(i) {
+tbl_rows <- map(seq_along(mfx_terms), function(i) {
   bind_rows(
     tibble(` ` = mfx_labels[i], `(1)` = m1$est[i], `(2)` = m2$est[i], `(3)` = m3$est[i]),
     tibble(` ` = "",             `(1)` = m1$se[i],  `(2)` = m2$se[i],  `(3)` = m3$se[i])
   )
-})
+}) %>% bind_rows()
 
 ## Add footer rows
 footer <- tribble(
@@ -187,7 +243,7 @@ compute_mfx <- function(stage2, joch_model, spec_covars) {
   # Subset vcov to spec_covars (Jochmans model may have year FEs in vcov)
   V <- V[spec_covars, spec_covars]
 
-  map_dfr(spec_covars, function(v) {
+  map(spec_covars, function(v) {
     is_bin <- v %in% c("same_sex", "same_prac", "same_race")
     delta  <- if (v == "diff_dist") 5 else 1
 
@@ -231,7 +287,7 @@ compute_mfx <- function(stage2, joch_model, spec_covars) {
     se <- sqrt(as.numeric(t(g_bar) %*% V %*% g_bar))
 
     tibble(term = v, estimate = dp, std.error = se)
-  })
+  }) %>% bind_rows()
 }
 
 mfx1 <- compute_mfx(stage2_1, logit_twfe1, covars1)
