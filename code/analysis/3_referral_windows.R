@@ -7,6 +7,7 @@ covars_w <- c("same_sex", "same_race", "same_prac",
               "diff_dist", "diff_age", "diff_gradyear")
 
 windows <- sort(unique(df_logit_windows$window))
+windows <- windows[as.integer(str_extract(windows, "\\d+")) <= 4]
 
 mfx_window <- map(windows, function(win) {
   message("Window: ", win)
@@ -46,7 +47,7 @@ mfx_window <- map(windows, function(win) {
       data = dat_cs,
       offset = ~.Xbeta,
       family = binomial("logit"),
-      glm.iter = 50
+      glm.iter = 200
     ),
     error = function(e) {
       message("  FE recovery failed for window ", win, ": ", conditionMessage(e))
@@ -152,18 +153,18 @@ ggplot(mfx_plot,
   geom_hline(yintercept = 0, linetype = "dashed", linewidth = .3) +
 
   geom_linerange(position = dodge,
-                 colour = "grey50", alpha = .35, linewidth = .9) +
+                 colour = "grey50", alpha = .6, linewidth = .5) +
 
   geom_point(position = dodge,
-             size = 3, colour = "black", fill = "white") +
+             size = 1.5, colour = "black", fill = "white") +
 
   scale_shape_manual(values = shape_vec,
                      breaks = plot_vars,
                      labels = shape_labs,
                      name   = "Covariate") +
 
-  scale_x_continuous(breaks = 1:6,
-                     labels = paste(1:6, "yr")) +
+  scale_x_continuous(breaks = 1:4,
+                     labels = paste(1:4, "yr")) +
 
   labs(x = "Years since move",
        y = "Average marginal effect") +

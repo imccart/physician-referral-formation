@@ -2,7 +2,7 @@
 
 # Overall sample size and relevant counts ----------------------------
 full_counts <- df_full_referrals %>%
-  group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
+  distinct(doctor, specialist, .keep_all = TRUE) %>%
   summarise(
     n_physicians = n_distinct(doctor),
     n_specialists = n_distinct(specialist),
@@ -11,12 +11,12 @@ full_counts <- df_full_referrals %>%
 
 ## Total patients
 df_full_referrals %>%
-  group_by(specialist) %>% slice(1) %>% ungroup() %>%
+  distinct(specialist, .keep_all = TRUE) %>%
   summarise(total_patients = sum(total_spec_patients))
 
 
 mover_counts <- df_initial_referrals %>%
-  group_by(doctor, specialist) %>% slice(1) %>% ungroup() %>%
+  distinct(doctor, specialist, .keep_all = TRUE) %>%
   summarise(
     n_physicians = n_distinct(doctor),
     n_specialists = n_distinct(specialist),
@@ -25,7 +25,7 @@ mover_counts <- df_initial_referrals %>%
 
 ## Total patients
 df_initial_referrals %>%
-  group_by(specialist) %>% slice(1) %>% ungroup() %>%
+  distinct(specialist, .keep_all = TRUE) %>%
   summarise(total_patients = sum(total_spec_patients))
 
 
@@ -103,49 +103,49 @@ flows_top %>% summarize(total_movers = sum(n_movers)) # total number of movers
 
 
 ## helper that computes degree, age, gender & race shares
+## Uses data.table for the inner grouped summarise (dplyr crashes with 200K+ groups)
 side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var, dist_var) {
-  df %>%
-    group_by({{ id_var }}, Year) %>%                               # doctor or specialist
+  agg <- as.data.table(df)[, .(
+    deg      = uniqueN(get(partner_var)),
+    age      = mean(Year - get(birth_var), na.rm = TRUE),
+    male     = get(sex_var)[1L] == "M",
+    race     = get(race_var)[1L],
+    distance = mean(get(dist_var), na.rm = TRUE)
+  ), by = c(id_var, "Year")] %>% as_tibble()
+
+  agg %>%
     summarise(
-      deg  = n_distinct({{ partner_var }}),                 # out- or in-degree
-      age  = mean(Year - {{ birth_var }}, na.rm = TRUE),    # years since birth
-      male = first({{ sex_var }}) == "M",
-      race = first({{ race_var }}),
-      distance = mean({{ dist_var }}, na.rm = TRUE), # average distance to partner
-      .groups = "drop"
-    ) %>%
-    summarise(
-      "Network Degree (Mean)" = mean(deg),                                 # network size
-      "Network Degree (SD)"   = sd(deg),
-      "Network Degree (Median)"  = median(deg),
-      "Mean Age" = mean(age, na.rm = TRUE),
-      "Mean Distance (mi)" = mean(distance, na.rm = TRUE),
-      "Percent Male"  = mean(male, na.rm = TRUE),
-      "Percent White" = mean(race == "white",    na.rm = TRUE),
-      "Percent Black" = mean(race == "black",    na.rm = TRUE),
-      "Percent Hispanic"  = mean(race == "hispanic", na.rm = TRUE),
-      "Observations"    = n_distinct({{ id_var }}) # number of distinct physicians
+      "Network Degree (Mean)"   = mean(deg),
+      "Network Degree (SD)"     = sd(deg),
+      "Network Degree (Median)" = median(deg),
+      "Mean Age"                = mean(age, na.rm = TRUE),
+      "Mean Distance (mi)"      = mean(distance, na.rm = TRUE),
+      "Percent Male"            = mean(male, na.rm = TRUE),
+      "Percent White"           = mean(race == "white",    na.rm = TRUE),
+      "Percent Black"           = mean(race == "black",    na.rm = TRUE),
+      "Percent Hispanic"        = mean(race == "hispanic", na.rm = TRUE),
+      "Observations"            = n_distinct(.data[[id_var]])
     )
 }
 
 
 ## Panel A: doctors (senders)
 doc_full <- side_stats(df_full_referrals,
-                       doctor, specialist,
-                       doc_sex, doc_race, doc_birth, dist_miles)
+                       "doctor", "specialist",
+                       "doc_sex", "doc_race", "doc_birth", "dist_miles")
 
 doc_move <- side_stats(df_initial_referrals,
-                       doctor, specialist,
-                       doc_sex, doc_race, doc_birth, dist_miles)
+                       "doctor", "specialist",
+                       "doc_sex", "doc_race", "doc_birth", "dist_miles")
 
 ## Panel B: specialists (receivers)
 spec_full <- side_stats(df_full_referrals,
-                        specialist, doctor,
-                        spec_sex, spec_race, spec_birth, dist_miles)
+                        "specialist", "doctor",
+                        "spec_sex", "spec_race", "spec_birth", "dist_miles")
 
 spec_move <- side_stats(df_initial_referrals,
-                        specialist, doctor,
-                        spec_sex, spec_race, spec_birth, dist_miles)
+                        "specialist", "doctor",
+                        "spec_sex", "spec_race", "spec_birth", "dist_miles")
 
 
 ## assemble long table, reshape for LaTeX
@@ -184,15 +184,15 @@ table_tex %>%
 
 
 ## Distribution of network size
-deg_out <- df_full_referrals %>%
-  group_by(doctor, Year) %>%
-  summarise(deg = n_distinct(specialist), .groups = "drop") %>%
+deg_out <- as.data.table(df_full_referrals)[,
+  .(deg = uniqueN(specialist)), by = .(doctor, Year)] %>%
+  as_tibble() %>%
   mutate(side = "PCP (out-degree)")
 
 ## receiver-side degree: how many distinct PCPs refer to each specialist
-deg_in  <- df_full_referrals %>%
-  group_by(specialist, Year) %>%
-  summarise(deg = n_distinct(doctor), .groups = "drop") %>%
+deg_in <- as.data.table(df_full_referrals)[,
+  .(deg = uniqueN(doctor)), by = .(specialist, Year)] %>%
+  as_tibble() %>%
   mutate(side = "Specialist (in-degree)")
 
 ## put them in one long data frame for facetted plotting
@@ -327,7 +327,8 @@ win_links <- ref_windows %>%
            doc_race, spec_race,
            dist_miles,
            doc_grad_year, spec_grad_year) %>%
-  mutate(k = as.integer(sub("Up to year ", "", window)))
+  mutate(k = as.integer(sub("Up to year ", "", window))) %>%
+  filter(k <= 4)
 
 win_match <- win_links %>%
   group_by(k) %>%
@@ -409,8 +410,9 @@ all_stats <- win_match %>%
   arrange(Statistic) %>%
   mutate(Statistic = as.character(Statistic))
 
+n_win <- ncol(all_stats) - 1
 all_stats %>%
   kable(format = "latex", booktabs = TRUE, linesep = "",
-        align = c("l", rep("r", 6)),
-        col.names = c(" ", paste("Year", 1:6))) %>%
+        align = c("l", rep("r", n_win)),
+        col.names = c(" ", paste("Year", seq_len(n_win)))) %>%
   writeLines(sprintf("results/tables/link_stats_by_window_%s.tex", current_specialty))

@@ -41,7 +41,7 @@ p_forest <- ggplot(df_forest,
            xmin = conf.low, xmax = conf.high,
            colour = spec_name, shape = spec_name)) +
   geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.3) +
-  geom_errorbarh(position = dodge, height = 0.2, linewidth = 0.6) +
+  geom_errorbar(position = dodge, width = 0.2, linewidth = 0.6, orientation = "y") +
   geom_point(position = dodge, size = 2.5) +
   scale_colour_manual(values = c("Orthopedic surgery" = "#1b9e77",
                                  "Cardiology (E&M)"   = "#d95f02",
@@ -98,8 +98,8 @@ p_dynamics <- ggplot(df_win_plot,
            ymin = conf.low, ymax = conf.high,
            colour = spec_name, shape = spec_name)) +
   geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.3) +
-  geom_linerange(position = dodge_w, linewidth = 0.6, alpha = 0.5) +
-  geom_point(position = dodge_w, size = 2) +
+  geom_linerange(position = dodge_w, linewidth = 0.5, alpha = 0.6) +
+  geom_point(position = dodge_w, size = 1.5) +
   facet_wrap(~ covar, scales = "free_y", ncol = 3) +
   scale_colour_manual(values = c("Orthopedic surgery" = "#1b9e77",
                                  "Cardiology (E&M)"   = "#d95f02",
@@ -109,7 +109,7 @@ p_dynamics <- ggplot(df_win_plot,
                                 "Cardiology (E&M)"   = 17,
                                 "Dermatology"        = 15),
                      name = "Specialty") +
-  scale_x_continuous(breaks = 1:6, labels = paste(1:6, "yr")) +
+  scale_x_continuous(breaks = 1:4, labels = paste(1:4, "yr")) +
   labs(x = "Years since move", y = "Average marginal effect") +
   theme_minimal(base_size = 10) +
   theme(legend.position = "bottom",

@@ -2,7 +2,7 @@
 ## Title:         Formation of Physician Referral Networks
 ## Author:        Ian McCarthy
 ## Date Created:  1/23/2025
-## Date Edited:   6/5/2025
+## Date Edited:   4/8/2026
 
 
 # Preliminaries -----------------------------------------------------------
@@ -38,7 +38,7 @@ neighbor_lookup <- contig_nb %>%
 ## MDPPAS
 df_mdppas <- data.frame()
 
-for (year in 2012:2018) {
+for (year in 2009:2018) {
   # Read MDPPAS data
   df <- read_csv(sprintf("data/input/MDPPAS/PhysicianData_%d.csv", year), 
                  col_types = cols_only(

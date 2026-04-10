@@ -1,11 +1,11 @@
 metric,value
-Network density,0.045
-Same practice group,0.063
-Same gender,0.553
-Same race,0.674
-Mean distance (miles),11.4
-Mean experience gap (years),13.6
-PCP-specialist pairs,1079257
-Unique PCPs,93494
-Unique specialists,12249
-PCP movers,2733
+Network density,0.044
+Same practice group,0.06
+Same gender,0.562
+Same race,0.684
+Mean distance (miles),11.9
+Mean experience gap (years),13.3
+PCP-specialist pairs,1598408
+Unique PCPs,116120
+Unique specialists,13017
+PCP movers,4664

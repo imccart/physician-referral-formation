@@ -1,7 +1,7 @@
 # Construct referral data only among movers ---------------------------------
 
 ## Identify movers in MD-PPAS data
-df_movers <- map(2013:2018, function(yr) {
+df_movers <- map(2010:2018, function(yr) {
 
   df_mdppas %>%                              # cols: npi, hrr, year
     filter(year %in% c(yr - 1, yr)) %>%

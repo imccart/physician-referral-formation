@@ -15,11 +15,11 @@ source("code/0-setup.R")
 gdf <- st_read("data/input/HRR_ShapeFile.shp") %>%
   filter(!str_starts(HRRCITY, "AK") & !str_starts(HRRCITY, "HI"))
 
-## Specialty configuration (matches data-code/_BuildData.R)
+## Specialty configuration
 specialties <- list(
-  ortho    = list(file = "data/input/referrals/REFERRALPAIRS_LARGE_ORTHO.csv",    has_qual = TRUE),
-  cardioem = list(file = "data/input/referrals/REFERRALPAIRS_LARGE_CARDIOEM.csv", has_qual = FALSE),
-  derm     = list(file = "data/input/referrals/REFERRALPAIRS_LARGE_DERM.csv",     has_qual = FALSE)
+  ortho    = list(has_qual = TRUE),
+  cardioem = list(has_qual = FALSE),
+  derm     = list(has_qual = FALSE)
 )
 
 ## Collectors for cross-specialty comparison
@@ -32,18 +32,6 @@ all_mfx_windows <- list()
 for (current_specialty in names(specialties)) {
   cfg <- specialties[[current_specialty]]
   message("\n=== Analyzing: ", current_specialty, " ===\n")
-
-  # Load raw referral pairs (for spec_quality)
-  df_pairs <- read_csv(cfg$file)
-
-  if (cfg$has_qual) {
-    spec_quality <- df_pairs %>%
-      group_by(Specialist_ID) %>%
-      slice(1) %>%
-      select(specialist = Specialist_ID, spec_qual, total_spec_patients)
-  } else {
-    spec_quality <- tibble(specialist = numeric(), spec_qual = numeric(), total_spec_patients = numeric())
-  }
 
   ## Referral data for all PCP/specialist pairs
   df_full_referrals <- read_csv(sprintf("data/output/df_full_referrals_%s.csv", current_specialty)) %>%
@@ -83,8 +71,7 @@ for (current_specialty in names(specialties)) {
 
   # Minor cleanup
   movers <- df_initial_referrals %>%
-    group_by(doctor) %>%
-    slice(1) %>%
+    distinct(doctor, .keep_all = TRUE) %>%
     select(doctor, origin, destination)
 
   # Run analysis scripts

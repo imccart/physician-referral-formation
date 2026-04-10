@@ -205,7 +205,7 @@ recover_fes <- function(joch_model, spec_covars) {
     data = dat_tmp,
     offset = ~.Xbeta,
     family = binomial("logit"),
-    glm.iter = 50
+    glm.iter = 200
   )
 
   fes <- fixef(fe_mod)
