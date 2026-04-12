@@ -272,6 +272,17 @@ summary_tbl <- tibble(
               mover_counts$n_physicians)
 )
 
+## Comment 1a: share of movers with at least one same-practice specialist in choice set
+pct_movers_same_prac <- df_logit %>%
+  filter(referral == 1 | referral == 0) %>%    # full choice set
+  group_by(doctor) %>%
+  summarise(has_same_prac = any(same_prac == 1, na.rm = TRUE), .groups = "drop") %>%
+  summarise(pct = mean(has_same_prac))
+
+summary_tbl <- bind_rows(summary_tbl,
+  tibble(metric = "Pct movers with same-practice specialist",
+         value  = round(pct_movers_same_prac$pct, 3)))
+
 write_csv(summary_tbl, sprintf("results/tables/inline_stats_%s.csv", current_specialty))
 
 ## Describing observed and unobserved links

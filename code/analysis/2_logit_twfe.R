@@ -397,3 +397,41 @@ kable(table_out,
   row_spec(12, extra_latex_after = "\\midrule") %>%
   row_spec(15, extra_latex_after = "\\midrule") %>%
   save_kable(sprintf("results/tables/logit_twfe_mfx_%s.tex", current_specialty))
+
+
+# Comment 4a: unique PCPs and specialists in Jochmans quartets ---------------
+quartet_composition <- tibble(
+  metric = c("Unique PCPs in quartets",
+             "Unique specialists in quartets",
+             "Pct non-separated (MFX sample)"),
+  value  = c(n_distinct(c(df_logit_twfe$doc1, df_logit_twfe$doc2)),
+             n_distinct(c(df_logit_twfe$spec1, df_logit_twfe$spec2)),
+             round(stage2_3$n_valid / nrow(dat_fe), 3))
+)
+
+# Comment 4b: compare non-separated vs full choice set
+nonsep_means <- dat_fe[stage2_3$valid, ] %>%
+  summarise(same_prac = mean(same_prac, na.rm = TRUE),
+            same_sex  = mean(same_sex, na.rm = TRUE),
+            same_race = mean(same_race, na.rm = TRUE),
+            dist      = mean(diff_dist, na.rm = TRUE))
+full_means <- dat_fe %>%
+  summarise(same_prac = mean(same_prac, na.rm = TRUE),
+            same_sex  = mean(same_sex, na.rm = TRUE),
+            same_race = mean(same_race, na.rm = TRUE),
+            dist      = mean(diff_dist, na.rm = TRUE))
+
+quartet_composition <- bind_rows(quartet_composition,
+  tibble(metric = c("Non-sep same_prac", "Full same_prac",
+                    "Non-sep same_sex", "Full same_sex",
+                    "Non-sep same_race", "Full same_race",
+                    "Non-sep mean_dist", "Full mean_dist"),
+         value = c(round(nonsep_means$same_prac, 3), round(full_means$same_prac, 3),
+                   round(nonsep_means$same_sex, 3), round(full_means$same_sex, 3),
+                   round(nonsep_means$same_race, 3), round(full_means$same_race, 3),
+                   round(nonsep_means$dist, 3), round(full_means$dist, 3))))
+
+# Append to inline stats
+inline_stats <- read_csv(sprintf("results/tables/inline_stats_%s.csv", current_specialty))
+inline_stats <- bind_rows(inline_stats, quartet_composition)
+write_csv(inline_stats, sprintf("results/tables/inline_stats_%s.csv", current_specialty))

@@ -27,6 +27,67 @@ all_mfx <- list()
 all_mfx_windows <- list()
 
 
+# Practice composition by specialty ----------------------------------------
+# What share of PCP-containing practice groups also include each specialist type?
+
+mdppas_comp <- map(2009:2018, function(yr) {
+  read_csv(sprintf("data/input/MDPPAS/PhysicianData_%d.csv", yr),
+           col_types = cols_only(
+             npi            = col_number(),
+             spec_broad     = col_character(),
+             spec_prim_1_name = col_character(),
+             group1         = col_character(),
+             Year           = col_integer()
+           )) %>%
+    filter(!is.na(group1) & group1 != "")
+}) %>% bind_rows()
+
+# Flag each physician's role
+mdppas_comp <- mdppas_comp %>%
+  mutate(
+    is_pcp   = spec_broad == "1",
+    is_ortho = spec_prim_1_name == "Orthopedic Surgery",
+    is_cardio = spec_prim_1_name %in% c("Cardiology",
+                                         "Clinical Cardiac Electrophysiology"),
+    is_derm  = spec_prim_1_name == "Dermatology"
+  )
+
+# For each practice group x year, check whether it contains each type
+group_comp <- mdppas_comp %>%
+  group_by(group1, Year) %>%
+  summarise(
+    has_pcp   = any(is_pcp),
+    has_ortho = any(is_ortho),
+    has_cardio = any(is_cardio),
+    has_derm  = any(is_derm),
+    .groups = "drop"
+  )
+
+# Among PCP-containing groups, share that also include each specialty
+pcp_groups <- group_comp %>% filter(has_pcp)
+
+practice_composition <- tibble(
+  specialty = c("Orthopedic Surgery", "Cardiology", "Dermatology"),
+  pct_of_pcp_groups = c(
+    mean(pcp_groups$has_ortho),
+    mean(pcp_groups$has_cardio),
+    mean(pcp_groups$has_derm)
+  ),
+  n_pcp_groups = nrow(pcp_groups)
+)
+
+write_csv(practice_composition, "results/tables/practice_composition.csv")
+message("Practice composition: ",
+        sprintf("Ortho %.1f%%, Cardio %.1f%%, Derm %.1f%% of %s PCP groups",
+                practice_composition$pct_of_pcp_groups[1] * 100,
+                practice_composition$pct_of_pcp_groups[2] * 100,
+                practice_composition$pct_of_pcp_groups[3] * 100,
+                formatC(practice_composition$n_pcp_groups[1], big.mark = ",")))
+
+rm(mdppas_comp, group_comp, pcp_groups)
+gc()
+
+
 # Per-specialty analysis ---------------------------------------------------
 
 for (current_specialty in names(specialties)) {
@@ -81,6 +142,9 @@ for (current_specialty in names(specialties)) {
 
   # Appendix scripts
   source("code/analysis/app_quad_comparison.R")
+  source("code/analysis/app_link_decomposition.R")
+  source("code/analysis/app_robustness_noprac.R")
+  source("code/analysis/app_period_windows.R")
   if (cfg$has_qual) source("code/analysis/app_welfare.R")
   source("code/analysis/app_convergence.R")
 

@@ -168,6 +168,7 @@ for (current_specialty in names(specialties)) {
   source("code/data-build/3_logit.R")
   source("code/data-build/4_logit_jochmans.R")
   source("code/data-build/5_referrals_by_time.R")
+  source("code/data-build/6_period_windows.R")
 
   # Free specialty-specific objects before next iteration
   rm(list = intersect(ls(), c(
