@@ -92,7 +92,7 @@ mfx_logit_race3 <- compute_mfx_zeltzer(logit_race3, df_logit, covars_race3)
 ## Extract MFX estimates and SEs into a table
 fmt_num <- function(x) {
   s <- sprintf("%.3f", abs(x))
-  if (x < 0) paste0("$-$", s) else s
+  if (x < 0) paste0("-", s) else s
 }
 
 extract_mfx <- function(mfx_obj, terms) {
@@ -136,9 +136,9 @@ footer <- tribble(
   "Observations", format(nobs(logit_race1), big.mark=","),
                   format(nobs(logit_race2), big.mark=","),
                   format(nobs(logit_race3), big.mark=","),
-  "Pseudo-$R^2$", gsub("-", "$-$", format(logit_race1$pseudo_r2, digits = 2)),
-                  gsub("-", "$-$", format(logit_race2$pseudo_r2, digits = 2)),
-                  gsub("-", "$-$", format(logit_race3$pseudo_r2, digits = 2))
+  "Pseudo-$R^2$", format(logit_race1$pseudo_r2, digits = 2),
+                  format(logit_race2$pseudo_r2, digits = 2),
+                  format(logit_race3$pseudo_r2, digits = 2)
 )
 
 tbl_all <- bind_rows(tbl_rows, footer)
@@ -309,7 +309,7 @@ coef_labels <- c(
 vars_order <- names(coef_labels)
 
 # Helper: format a cell
-fmt_est <- function(x) { if (is.na(x) || length(x) == 0) " " else gsub("-", "$-$", comma(x, accuracy = 0.001)) }
+fmt_est <- function(x) { if (is.na(x) || length(x) == 0) " " else comma(x, accuracy = 0.001) }
 fmt_se  <- function(x) { if (is.na(x) || length(x) == 0) " " else paste0("(", comma(abs(x), accuracy = 0.001), ")") }
 
 # Build β panel
@@ -360,7 +360,7 @@ beta_body <- lapply(vars_order, beta_block) %>% bind_rows()
 mfx_body  <- lapply(vars_order, mfx_block) %>% bind_rows()
 
 # Merge panels side by side
-table_body <- bind_cols(beta_body, mfx_body %>% select(-term))
+table_body <- bind_cols(beta_body, mfx_body %>% select(-all_of("term")))
 
 # Footer rows
 n_joch  <- format(nobs(logit_twfe3), big.mark = ",")

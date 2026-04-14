@@ -8,7 +8,6 @@
 # Preliminaries -----------------------------------------------------------
 source("code/0-setup.R")
 
-
 # Shared data -------------------------------------------------------------
 
 ## HRR shapefile
@@ -145,7 +144,6 @@ for (current_specialty in names(specialties)) {
   source("code/analysis/app_link_decomposition.R")
   source("code/analysis/app_robustness_noprac.R")
   source("code/analysis/app_period_windows.R")
-  if (cfg$has_qual) source("code/analysis/app_welfare.R")
   source("code/analysis/app_convergence.R")
 
   # Capture MFX for cross-specialty comparison
@@ -155,7 +153,17 @@ for (current_specialty in names(specialties)) {
   message("=== Done: ", current_specialty, " ===\n")
 }
 
-
-# Cross-specialty comparison -----------------------------------------------
-
+# Cross-specialty comparison ------------------------------------------------
 source("code/analysis/4_cross_specialty.R")
+
+# Assessment of peers on referral patterns ----------------------------------
+source("code/analysis/5_peer_referrals.R")
+source("code/analysis/6_quality_heterogeneity.R")
+
+# Quality implications (only for ortho) -------------------------------------
+current_specialty <- "ortho"
+source("code/analysis/7_welfare.R")
+
+
+# Simulation app ---------------------------------------------------------
+source("code/analysis/app_simulation.R")

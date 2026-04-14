@@ -124,7 +124,7 @@ fmt_diag <- function(x) {
       paste0("$", formatC(mantissa, digits = 2, format = "f"),
              " \\times 10^{", exp_val, "}$")
     } else {
-      gsub("-", "$-$", formatC(val, digits = 2, format = "f"))
+      formatC(val, digits = 2, format = "f")
     }
   })
 }
@@ -132,7 +132,7 @@ fmt_diag <- function(x) {
 # Combine and format
 full_table <- bind_rows(
   mfx_table %>% mutate(across(-variable,
-                               ~ gsub("-", "$-$", formatC(.x, digits = 4, format = "f")))),
+                               ~ formatC(.x, digits = 4, format = "f"))),
   tibble(variable = "", iter_10 = "", iter_25 = "", iter_50 = "",
          iter_100 = "", iter_250 = ""),
   diag_rows %>% mutate(across(-variable, fmt_diag))

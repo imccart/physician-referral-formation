@@ -105,13 +105,16 @@ flows_top %>% summarize(total_movers = sum(n_movers)) # total number of movers
 ## helper that computes degree, age, gender & race shares
 ## Uses data.table for the inner grouped summarise (dplyr crashes with 200K+ groups)
 side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var, dist_var) {
-  agg <- as.data.table(df)[, .(
-    deg      = uniqueN(get(partner_var)),
-    age      = mean(Year - get(birth_var), na.rm = TRUE),
-    male     = get(sex_var)[1L] == "M",
-    race     = get(race_var)[1L],
-    distance = mean(get(dist_var), na.rm = TRUE)
-  ), by = c(id_var, "Year")] %>% as_tibble()
+  dt <- copy(as.data.table(df))
+  # Use .SD column access to avoid get() scoping issues with locked bindings
+  keep_cols <- c(id_var, "Year", partner_var, birth_var, sex_var, race_var, dist_var)
+  agg <- dt[, .(
+    deg      = uniqueN(.SD[[partner_var]]),
+    age      = mean(Year - .SD[[birth_var]], na.rm = TRUE),
+    male     = .SD[[sex_var]][1L] == "M",
+    race     = .SD[[race_var]][1L],
+    distance = mean(.SD[[dist_var]], na.rm = TRUE)
+  ), by = c(id_var, "Year"), .SDcols = keep_cols] %>% as_tibble()
 
   agg %>%
     summarise(

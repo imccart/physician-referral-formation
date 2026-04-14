@@ -44,30 +44,15 @@ April 2026
 \section{Race Predictions}
 \label{sec:race}
 
-% Discussion of NPI sources and predictions
-Our set of physicians is built from the Medicare Data on Provider Practice and Specialty (MDPPAS) and the National Provider Identifier (NPI) dataset from CMS. These combine to over 4 million physicians and other healthcare providers. Additionally, we use a web scraping of physician images from the physician networking service Zocdoc. However in these provided data, reporting race is not always included. To overcome this, we use several prediction methods to assign physician race, each of which will be discussed in detail in this section.
+Physician race is not available in national administrative data. We impute race by combining three complementary classifiers and aggregating their predictions with a random-forest ensemble. This section summarizes the methods and their accuracy; full implementation details are available from the authors.
 
-%Discuss Name Prism
-Name prism is a publicly-available classification tool to predict race and ethnicity from first and last names designed by Junting Ye and Steven Skiena at Stony Brook University and Yifan Hu, at Amazon. Previous name-based classifiers have been limited to access of only small, unrepresentative sets of names. The Name Prism system was designed through an analysis of 57 million contact lists to overcome this challenge that other name-based nationality classifiers faced. Name Prism relies on the principle of homophily, that people more often associate with individuals of a similar background. They introduce name embeddings, which refers to the syntax of the other names found in the context of one's own name, i.e. their contact list. The Name Prism algorithm then generates a probability a name is a specific nationality based on the names in the training data, the name embeddings of the contact list, their own name prefix/suffix strings, and their own name characters that are of the same language as names in the training data.
+\paragraph{Individual classifiers.} We obtain race probabilities from three sources. First, NamePrism generates name-based probabilities using name embeddings trained on 57 million contact lists. Second, the WRU (``Who are You'') algorithm applies Bayes' rule to combine surname, first name, and geographic location with census-tract demographics, using the fully Bayesian Improved Surname Geocoding (fBISG) methodology. Third, we scrape physician profile photos from Zocdoc and apply the DeepFace neural network to generate image-based race probabilities. We match Zocdoc profiles to our physician sample using first name, last name, and zip code. For consistency, we harmonize race categories across methods, consolidating API and Asian into Asian, renaming Latino/Hispanic to Hispanic, and combining Indian and Middle Eastern into Other.
 
-% Discuss WRU
-The "Who are you", WRU, algorithm is a Bayesian prediction of racial category using surname, first name, middle name, and geolocation. Given this information, this package will predict an individuals race/ethnicity utilizing Bayes rule to calculate the posterior probability of each racial category. This method was built from census data and improved to address two problems in predictions that arose specifically for minorities. The first problem is that the census often reports a count of 0 for minorities, even in locations where members of those groups do reside. Second, many of the surnames for minority individuals are missing. The most recent edition, the fully Bayesian Improved Surname Geocoding (fBISG) methodology described in Imai, Olivella, and Rosenman (2022), addresses these concerns and improves the accuracy of race predictions specifically for racial minorities.
+\paragraph{Ensemble prediction.} We aggregate these individual predictions using a random-forest classifier (Ranger package). The ``Full'' model uses all three sources and attains 89\% overall accuracy for approximately 58,000 physicians. The ``Name Based'' model uses only NamePrism and WRU, reaching 82\% accuracy for nearly 1 million physicians. The tradeoff is accuracy versus coverage. We use the Full model when all three inputs are available and fall back to the Name Based model otherwise.
 
-% Discuss Zocdoc Web Scraping
-A third prediction method comes from physician pictures from the networking service Zocdoc. We web scraped physician profiles for a user photograph, name, and location. Then for each profile-photo pair, we predicted physician race using the deepface package. This gave us a physicians first and last name, location, and race predictions. We then combined this information with our existing MDPPAS and NPPES data by matching physicians based on first and last name and zip code. In some cases, users would also self report their ethnicity in their profile. These observations became part of our validation sets for later accuracy assessment.
+\paragraph{Validation.} We validate predictions against verified race information from Florida voter files, Texas medical-license records, and self-reported Zocdoc profiles, matched to our physician sample by name and zip code. Table~\ref{tab:accuracy-methods} reports overall accuracy by method. Both random-forest ensembles outperform any individual classifier. Table~\ref{tab:ppv-methods} reports precision (positive predictive value) by race category. The Full model achieves the highest precision for Black and White physicians, while facial recognition alone is more precise for Asian and Hispanic physicians, reflecting the additional signal in profile photos for these groups. Tables~\ref{tab:conf_full} and \ref{tab:conf_name} present confusion matrices for the two ensemble models.
 
-% Changes to categories
-Name Prism provides a probability that a given name is asian, api, black, hispanic, white, or other. WRU provides probabilities for asian, black, hispanic, white, or other. The deepface facial recognition used on the Zocdoc web scraping method gave probabilities for asian, black, indian, latino/hispanic, middle eastern, white, or other based on a photo of the individual. For consistency across methods, we consolidate api and asian into asian, rename latino/hispanic to hispanic, and combine indian and middle eastern into other.
-
-% Random Forest
-To form an aggregate prediction from these different existing predictions, we trained a random forest classifier using the Ranger package to predict a person's race given the maximum amount of existing predictions from the other methods. The goal was to combine these multiple predictions into a single race prediction for each physician. A random forest was fitted using the combination of predictor variables available. For example, a random forest was fit based on observations that had predictions from deepface, Name Prism, and WRU. This will be referred to as our Full random forest. Then another random forest, Name Based, was fit based on observations that had predictions from Name Based and WRU. The trade off we face between the Full and the Name Based random forest is accuracy and sample size. The Full random forest results in an overall accuracy of 89\% for over 58,000 physicians. This is a higher accuracy but available for a lower sample size than the Name Based model, which has an overall accuracy of 82\% for over 990,000 physicians.
-
-% Truth Data
-We have compiled information of a person's true race from three sources: Florida voter files, Texas license data, and reported race from web scraping of Zocdoc profiles. This truth data set allows us to determine the accuracy of each of these methods for our physician sample. The Florida voter files and Texas license data were merged with our physician set and matched based on full name and zip code. This resulted in a set of physicians with their true race, making up our validation set and allowing us to train the random forests. For the Full or Name Based random forests to be worthwhile, we want to see the accuracy of these aggregated predictions be an improvement over any of the existing methods by themselves. As reported in Table \ref{tab:accuracy-methods}, both the Full and Name Based random forests are more accurate overall than the Name Prism or WRU alone. As an aggregation method for comparison, we generated another field, referred to as Same Max, that reported a race if all available methods agreed in their prediction of race. Still, the random forests outperformed this alternative aggregation method in terms of overall accuracy.
-
-The Full Random forest has a higher overall accuracy than the other methods, however it has a lower level of precision for individual race categories than the Facial prediction alone. Table \ref{tab:ppv-methods} shows the Positive Prediction Value, or precision, of predictions for each race. The higher the precision indicates fewer false positives and therefore a lower likelihood of Type 1 errors. The Full Random Forest and facial recognition alone are similar in precision for Black and White, but the facial recognition is more precise in predicting Asians and Hispanics. The relative lack of precision in predicting Asians by the Full Random Forest is shown in the confusion matrix (Table \ref{tab:conf_full}). The Full Random Forest often misclassified those who are truly Asian into the Other category, as well as incorrectly classifying true Hispanics across Asian, Other, or White. Though the overall accuracy is higher, the Asian and Hispanic groups are less well identified in the Full Random Forest than by the facial recognition method alone.
-
-The Name Based Random Forest is more precise for all races compared to the individual name prediction methods. This is consistent with its higher overall accuracy as well. The trade off between accuracy and sample size for the Full Random Forest and Name Based Random Forest persists in regards to precision. The Name Based Random Forest has a lower precision for all specified race categories compared to the Full Random Forest. However, the Name Based Random Forest does not utilize the Other category in the same way as the Full Random Forest. With the precision of the Other category at best being 58\% among the other methods, this lack of assigning the Other race could be advantageous for our analysis of referrals. The discrepancy in the number of Other race assigned is driven by the facial recognition method, which is present in the Full Random Forest but not the Name Based. This likely reflects that the facial recognition algorithm allows for more nuanced assignment of race which is not available in the name based methods. These additional categories from the facial recognition method were consolidated into a single category, Other. Another notable difference between these methods predictions is that the Full Random forest has a much larger number of accurately classified Blacks than the Name Based Random Forest. Comparing the diagonal entries of Tables \ref{tab:conf_full} and \ref{tab:conf_name} reveals notable increases in the number of correctly predicted Black and Hispanic physicians by the Full Random Forest, but a larger number of accurately predicted White physicians by the Name Based Random Forest.
+The primary measurement concern for our analysis is whether race prediction errors are correlated with the referral covariates (practice affiliation, distance, gender). Because our classifiers rely on names and photos rather than practice or geographic information, prediction errors are unlikely to be systematically related to the organizational and spatial variables that drive our main results. Race concordance is imprecisely estimated in all three specialties, which is consistent with some degree of measurement error in the race variable.
 
 \section{Estimation Sample}
 \label{sec:est-sample}
@@ -124,6 +109,20 @@ Our two-stage estimation procedure recovers doctor and specialist fixed effects 
 Tables~\ref{tab:convergence-ortho}--\ref{tab:convergence-derm} present the results for each specialty. In all three cases, marginal effects stabilize well before the maximum iteration count, with differences smaller than 0.001 percentage points across higher iteration counts. Model deviance also stabilizes, while the standard deviations of the recovered fixed effects continue to grow, consistent with separated fixed effects diverging to $\pm\infty$ while the informative subset of observations has already stabilized.
 
 Because marginal effects are computed only on the non-separated subsample (where both doctor and specialist fixed effects are identified), it is important to verify that this subsample is not systematically different from the full choice set. Comparing the two groups, the non-separated subsample modestly overweights same-practice pairs and geographically closer pairs, consistent with the intuition that referral links (and thus non-separation) are more likely when organizational ties exist. However, demographic concordance (gender, race) is similar across the two groups, suggesting that our marginal effect estimates for demographic covariates are unlikely to be biased by the separation-induced sample restriction.
+
+
+\section{Monte Carlo Validation of Two-Stage Estimation}
+\label{sec:simulation}
+
+To assess the finite-sample performance of the two-stage estimation procedure described in Section \ref{sec:estimation} of the main text, we conduct a Monte Carlo simulation with a known data-generating process. The exercise compares three approaches to recovering the structural parameters and marginal effects of a network-formation model with two-sided fixed effects.
+
+\paragraph{Data-generating process.} Each replication generates a network of PCPs and specialists assigned to HRR-year cells. We draw PCP fixed effects $\alpha_i$ and specialist fixed effects $\gamma_j$ that are correlated with the covariates, so that omitting specialist fixed effects produces genuine omitted-variable bias rather than merely adding noise. Specifically, physicians closer to the center of the HRR receive higher fixed effects, and male specialists receive higher $\gamma_j$. The referral outcome $y_{ij}$ is drawn from a Bernoulli distribution with probability $\text{logit}^{-1}(x_{ij}'\beta + \alpha_i + \gamma_j)$, where the true parameters are $\beta_{\text{practice}} = 2.5$, $\beta_{\text{gender}} = 0.5$, and $\beta_{\text{distance}} = -0.1$.
+
+\paragraph{Estimators.} We compare three estimators in each replication. (1) The true $\beta$ and marginal effects computed directly from the known DGP. (2) A naive conditional logit with PCP fixed effects only, analogous to \cite{zeltzer2020}. (3) Our two-stage procedure, in which the first stage estimates $\beta$ via the Jochmans quadruple-based conditional logit and the second stage recovers both PCP and specialist fixed effects.
+
+\paragraph{Results.} Tables~\ref{tab:sim-baseline}--\ref{tab:sim-highvar} present results across three scenarios that vary the degree of fixed-effect heterogeneity and covariate correlation. In the baseline scenario (Table~\ref{tab:sim-baseline}), the naive estimator attenuates $\beta_{\text{practice}}$ by approximately 13\% and $\beta_{\text{gender}}$ by 12\%, while the two-stage procedure recovers both parameters to within 1\% of the true values. Under stronger covariate correlation (Table~\ref{tab:sim-highcorr}), attenuation in the naive estimator persists and the distance coefficient is overestimated by 23\%. Under both higher correlation and larger fixed-effect variance (Table~\ref{tab:sim-highvar}), the naive estimator attenuates $\beta_{\text{practice}}$ by 33\% and $\beta_{\text{gender}}$ by 34\%, while the two-stage estimates remain within 1\% of the truth.
+
+Marginal effects show smaller differences across estimators than the $\beta$ coefficients, because the naive estimator's PCP fixed effects partially compensate for the omitted specialist heterogeneity when computing predicted probabilities. Nonetheless, the two-stage procedure consistently produces marginal effects closer to the true values, particularly for distance, where the naive estimator overstates the effect by up to 60\% under higher correlation.
 
 
 \pagebreak
@@ -443,6 +442,48 @@ Because marginal effects are computed only on the non-separated subsample (where
     \input{../results/tables/app_convergence_derm.tex}
 }
 \label{tab:convergence-derm}
+\end{minipage}
+\end{table}
+
+
+%%% SIMULATION TABLES
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Monte Carlo Validation -- Baseline}\footnote{Results from 100 Monte Carlo replications. True parameters are $\beta_{\text{practice}} = 2.5$, $\beta_{\text{gender}} = 0.5$, $\beta_{\text{distance}} = -0.1$. ``Naive'' is a conditional logit with PCP fixed effects only. ``Two-stage'' uses the Jochmans quadruple-based estimator followed by fixed-effect recovery. Brackets report standard deviations across replications. Fixed effects are correlated with covariates (centrality loading = 0.5, gender loading = 0.3, FE standard deviation = 1.0).}}
+\centerline{%
+    \input{../results/tables/app_simulation_baseline.tex}
+}
+\label{tab:sim-baseline}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Monte Carlo Validation -- Higher Correlation}\footnote{Same design as Table \ref{tab:sim-baseline} but with stronger fixed-effect--covariate correlation (centrality loading = 1.5, gender loading = 1.0, FE standard deviation = 1.0).}}
+\centerline{%
+    \input{../results/tables/app_simulation_higher_correlation.tex}
+}
+\label{tab:sim-highcorr}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Monte Carlo Validation -- Higher Correlation and Variance}\footnote{Same design as Table \ref{tab:sim-baseline} but with stronger fixed-effect--covariate correlation and larger fixed-effect variance (centrality loading = 1.5, gender loading = 1.0, FE standard deviation = 2.0).}}
+\centerline{%
+    \input{../results/tables/app_simulation_higher_corr___var.tex}
+}
+\label{tab:sim-highvar}
 \end{minipage}
 \end{table}
 
