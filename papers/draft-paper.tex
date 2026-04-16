@@ -178,7 +178,7 @@ For our network formation model and subsequent estimation, a PCP is assumed to c
 \subsection{Descriptive Statistics}
 \label{sec:desc}
 
-Table~\ref{tab:desc} summarizes physician and referral characteristics for each specialty. Across all three, PCP movers are younger and less male than the full PCP population, consistent with younger physicians being more geographically mobile. The typical PCP refers to 2--3 distinct specialists, with movers initially referring to fewer specialists immediately after relocating. Specialist characteristics vary with the specialty’s demographic composition: orthopedic surgeons are nearly all male (98\%), cardiologists are predominantly male (88\%), and dermatologists are roughly gender-balanced (56\% male). Dermatologists have the highest median in-degree (27 referring PCPs), consistent with fewer dermatologists serving larger catchment areas.
+Tables~\ref{tab:desc-doctors} and \ref{tab:desc-specialists} summarize physician and referral characteristics for each specialty. Across all three, PCP movers are younger and less male than the full PCP population, consistent with younger physicians being more geographically mobile. The typical PCP refers to 2--3 distinct specialists, with movers initially referring to fewer specialists immediately after relocating. Specialist characteristics vary with the specialty’s demographic composition. Orthopedic surgeons are nearly all male (98\%), cardiologists are predominantly male (88\%), and dermatologists are roughly gender-balanced (56\% male). Dermatologists have the highest median in-degree (27 referring PCPs), consistent with fewer dermatologists serving larger catchment areas.
 
 Table~\ref{tab:link-stats} contrasts observable concordance between established and non-established referral links across all three specialties. Organizational proximity and geography dominate the contrast in every specialty. Same-practice rates among established links range from 12.2\% in dermatology to 24.8\% in cardiology, compared to 2--3\% among non-links. Average distance is roughly 10--11 miles for established links versus 29--42 miles for non-links. Demographic concordance differs more modestly between established and non-established links, with gender and race concordance gaps of 1--5 percentage points.
 
@@ -193,7 +193,7 @@ Table~\ref{tab:logit-twfe} presents the estimation results for all three special
 
 \paragraph{Demographic concordance.} Gender concordance is largest in orthopedic surgery (6 percentage points), small in dermatology (1 percentage point), and negligible in cardiology. This pattern does not scale with the degree of gender variation in the specialist pool. Orthopedic surgery, where specialists are nearly all male, shows the largest gender effect, while dermatology, with a roughly gender-balanced specialist pool, shows a much smaller effect. Race concordance is imprecisely estimated in all three specialties. Age and experience play no meaningful role anywhere.
 
-Figure~\ref{fig:mfx-cross} summarizes these cross-specialty patterns in a forest plot of the full-specification marginal effects.
+Figure~\ref{fig:mfx-cross} summarizes these patterns in a forest plot of the full-specification marginal effects across all three specialties.
 
 \subsection{Dynamics in Network Formation}
 \label{sec:dynamics}
@@ -224,11 +224,13 @@ These results suggest that a substantial share of the practice affiliation effec
 \section{Quality Reallocation}
 \label{sec:welfare}
 
-Our results indicate that practice affiliation and geographic proximity are the dominant drivers of referral formation, raising a natural question for policy: do these convenience-driven referral patterns come at a cost to patient outcomes? If PCPs are choosing specialists based on organizational ties rather than clinical quality, the welfare implications could be substantial. To gauge the magnitude of any such quality loss, we turn to a counterfactual exercise.
+Our results indicate that practice affiliation and geographic proximity are the dominant drivers of referral formation, raising a natural question for policy. Do these convenience-driven referral patterns come at a cost to patient outcomes? If PCPs are choosing specialists based on organizational ties rather than clinical quality, the welfare implications could be substantial. To gauge the magnitude of any such quality loss, we turn to a counterfactual exercise.
 
-Orthopedic surgery referrals culminate in discrete surgical episodes (major joint replacements) for which well-defined outcome metrics exist, most notably readmission rates.\footnote{We measure surgeon quality using 90-day readmission rates following major joint replacement, drawing on quality measures developed under the CMS Comprehensive Care for Joint Replacement Model and the National Quality Forum.} Cardiology and dermatology referrals, by contrast, typically lead to office-based consultations for evaluation rather than discrete procedures, making quality measurement substantially more difficult. We therefore restrict the quality analysis to orthopedic surgery, not because quality data are unavailable for the other specialties per se, but because the clinical setting permits a more credible and interpretable quality measure.
+Orthopedic surgery referrals culminate in discrete surgical episodes (major joint replacements) for which well-defined outcome metrics exist.\footnote{We construct a surgeon-level composite quality measure combining mortality, readmissions, and complications, drawing on quality measures developed under the CMS Comprehensive Care for Joint Replacement Model and the National Quality Forum. Some complications are identified only in the inpatient stay or only within 30 days, but no outcome measure extends beyond 90 days of discharge.} Cardiology and dermatology referrals, by contrast, typically lead to office-based consultations for evaluation rather than discrete procedures, making quality measurement substantially more difficult. We therefore restrict the quality analysis to orthopedic surgery, not because quality data are unavailable for the other specialties per se, but because the clinical setting permits a more credible and interpretable quality measure.
 
-For orthopedic surgery, we assess the quality implications of referral preferences by computing counterfactual referral probabilities under which the coefficient on each characteristic is set to zero. These exercises, presented in the supplemental appendix, suggest that the quality losses attributable to organizational and demographic matching are modest, consistent with the relatively small marginal effects for most covariates outside of practice affiliation.
+For each referral determinant, we set its estimated coefficient to zero, recompute referral probabilities using the two-stage predicted index, and calculate the change in expected adverse patient outcomes per 1,000 referrals within each HRR. Positive values indicate fewer expected adverse outcomes when the channel is removed, and negative values indicate worsening quality. This exercise parallels earlier work that attaches performance measures to observed physician networks \citep{barnett2012mc, landon_using_2013, zeltzer2020}.
+
+The quality-reallocation effects (reported in full in the supplemental appendix) are generally modest. Practice affiliation and geographic distance produce the largest mean effects (0.27 and 0.29 fewer adverse outcomes per 1,000 referrals when each is zeroed out), while gender, race, age, and experience concordance produce mean effects near zero. Distance exhibits the widest cross-market dispersion (standard deviation of 4.65), with effects ranging from a worsening of roughly 4 adverse outcomes per 1,000 referrals at the 10th percentile to an improvement of more than 4 at the 90th percentile. Practice affiliation is more concentrated, with zero effect at both the 25th and 75th percentiles but a heavier right tail. These results suggest that the quality losses from homophily-driven referrals are small on average, though they may matter in specific local markets.
 
 
 %%% DISCUSSION
@@ -281,11 +283,23 @@ We conclude with three policy observations. First, while increasing horizontal i
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{PCP and Specialist Summary Statistics}\footnote{For each specialty, Panel A (B) reports summary statistics for doctors who send (receive) at least one referral over our time period. ``All referrals’’ denotes the complete set of referrals, while ``PCP movers’’ restricts the sample to PCPs observed in the year they first move to a new HRR. Network size is measured as out-degree for doctors and in-degree for specialists; age is calculated from year of birth; gender and race shares are proportions of male, White, Black, Hispanic physicians, respectively. Observation counts correspond to the number of distinct physicians in each category.}}
+\caption[caption]{\textbf{PCP Summary Statistics}\footnote{For each specialty, we report summary statistics for PCPs who send at least one referral over our time period. ``All referrals'' denotes the complete set of PCPs, while ``PCP movers'' restricts the sample to PCPs observed in the year they first move to a new HRR. Network size is measured as out-degree; age is calculated from year of birth; gender and race shares are proportions of male, White, Black, and Hispanic physicians, respectively. Observation counts correspond to the number of distinct physicians in each category.}}
 \centerline{%
-     \input{../results/tables/desc_all.tex}
+     \input{../results/tables/desc_doctors_all.tex}
 }
-\label{tab:desc}
+\label{tab:desc-doctors}
+\end{minipage}
+\end{table}
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Specialist Summary Statistics}\footnote{For each specialty, we report summary statistics for specialists who receive at least one referral over our time period. ``All referrals'' denotes the complete set of specialists, while ``PCP movers'' restricts the sample to specialists who receive a referral from a PCP mover in the year the PCP first moves to a new HRR. Network size is measured as in-degree; age is calculated from year of birth; gender and race shares are proportions of male, White, Black, and Hispanic physicians, respectively. Observation counts correspond to the number of distinct physicians in each category.}}
+\centerline{%
+     \input{../results/tables/desc_specialists_all.tex}
+}
+\label{tab:desc-specialists}
 \end{minipage}
 \end{table}
 

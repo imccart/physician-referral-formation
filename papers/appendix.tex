@@ -44,7 +44,7 @@ April 2026
 \section{Monte Carlo Validation of Two-Stage Estimation}
 \label{sec:simulation}
 
-To assess the finite-sample performance of the two-stage estimation procedure described in Section \ref{sec:estimation} of the main text, we conduct a Monte Carlo simulation with a known data-generating process. The exercise compares three approaches to recovering the structural parameters and marginal effects of a network-formation model with two-sided fixed effects.
+To assess the finite-sample performance of the two-stage estimation procedure described in the main text, we conduct a Monte Carlo simulation with a known data-generating process. The exercise compares three approaches to recovering the structural parameters and marginal effects of a network-formation model with two-sided fixed effects.
 
 \paragraph{Data-generating process.} Each replication generates a network of PCPs and specialists assigned to HRR-year cells. We draw PCP fixed effects $\alpha_i$ and specialist fixed effects $\gamma_j$ that are correlated with the covariates, so that omitting specialist fixed effects produces genuine omitted-variable bias rather than merely adding noise. Specifically, physicians closer to the center of the HRR receive higher fixed effects, and male specialists receive higher $\gamma_j$. The referral outcome $y_{ij}$ is drawn from a Bernoulli distribution with probability $\text{logit}^{-1}(x_{ij}'\beta + \alpha_i + \gamma_j)$, where the true parameters are $\beta_{\text{practice}} = 2.5$, $\beta_{\text{gender}} = 0.5$, and $\beta_{\text{distance}} = -0.1$.
 
@@ -68,13 +68,13 @@ Because marginal effects are computed only on the non-separated subsample (where
 \section{Progressive Specifications}
 \label{sec:progressive}
 
-Tables~\ref{tab:or-progressive} and \ref{tab:mfx-progressive} present the full set of progressive specifications across all three specialties. For each specialty, columns (1)--(3) build up the covariate set from a baseline of gender, practice affiliation, and distance through a specification that adds age and experience differences and finally race concordance. The full-specification results (columns 3, 6, and 9) correspond to the odds ratios and marginal effects reported in Table~\ref{tab:logit-twfe} of the main text.
+Tables~\ref{tab:or-progressive} and \ref{tab:mfx-progressive} present the full set of progressive specifications across all three specialties. For each specialty, columns (1)--(3) build up the covariate set from a baseline of gender, practice affiliation, and distance through a specification that adds age and experience differences and finally race concordance. The full-specification results (columns 3, 6, and 9) correspond to the odds ratios and marginal effects reported in the main text.
 
 
 \section{Link-level Conditional Logit}
 \label{sec:linkcl}
 
-Table~\ref{tab:linkcl} presents estimates from a conditional logit estimation for each specialty, analogous to Table 5 in \cite{zeltzer2020}. The dependent variable is a link dummy, set to one if a referral link is present and 0 otherwise, and covariates include demographic concordance, practice and geographic proximity, and year and PCP fixed effects. Following \cite{zeltzer2020}, this analysis does not include specialist fixed effects.
+Tables~\ref{tab:linkcl-ortho}, \ref{tab:linkcl-cardio}, and \ref{tab:linkcl-derm} present estimates from a conditional logit estimation for each specialty, analogous to Table 5 in \cite{zeltzer2020}. The dependent variable is a link dummy, set to one if a referral link is present and 0 otherwise, and covariates include demographic concordance, practice and geographic proximity, and year and PCP fixed effects. Following \cite{zeltzer2020}, this analysis does not include specialist fixed effects.
 
 Many of the estimates are broadly consistent with the results from \cite{zeltzer2020}. For example, in both sets of results, organisational proximity dominates: sharing a practice increases the probability of a link by 11--15 percentage points, close to the 30\% odds-ratio effect ($\exp(1.346)-1$) in Table 5 of \cite{zeltzer2020}. Distance enters with the expected negative sign (about --1.2 pp per mile within 50 miles), matching the quadratic distance term in \cite{zeltzer2020}, and experience, medical-school concordance, and specialist sex have only minor effects in both studies. Gender concordance, however, is economically small and imprecise in our orthopedic data, whereas \cite{zeltzer2020} finds a positive 10\% odds ratio. One possible explanation is the limited gender variation among orthopedic surgeons (98\% male), though gender concordance is also small in dermatology, where the specialist pool is roughly gender-balanced.
 
@@ -110,7 +110,7 @@ The period-specific estimates are noisier due to smaller per-period sample sizes
 
 To assess the quality implications of our estimated referral preferences, we graft an external measure of surgeon performance (surgeon quality as measured by the CMS Comprehensive Care for Joint Replacement Model and the National Quality Forum).\footnote{Surgeon quality derives from mortality, readmissions, and complications. Some complications are identified only in the inpatient stay or only within 30 days, but no outcome measure extends beyond 90 days of discharge.} This exercise is limited to orthopedic surgery, the only specialty in our analysis with a well-defined surgical outcome measure. For each referral determinant, we set its estimated coefficient to zero, recompute referral probabilities using the two-stage predicted index, and calculate the change in expected adverse patient outcomes per 1,000 referrals within each HRR. Positive values indicate fewer expected adverse outcomes when the channel is removed (i.e., a quality improvement); negative values indicate worsening quality.
 
-This exercise parallels earlier work that attaches performance measures to observed physician networks \citep{barnett2012mc, landon_using_2013, zeltzer2020}. Table~\ref{tab:welfare-hrr} summarizes the results. The quality-reallocation effects are generally modest. Gender concordance, race concordance, and practice affiliation each produce mean quality changes near zero. Geographic distance shows a slightly larger mean effect, but with substantial dispersion across markets. These results suggest that the quality losses from homophily-driven referrals are small on average, though they may matter in specific local markets.
+This exercise parallels earlier work that attaches performance measures to observed physician networks \citep{barnett2012mc, landon_using_2013, zeltzer2020}. Table~\ref{tab:welfare-hrr} summarizes the results. The quality-reallocation effects are generally modest. Practice affiliation and geographic distance produce the largest mean effects (0.27 and 0.29 fewer adverse outcomes per 1,000 referrals when each is zeroed out), while gender, race, age, and experience concordance produce mean effects near zero. Distance exhibits the widest cross-market dispersion (standard deviation of 4.65), with effects ranging from a worsening of roughly 4 adverse outcomes per 1,000 referrals at the 10th percentile to an improvement of more than 4 at the 90th percentile. Practice affiliation is more concentrated, with zero effect at both the 25th and 75th percentiles but a heavier right tail. These results suggest that the quality losses from homophily-driven referrals are small on average, though they may matter in specific local markets.
 
 
 \section{Race Predictions}
@@ -202,7 +202,7 @@ The primary measurement concern for our analysis is whether race prediction erro
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Progressive Specifications -- Odds Ratios}\footnote{Odds ratios from the \cite{jochmans2018} quadruple-based estimator across three progressive specifications for each specialty. Standard errors (in parentheses) are computed via the delta method from HRR-clustered standard errors on the log-odds scale. Columns (3), (6), and (9) correspond to the full specification reported in Table~\ref{tab:logit-twfe} of the main text.}}
+\caption[caption]{\textbf{Progressive Specifications -- Odds Ratios}\footnote{Odds ratios from the \cite{jochmans2018} quadruple-based estimator across three progressive specifications for each specialty. Standard errors (in parentheses) are computed via the delta method from HRR-clustered standard errors on the log-odds scale. Columns (3), (6), and (9) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_or_progressive.tex}
 }
@@ -215,7 +215,7 @@ The primary measurement concern for our analysis is whether race prediction erro
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across three progressive specifications for each specialty. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (3), (6), and (9) correspond to the full specification reported in Table~\ref{tab:logit-twfe} of the main text.}}
+\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across three progressive specifications for each specialty. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (3), (6), and (9) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_mfx_progressive.tex}
 }
@@ -231,11 +231,35 @@ The primary measurement concern for our analysis is whether race prediction erro
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Link-level Conditional Logistic Regression}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}, for each specialty. Standard errors are robust to heteroskedasticity.}}
+\caption[caption]{\textbf{Link-level Conditional Logistic Regression -- Orthopedic Surgery}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
 \centerline{%
-    \input{../results/tables/app_logit_race_mfx_all.tex}
+    \input{../results/tables/app_logit_race_mfx_ortho.tex}
 }
-\label{tab:linkcl}
+\label{tab:linkcl-ortho}
+\end{minipage}
+\end{table}
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Link-level Conditional Logistic Regression -- Cardiology}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
+\centerline{%
+    \input{../results/tables/app_logit_race_mfx_cardioem.tex}
+}
+\label{tab:linkcl-cardio}
+\end{minipage}
+\end{table}
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Link-level Conditional Logistic Regression -- Dermatology}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
+\centerline{%
+    \input{../results/tables/app_logit_race_mfx_derm.tex}
+}
+\label{tab:linkcl-derm}
 \end{minipage}
 \end{table}
 
@@ -275,16 +299,16 @@ The primary measurement concern for our analysis is whether race prediction erro
 %%% PERIOD-SPECIFIC FIGURE
 
 \clearpage
-\begin{figure}[h]
+\begin{figure}[p]
 \centering
 \begin{minipage}[h]{6in}
 \caption[caption]{Period-Specific Marginal Effects\footnote{Average marginal effects from separate two-stage estimates for each individual post-move year (non-cumulative). Stage 1 estimates structural coefficients via the \cite{jochmans2018} estimator; Stage 2 recovers doctor and specialist fixed effects. Vertical bands are 95\% confidence intervals.}}
 \begin{tabular}{c}
-\includegraphics[width=5.5in]{../results/figures/mfx_by_window_period_ortho.png} \\
-(a) Orthopedic Surgery \\[6pt]
-\includegraphics[width=5.5in]{../results/figures/mfx_by_window_period_cardioem.png} \\
-(b) Cardiology \\[6pt]
-\includegraphics[width=5.5in]{../results/figures/mfx_by_window_period_derm.png} \\
+\includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_ortho.png} \\
+(a) Orthopedic Surgery \\[2pt]
+\includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_cardioem.png} \\
+(b) Cardiology \\[2pt]
+\includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_derm.png} \\
 (c) Dermatology
 \end{tabular}
 \label{fig:period}

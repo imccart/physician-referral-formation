@@ -406,10 +406,11 @@ conv_panels <- map(specs, function(s) {
     body)
 }) %>% unlist()
 
-# Read header from ortho version
+# Read header from ortho version (skip \begin{tabular} and any blank lines before it)
 conv_header <- readLines("results/tables/app_convergence_ortho.tex")
+conv_header_begin <- grep("\\\\begin\\{tabular\\}", conv_header)[1] + 1
 conv_header_end <- grep("\\\\midrule", conv_header)[1]
-conv_header_lines <- conv_header[2:(conv_header_end)]
+conv_header_lines <- conv_header[conv_header_begin:conv_header_end]
 
 conv_combined <- c(
   "\\begin{tabular}{lrrrrr}",
@@ -432,10 +433,11 @@ linkcl_panels <- map(specs, function(s) {
     body)
 }) %>% unlist()
 
-# Read header from ortho version
+# Read header from ortho version (skip \begin{tabular} and any blank lines before it)
 linkcl_header <- readLines("results/tables/app_logit_race_mfx_ortho.tex")
+linkcl_header_begin <- grep("\\\\begin\\{tabular\\}", linkcl_header)[1] + 1
 linkcl_header_end <- grep("\\\\midrule", linkcl_header)[1]
-linkcl_header_lines <- linkcl_header[2:(linkcl_header_end)]
+linkcl_header_lines <- linkcl_header[linkcl_header_begin:linkcl_header_end]
 
 linkcl_combined <- c(
   "\\begin{tabular}{lrrr}",
