@@ -294,6 +294,19 @@ writeLines(dynamics_combined, "results/tables/dynamics_all.tex")
 # 7. Peer referrals — 9 cols (3 specs × 3 specialties)
 # ============================================================
 
+## Scale MFX and SEs to percentage points (×100) so the table is readable
+## and matches the paper prose ("6.6 to 3.2 percentage points"). Skip rows
+## with non-numeric cells (Yes/No) or counts with commas (Observations).
+scale_cell_pp <- function(cell) {
+  c0 <- trimws(cell)
+  if (c0 %in% c("", " ")) return(cell)
+  has_paren <- grepl("^\\(.*\\)$", c0)
+  inner <- gsub("[()]", "", c0)
+  if (!grepl("^-?[0-9]*\\.[0-9]+$", inner)) return(cell)
+  scaled <- sprintf("%.2f", as.numeric(inner) * 100)
+  if (has_paren) paste0("(", scaled, ")") else scaled
+}
+
 peer_data <- map(specs, function(s) {
   lines <- readLines(sprintf("results/tables/peer_referrals_%s.tex", s))
   body_start <- grep("\\\\midrule", lines)[1] + 1
@@ -302,6 +315,10 @@ peer_data <- map(specs, function(s) {
   # Parse: each row is "label & v1 & v2 & v3\\"
   map(body, function(line) {
     parts <- trimws(strsplit(gsub("\\\\\\\\", "", line), "&")[[1]])
+    # Scale numeric cells (columns 2+) to percentage points
+    if (length(parts) > 1) {
+      parts[-1] <- vapply(parts[-1], scale_cell_pp, character(1))
+    }
     parts
   })
 }) %>% set_names(specs)
