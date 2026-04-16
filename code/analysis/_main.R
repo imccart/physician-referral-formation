@@ -2,7 +2,9 @@
 ## Title:         Formation of Physician Referral Networks
 ## Author:        Ian McCarthy
 ## Date Created:  5/20/2025
-## Date Edited:   2/27/2026
+## Date Edited:   4/15/2026
+## Usage:         Set current_specialty and run one block at a time,
+##                or source the entire file to run everything.
 
 
 # Preliminaries -----------------------------------------------------------
@@ -13,18 +15,6 @@ source("code/0-setup.R")
 ## HRR shapefile
 gdf <- st_read("data/input/HRR_ShapeFile.shp") %>%
   filter(!str_starts(HRRCITY, "AK") & !str_starts(HRRCITY, "HI"))
-
-## Specialty configuration
-specialties <- list(
-  ortho    = list(has_qual = TRUE),
-  cardioem = list(has_qual = FALSE),
-  derm     = list(has_qual = FALSE)
-)
-
-## Collectors for cross-specialty comparison
-all_mfx <- list()
-all_mfx_windows <- list()
-
 
 # Practice composition by specialty ----------------------------------------
 # What share of PCP-containing practice groups also include each specialist type?
@@ -41,7 +31,6 @@ mdppas_comp <- map(2009:2018, function(yr) {
     filter(!is.na(group1) & group1 != "")
 }) %>% bind_rows()
 
-# Flag each physician's role
 mdppas_comp <- mdppas_comp %>%
   mutate(
     is_pcp   = spec_broad == "1",
@@ -51,7 +40,6 @@ mdppas_comp <- mdppas_comp %>%
     is_derm  = spec_prim_1_name == "Dermatology"
   )
 
-# For each practice group x year, check whether it contains each type
 group_comp <- mdppas_comp %>%
   group_by(group1, Year) %>%
   summarise(
@@ -62,7 +50,6 @@ group_comp <- mdppas_comp %>%
     .groups = "drop"
   )
 
-# Among PCP-containing groups, share that also include each specialty
 pcp_groups <- group_comp %>% filter(has_pcp)
 
 practice_composition <- tibble(
@@ -87,83 +74,79 @@ rm(mdppas_comp, group_comp, pcp_groups)
 gc()
 
 
-# Per-specialty analysis ---------------------------------------------------
+# =========================================================================
+# Specialty-specific analyses "ortho", "cardioem", "derm"
+# =========================================================================
 
-for (current_specialty in names(specialties)) {
-  cfg <- specialties[[current_specialty]]
-  message("\n=== Analyzing: ", current_specialty, " ===\n")
+current_specialty <- "derm"
 
-  ## Referral data for all PCP/specialist pairs
-  df_full_referrals <- read_csv(sprintf("data/output/df_full_referrals_%s.csv", current_specialty)) %>%
-    filter(doc_hrr == spec_hrr)
+df_full_referrals <- read_csv(sprintf("data/output/df_full_referrals_%s.csv", current_specialty)) %>%
+  filter(doc_hrr == spec_hrr)
 
-  ## Referral data for movers only
-  df_initial_referrals <- read_csv(sprintf("data/output/df_initial_referrals_%s.csv", current_specialty))
+df_initial_referrals <- read_csv(sprintf("data/output/df_initial_referrals_%s.csv", current_specialty))
 
-  ## Referral "choice" data for standard logit
-  df_logit <- read_csv(sprintf("data/output/df_logit_movers_%s.csv", current_specialty)) %>%
-    mutate(doc_male = as.numeric(doc_sex == "M"), spec_male = as.numeric(spec_sex == "M"),
-           exp_spec = (Year - spec_grad_year) / 10,
-           doctor = as.factor(doctor),
-           specialist = as.factor(specialist))
+df_logit <- read_csv(sprintf("data/output/df_logit_movers_%s.csv", current_specialty)) %>%
+  mutate(doc_male = as.numeric(doc_sex == "M"), spec_male = as.numeric(spec_sex == "M"),
+         exp_spec = (Year - spec_grad_year) / 10,
+         doctor = as.factor(doctor),
+         specialist = as.factor(specialist))
 
-  ## Referral choice data for Jochmans (2018) logit
-  df_logit_twfe <- read_csv(sprintf("data/output/df_jochmans_%s.csv", current_specialty))
+df_logit_twfe <- read_csv(sprintf("data/output/df_jochmans_%s.csv", current_specialty))
 
-  ## Referrals by window
-  ref_windows <- read_csv(sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty))
+ref_windows <- read_csv(sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty))
 
-  ## Choice data for Jochmans (2018) by window
-  df_logit_windows <- read_csv(sprintf("data/output/df_jochmans_windows_%s.csv", current_specialty))
+df_logit_windows <- read_csv(sprintf("data/output/df_jochmans_windows_%s.csv", current_specialty))
 
-  ## Standard choice-set data by window (for two-stage per-window estimation)
-  base_cols <- c("Year", "doctor", "specialist", "referral",
-                 "same_sex", "same_race", "same_prac", "diff_dist",
-                 "diff_age", "diff_gradyear", "doc_hrr", "window")
-  if (cfg$has_qual) base_cols <- c(base_cols, "spec_qual")
+base_cols <- c("Year", "doctor", "specialist", "referral",
+               "same_sex", "same_race", "same_prac", "diff_dist",
+               "diff_age", "diff_gradyear", "doc_hrr", "window")
 
-  df_choiceset_windows <- read_csv(
-    sprintf("data/output/df_logit_windows_%s.csv", current_specialty),
-    col_select = all_of(base_cols)
-  ) %>%
-    mutate(doctor     = as.factor(doctor),
-           specialist = as.factor(specialist))
+df_choiceset_windows <- read_csv(
+  sprintf("data/output/df_logit_windows_%s.csv", current_specialty),
+  col_select = all_of(base_cols)
+) %>%
+  mutate(doctor     = as.factor(doctor),
+         specialist = as.factor(specialist))
 
-  # Minor cleanup
-  movers <- df_initial_referrals %>%
-    distinct(doctor, .keep_all = TRUE) %>%
-    select(doctor, origin, destination)
+movers <- df_initial_referrals %>%
+  distinct(doctor, .keep_all = TRUE) %>%
+  select(doctor, origin, destination)
 
-  # Run analysis scripts
-  source("code/analysis/1_descriptive_stats.R")
-  source("code/analysis/2_logit_twfe.R")
-  source("code/analysis/3_referral_windows.R")
+source("code/analysis/build_peer_referrals.R")
+source("code/analysis/1_descriptive_stats.R")
+source("code/analysis/2_logit_twfe.R")
 
-  # Appendix scripts
-  source("code/analysis/app_quad_comparison.R")
-  source("code/analysis/app_link_decomposition.R")
-  source("code/analysis/app_robustness_noprac.R")
-  source("code/analysis/app_period_windows.R")
-  source("code/analysis/app_convergence.R")
+write_csv(mfx3 %>% mutate(specialty = current_specialty),
+          sprintf("results/tables/mfx_%s.csv", current_specialty))
 
-  # Capture MFX for cross-specialty comparison
-  all_mfx[[current_specialty]] <- mfx3 %>% mutate(specialty = current_specialty)
-  all_mfx_windows[[current_specialty]] <- mfx_window %>% mutate(specialty = current_specialty)
+source("code/analysis/app_quad_comparison.R")
+source("code/analysis/app_robustness_noprac.R")
+source("code/analysis/app_convergence.R")
 
-  message("=== Done: ", current_specialty, " ===\n")
-}
+rm(list = intersect(ls(), c(
+  "df_full_referrals", "df_logit", "df_logit_twfe", "df_initial_referrals",
+  "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4",
+  "logit_race1", "logit_race2", "logit_race3",
+  "stage2_1", "stage2_2", "stage2_3", "stage2_4",
+  "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4")))
+gc()
 
-# Cross-specialty comparison ------------------------------------------------
+source("code/analysis/3_referral_windows.R")
+
+write_csv(mfx_window %>% mutate(specialty = current_specialty),
+          sprintf("results/tables/mfx_window_%s.csv", current_specialty))
+
+source("code/analysis/app_link_decomposition.R")
+source("code/analysis/app_period_windows.R")
+
+# =========================================================================
+# Cross-specialty and post-estimation
+# =========================================================================
+
 source("code/analysis/4_cross_specialty.R")
+source("code/analysis/5_welfare.R")
 
-# Assessment of peers on referral patterns ----------------------------------
-source("code/analysis/5_peer_referrals.R")
-source("code/analysis/6_quality_heterogeneity.R")
+#source("code/analysis/app_simulation.R")
+source("code/analysis/app_sensitivity.R")
+source("code/analysis/paper_tables.R")
 
-# Quality implications (only for ortho) -------------------------------------
-current_specialty <- "ortho"
-source("code/analysis/7_welfare.R")
-
-
-# Simulation app ---------------------------------------------------------
-source("code/analysis/app_simulation.R")

@@ -13,49 +13,50 @@ mfx_window <- map(windows, function(win) {
   message("Window: ", win)
 
   # Stage 1: Jochmans on quartet data for this window
-  dat_joch <- df_logit_windows %>% filter(window == win)
+  dat_joch <- df_logit_windows %>%
+    filter(window == win) %>%
+    drop_na(all_of(covars_w))
+  message("  Stage 1: ", nrow(dat_joch), " obs")
 
-  joch_w <- tryCatch(
-    fixest::feglm(
-      referral ~ same_sex + same_race + same_prac +
-                 diff_dist + diff_age + diff_gradyear | year,
-      data = dat_joch,
-      vcov = ~hrr,
-      family = binomial("logit")
-    ),
-    error = function(e) {
-      message("  Jochmans failed for window ", win, ": ", conditionMessage(e))
-      return(NULL)
-    }
+  joch_w <- fixest::feglm(
+    referral ~ same_sex + same_race + same_prac +
+               diff_dist + diff_age + diff_gradyear | year,
+    data = dat_joch,
+    vcov = ~hrr,
+    family = binomial("logit")
   )
-
-  if (is.null(joch_w)) return(tibble())
 
   beta_w <- coef(joch_w)[covars_w]
 
   # Stage 2: FE recovery on choice-set data for this window
-  dat_cs <- df_choiceset_windows %>% filter(window == win)
-  Xmat_w <- as.matrix(dat_cs[, covars_w])
-  na_w   <- complete.cases(Xmat_w)
-  dat_cs <- dat_cs[na_w, ]
-  Xbeta_w <- drop(Xmat_w[na_w, ] %*% beta_w)
+  dat_cs <- df_choiceset_windows %>%
+    filter(window == win) %>%
+    drop_na(all_of(covars_w))
+
+  # Drop singletons and no-variation FE levels before feglm
+  doc_n  <- dat_cs %>% count(doctor) %>% filter(n > 1)
+  spec_n <- dat_cs %>% count(specialist) %>% filter(n > 1)
+  dat_cs <- dat_cs %>%
+    filter(doctor %in% doc_n$doctor, specialist %in% spec_n$specialist)
+
+  doc_var  <- dat_cs %>% group_by(doctor) %>% summarise(v = n_distinct(referral)) %>% filter(v > 1)
+  spec_var <- dat_cs %>% group_by(specialist) %>% summarise(v = n_distinct(referral)) %>% filter(v > 1)
+  dat_cs <- dat_cs %>%
+    filter(doctor %in% doc_var$doctor, specialist %in% spec_var$specialist)
+
+  rm(doc_n, spec_n, doc_var, spec_var)
+  message("  Stage 2: ", nrow(dat_cs), " obs after pre-filtering")
+
+  Xbeta_w <- drop(as.matrix(dat_cs[, covars_w]) %*% beta_w)
   dat_cs <- dat_cs %>% mutate(.Xbeta = Xbeta_w)
 
-  fe_w <- tryCatch(
-    fixest::feglm(
-      referral ~ 1 | doctor + specialist,
-      data = dat_cs,
-      offset = ~.Xbeta,
-      family = binomial("logit"),
-      glm.iter = 200
-    ),
-    error = function(e) {
-      message("  FE recovery failed for window ", win, ": ", conditionMessage(e))
-      return(NULL)
-    }
+  fe_w <- fixest::feglm(
+    referral ~ 1 | doctor + specialist,
+    data = dat_cs,
+    offset = ~.Xbeta,
+    family = binomial("logit"),
+    glm.iter = 200
   )
-
-  if (is.null(fe_w)) return(tibble())
 
   fes_w   <- fixef(fe_w)
   doc_fe  <- fes_w$doctor[as.character(dat_cs$doctor)]
@@ -106,6 +107,8 @@ mfx_window <- map(windows, function(win) {
     tibble(term = v, estimate = dp, std.error = se)
   }) %>% bind_rows()
 
+  rm(dat_joch, joch_w, beta_w, dat_cs, Xmat_w, na_w, Xbeta_w,
+     fe_w, fes_w, eta_w, valid, dat_v)
   gc()
   mfx %>% mutate(model = win)
 }) %>% bind_rows()

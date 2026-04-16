@@ -157,9 +157,9 @@ kable(tbl_all, format = "latex", booktabs = TRUE, escape = FALSE, linesep = "",
 # MFX: first-difference using full predicted probabilities (Xβ + α_i + γ_j)
 
 covars <- c("same_sex", "same_prac", "diff_dist",
-            "same_race", "diff_age", "diff_gradyear")
+            "same_race", "diff_age", "diff_gradyear", "peer_referrals")
 
-## Stage 1: Jochmans β (three specifications) ----
+## Stage 1: Jochmans β (four specifications) ----
 
 message("Stage 1: Jochmans quartet estimation...")
 
@@ -179,6 +179,13 @@ logit_twfe2 <- fixest::feglm(
 
 logit_twfe3 <- fixest::feglm(
   referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
+  data = df_logit_twfe,
+  vcov = ~hrr,
+  family = binomial("logit")
+)
+
+logit_twfe4 <- fixest::feglm(
+  referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear + peer_referrals | year,
   data = df_logit_twfe,
   vcov = ~hrr,
   family = binomial("logit")
@@ -220,15 +227,18 @@ recover_fes <- function(joch_model, spec_covars) {
 
 covars1 <- c("same_sex", "same_prac", "diff_dist")
 covars2 <- c("same_sex", "same_prac", "diff_dist", "diff_age", "diff_gradyear")
-covars3 <- covars
+covars3 <- c("same_sex", "same_prac", "diff_dist", "same_race", "diff_age", "diff_gradyear")
+covars4 <- covars
 
 stage2_1 <- recover_fes(logit_twfe1, covars1)
 stage2_2 <- recover_fes(logit_twfe2, covars2)
 stage2_3 <- recover_fes(logit_twfe3, covars3)
+stage2_4 <- recover_fes(logit_twfe4, covars4)
 
 message("  Spec 1: ", stage2_1$n_valid, " valid obs")
 message("  Spec 2: ", stage2_2$n_valid, " valid obs")
 message("  Spec 3: ", stage2_3$n_valid, " valid obs")
+message("  Spec 4: ", stage2_4$n_valid, " valid obs")
 
 
 ## MFX via first-difference + delta-method SEs ----
@@ -293,17 +303,19 @@ compute_mfx <- function(stage2, joch_model, spec_covars) {
 mfx1 <- compute_mfx(stage2_1, logit_twfe1, covars1)
 mfx2 <- compute_mfx(stage2_2, logit_twfe2, covars2)
 mfx3 <- compute_mfx(stage2_3, logit_twfe3, covars3)
+mfx4 <- compute_mfx(stage2_4, logit_twfe4, covars4)
 
 
 ## Build combined table: structural β + MFX ----
 
 coef_labels <- c(
-  same_sex      = "Same gender",
-  same_prac     = "Same practice group",
-  same_race     = "Same race",
-  diff_dist     = "Distance",
-  diff_age      = "Age difference",
-  diff_gradyear = "Experience difference"
+  same_sex        = "Same gender",
+  same_prac       = "Same practice group",
+  same_race       = "Same race",
+  diff_dist       = "Distance",
+  diff_age        = "Age difference",
+  diff_gradyear   = "Experience difference",
+  peer_referrals  = "Peer referrals"
 )
 
 vars_order <- names(coef_labels)
@@ -327,12 +339,14 @@ beta_block <- function(var) {
   tibble(term = lbl,
          `(1)` = fmt_est(get_b(logit_twfe1)),
          `(2)` = fmt_est(get_b(logit_twfe2)),
-         `(3)` = fmt_est(get_b(logit_twfe3))) %>%
+         `(3)` = fmt_est(get_b(logit_twfe3)),
+         `(4)` = fmt_est(get_b(logit_twfe4))) %>%
   bind_rows(
     tibble(term = "",
            `(1)` = fmt_se(get_se(logit_twfe1)),
            `(2)` = fmt_se(get_se(logit_twfe2)),
-           `(3)` = fmt_se(get_se(logit_twfe3)))
+           `(3)` = fmt_se(get_se(logit_twfe3)),
+           `(4)` = fmt_se(get_se(logit_twfe4)))
   )
 }
 
@@ -345,14 +359,16 @@ mfx_block <- function(var) {
   }
 
   tibble(term = lbl,
-         `(4)` = fmt_est(get_val(mfx1, "estimate")),
-         `(5)` = fmt_est(get_val(mfx2, "estimate")),
-         `(6)` = fmt_est(get_val(mfx3, "estimate"))) %>%
+         `(5)` = fmt_est(get_val(mfx1, "estimate")),
+         `(6)` = fmt_est(get_val(mfx2, "estimate")),
+         `(7)` = fmt_est(get_val(mfx3, "estimate")),
+         `(8)` = fmt_est(get_val(mfx4, "estimate"))) %>%
   bind_rows(
     tibble(term = "",
-           `(4)` = fmt_se(get_val(mfx1, "std.error")),
-           `(5)` = fmt_se(get_val(mfx2, "std.error")),
-           `(6)` = fmt_se(get_val(mfx3, "std.error")))
+           `(5)` = fmt_se(get_val(mfx1, "std.error")),
+           `(6)` = fmt_se(get_val(mfx2, "std.error")),
+           `(7)` = fmt_se(get_val(mfx3, "std.error")),
+           `(8)` = fmt_se(get_val(mfx4, "std.error")))
   )
 }
 
@@ -363,23 +379,23 @@ mfx_body  <- lapply(vars_order, mfx_block) %>% bind_rows()
 table_body <- bind_cols(beta_body, mfx_body %>% select(-all_of("term")))
 
 # Footer rows
-n_joch  <- format(nobs(logit_twfe3), big.mark = ",")
-n_stage2 <- format(stage2_3$n_valid, big.mark = ",")
-
 footer <- tribble(
-  ~term, ~`(1)`, ~`(2)`, ~`(3)`, ~`(4)`, ~`(5)`, ~`(6)`,
-  "Year FE",        "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
-  "Doctor FE",      "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
-  "Specialist FE",  "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
+  ~term, ~`(1)`, ~`(2)`, ~`(3)`, ~`(4)`, ~`(5)`, ~`(6)`, ~`(7)`, ~`(8)`,
+  "Year FE",        "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
+  "Doctor FE",      "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
+  "Specialist FE",  "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes", "Yes",
   "Quartet obs",
     format(nobs(logit_twfe1), big.mark = ","),
     format(nobs(logit_twfe2), big.mark = ","),
-    n_joch, " ", " ", " ",
+    format(nobs(logit_twfe3), big.mark = ","),
+    format(nobs(logit_twfe4), big.mark = ","),
+    " ", " ", " ", " ",
   "Choice-set obs",
-    " ", " ", " ",
+    " ", " ", " ", " ",
     format(stage2_1$n_valid, big.mark = ","),
     format(stage2_2$n_valid, big.mark = ","),
-    n_stage2
+    format(stage2_3$n_valid, big.mark = ","),
+    format(stage2_4$n_valid, big.mark = ",")
 )
 
 table_out <- bind_rows(table_body, footer)
@@ -388,14 +404,14 @@ kable(table_out,
       format    = "latex",
       booktabs  = TRUE,
       linesep   = "",
-      align     = c("l", rep("r", 6)),
-      col.names = c("", "(1)", "(2)", "(3)", "(4)", "(5)", "(6)")) %>%
+      align     = c("l", rep("r", 8)),
+      col.names = c("", "(1)", "(2)", "(3)", "(4)", "(5)", "(6)", "(7)", "(8)")) %>%
   add_header_above(c(" " = 1,
-                     "Structural $\\\\beta$ (log-odds)" = 3,
-                     "Avg. marginal effects" = 3),
+                     "Structural $\\\\beta$ (log-odds)" = 4,
+                     "Avg. marginal effects" = 4),
                    escape = FALSE) %>%
-  row_spec(12, extra_latex_after = "\\midrule") %>%
-  row_spec(15, extra_latex_after = "\\midrule") %>%
+  row_spec(14, extra_latex_after = "\\midrule") %>%
+  row_spec(17, extra_latex_after = "\\midrule") %>%
   save_kable(sprintf("results/tables/logit_twfe_mfx_%s.tex", current_specialty))
 
 
@@ -435,3 +451,33 @@ quartet_composition <- bind_rows(quartet_composition,
 inline_stats <- read_csv(sprintf("results/tables/inline_stats_%s.csv", current_specialty))
 inline_stats <- bind_rows(inline_stats, quartet_composition)
 write_csv(inline_stats, sprintf("results/tables/inline_stats_%s.csv", current_specialty))
+
+
+## Save raw estimates for paper_tables.R ----
+# Coefficients, SEs, ORs, and MFX across all 4 specifications
+
+save_spec <- function(mod, mfx_df, spec_num, spec_covars) {
+  b  <- coef(mod)[spec_covars]
+  se <- sqrt(diag(vcov(mod, vcov = ~hrr)))[spec_covars]
+  beta_df <- tibble(
+    term = names(b), spec = spec_num,
+    beta = unname(b), beta_se = unname(se),
+    or = exp(unname(b)),
+    n_quartet = nobs(mod)
+  )
+  mfx_out <- mfx_df %>%
+    mutate(spec = spec_num) %>%
+    rename(mfx = estimate, mfx_se = std.error)
+  left_join(beta_df, mfx_out, by = c("term", "spec"))
+}
+
+estimates_all <- bind_rows(
+  save_spec(logit_twfe1, mfx1, 1, covars1),
+  save_spec(logit_twfe2, mfx2, 2, covars2),
+  save_spec(logit_twfe3, mfx3, 3, covars3),
+  save_spec(logit_twfe4, mfx4, 4, covars4)
+) %>%
+  mutate(specialty = current_specialty,
+         n_choiceset = stage2_4$n_valid)
+
+write_csv(estimates_all, sprintf("results/tables/estimates_%s.csv", current_specialty))

@@ -151,7 +151,7 @@ Our analysis relies on the 100\% Medicare fee-for-service (FFS) claims files fro
 
 We study referral formation across three specialty areas: orthopedic surgery, cardiology, and dermatology. These specialties span a range of clinical settings and referral processes. Orthopedic referrals are identified through inpatient admissions for planned and elective major joint replacement via Diagnosis Related Group (DRG) codes, while cardiology and dermatology referrals are identified through new-patient evaluation and management (E\&M) office visits via Current Procedural Terminology (CPT) codes. The three specialties also differ markedly in their demographic composition and organizational structure. Orthopedic surgeons are nearly all male (98\%), cardiologists are predominantly male but less so than orthopedists (88\%), and dermatologists are roughly gender-balanced (56\% male). In the MD-PPAS data, 3.5\% of practice groups containing a PCP also include a cardiologist, 2.8\% include an orthopedic surgeon, and only 1.2\% include a dermatologist, reflecting the tendency of dermatologists to practice independently or in single-specialty groups.
 
-Across all three specialties, we infer the referring PCP as the primary care physician with the highest number of office-based E\&M visits in the twelve months before the specialist encounter, following \cite{pham2009} and \cite{agha2017}, provided the patient saw that PCP at least twice.\footnote{An alternative approach uses the referring physician NPI (\texttt{rfr\_physn\_npi}) recorded on the specialist's claim, but this can be an unreliable measure of the PCP. For example, in the case of orthopedic surgery, this field on the inpatient claim is not populated in roughly 32\% of cases, and when populated, it most often lists the surgeon themselves (about 43\%) or a non-PCP specialist (about 7\%), with only 18\% listing a PCP. Our carrier-lookback method identifies a PCP for approximately 80\% of orthopedic procedures and, among cases where both methods identify a PCP, concordance exceeds 82\% in every year.} We limit the sample to PCPs and specialists each with at least 10 encounters over the full 2010--2018 period. Specialty-specific sample construction and summary statistics are discussed in Sections \ref{sec:ortho}--\ref{sec:derm}.
+Across all three specialties, we infer the referring PCP as the primary care physician with the highest number of office-based E\&M visits in the twelve months before the specialist encounter, following \cite{pham2009} and \cite{agha2017}, provided the patient saw that PCP at least twice.\footnote{An alternative approach uses the referring physician NPI (\texttt{rfr\_physn\_npi}) recorded on the specialist's claim, but this can be an unreliable measure of the PCP. For example, in the case of orthopedic surgery, this field on the inpatient claim is not populated in roughly 32\% of cases, and when populated, it most often lists the surgeon themselves (about 43\%) or a non-PCP specialist (about 7\%), with only 18\% listing a PCP. Our carrier-lookback method identifies a PCP for approximately 80\% of orthopedic procedures and, among cases where both methods identify a PCP, concordance exceeds 82\% in every year.} We limit the sample to PCPs and specialists each with at least 10 encounters over the full 2010--2018 period. Specialty-specific sample construction details follow below.
 
 As discussed in Section \ref{sec:model}, our primary variables of interest consist of physician demographics and practice characteristics. Since our analysis ultimately conditions on both PCP and specialist fixed effects, our key practice characteristic (other than indicators for sharing the same practice) is geographic proximity, measured as the distance between zipcode centroids of the PCP’s primary practice location and that of the specialist. These data are available from MD-PPAS. We construct the differential age as well as years since medical school graduation as a measure of similarity in medical experience. These data come from CMS Physician Compare. We also construct measures of gender homophily, again from data in MD-PPAS.
 
@@ -161,95 +161,48 @@ We flag a PCP as a \textit{mover} in the first year they practice in a new HRR. 
 
 For our network formation model and subsequent estimation, a PCP is assumed to construct their referral network as a subset of all possible specialists in their HRR. Referral counts among any given PCP-specialist pair are on average small. As such, we define PCP-specialist links as any observed referral between a given PCP and specialist, effectively ignoring the intensive margin.
 
+\subsection{Specialty-Specific Sample Construction}
 
-%%% SPECIALTY SECTIONS
+\paragraph{Orthopedic surgery.} Major joint replacement is among the most common inpatient surgical procedures for Medicare beneficiaries. Since we limit to planned and elective inpatient procedures, the PCP's referral to an orthopedic surgeon typically occurs well in advance of the surgery, making the referral decision relatively deliberate.\footnote{While joint replacements can now take place in an outpatient setting, hip and knee replacements remained on the inpatient-only list over essentially the entirety of our data. Total knee replacements, for example, were only reimbursable in an outpatient setting as of January 2018, and hip replacements two years later in 2020.} Orthopedic surgery is also one of the most male-dominated specialties, with 98\% of surgeons in our data being male. Among practice groups that contain at least one PCP, 2.8\% also include an orthopedic surgeon. We identify eligible procedures by DRG codes 461, 462, 469, 470, 480--489, and 507--511, keeping only cases performed by an orthopedic surgeon with an identifiable referring PCP. Our full referral data consist of approximately 566,000 PCP-specialist pairs, roughly 64,000 unique PCPs, around 15,200 unique specialists, and 1,234 PCP movers.
 
-\section{Orthopedic Surgery}
-\label{sec:ortho}
+\paragraph{Cardiology.} Cardiology referrals in our data are based on new-patient E\&M office visits (CPT codes 99201--99205) performed by cardiologists and clinical cardiac electrophysiologists. Unlike orthopedic surgery, these are initial consultations for evaluation rather than discrete surgical procedures, ranging from routine assessments (e.g., lipid management, hypertension follow-up) to more urgent evaluations (e.g., chest pain, arrhythmia workup). We focus on E\&M visits rather than cardiac procedures because the PCP-to-surgeon referral chain for cardiology procedures is less direct, with PCPs often referring to a general cardiologist who may then refer onward for procedural care. Cardiology is predominantly male (88\% of specialists), though less so than orthopedic surgery. Among PCP-containing practice groups, 3.5\% also include a cardiologist, the highest co-location rate of the three specialties, reflecting the integration of cardiology into hospital-based and multispecialty group practices. We identify 1.67 million PCP-specialist pairs, roughly 113,000 unique PCPs, around 23,000 unique specialists, and 5,071 PCP movers.
 
-\subsection{Data and Institutional Context}
-
-Major joint replacement is among the most common inpatient surgical procedures for Medicare beneficiaries. Since we limit to planned and elective inpatient procedures, the PCP’s referral to an orthopedic surgeon typically occurs well in advance of the surgery, making the referral decision relatively deliberate.\footnote{While joint replacements can now take place in an outpatient setting, hip and knee replacements remained on the inpatient only essentially over the entirety of our data. Total knee replacements, for example, were only reimbursable in an outpatient setting as of January 2018, and hip replacements two years later in 2020.} Orthopedic surgery is also one of the most male-dominated specialties, with 98\% of surgeons in our data being male. Among practice groups that contain at least one PCP, 2.8\% also include an orthopedic surgeon.
-
-From the Medicare FFS claims data, we identify eligible planned and elective orthopedic surgeries by DRG codes 461, 462, 469, 470, 480--489, and 507--511. We keep only cases in which the operation is performed by an orthopedic surgeon (per MD-PPAS specialty codes) and a referring PCP can be inferred. Our full referral data consist of approximately 566,000 PCP-specialist pairs, roughly 64,000 unique PCPs, around 15,200 unique specialists, and 1,234 PCP movers.
-
-\subsection{Descriptive Statistics}
-
-Table \ref{tab:desc-ortho} summarizes the orthopedic referral data, with Panel A presenting information on PCPs and Panel B on specialists. The median PCP refers to 2 distinct orthopedic surgeons, is 53 years old, and is male in 75\% of cases. Movers are younger (48 years), less male (66\%), and refer to fewer specialists immediately after relocating. From Panel B, specialists receive referrals from a median of 6 unique PCPs. Specialists receiving referrals from PCP movers are more likely to be white (92\% versus 90\%) and slightly more likely to be male (97.8\% versus 97.6\%) compared to the full data, despite PCP movers being less likely to be white males than the broader PCP population.
-
-Table~\ref{tab:link-stats-ortho} contrasts observable concordance between established and non-established referral links. Organizational proximity and geography dominate: 18.9\% of linked pairs share a practice group (versus 2.8\% of non-links), and the average distance is 10 miles for established links versus 42 miles for non-links. Demographic concordance differs modestly between groups, with gender concordance at 66.6\% versus 65.4\% and race concordance at 75.5\% versus 71.4\%.
-
-\subsection{Initial Network Formation}
-
-Table~\ref{tab:logit-twfe-ortho} summarizes the estimation results for orthopedic surgery. Columns (1)--(3) report the coefficients (log-odds) from the Jochmans estimator across three specifications, while columns (4)--(6) present the corresponding average marginal effects based on our two-stage estimator discussed in Section \ref{sec:estimation}. We focus our discussion on the marginal effects.
-
-Practice affiliation is the dominant predictor of referral choice. Sharing a practice group raises the referral probability by approximately 39 percentage points (95\% CI: 22 to 55), dwarfing all other characteristics. Roughly 37\% of PCP movers have at least one same-practice orthopedic surgeon in their choice set, and for those who do, referring within-practice may reflect organizational convenience, such as shared information systems and physical proximity within the practice. Because practice affiliation is so dominant, one natural question is whether the remaining covariates carry any independent explanatory power once within-practice referrals are removed. The supplemental appendix presents a robustness specification that drops practice affiliation entirely, isolating the ``reaching outside the practice'' decision. In this specification, distance and gender concordance retain their signs and significance, confirming that these factors operate independently of organizational co-location.
-
-Distance lowers the referral probability by roughly 5 percentage points per 5 miles. Gender concordance increases the probability by around 6 percentage points, a notable finding given that 98\% of orthopedic surgeons are male and gender variation in the specialist pool is limited. Race concordance has a point estimate of 7 percentage points but is imprecisely estimated. Age and experience concordance are economically negligible.
-
-\subsection{Dynamics in Network Formation}
-
-Table~\ref{tab:dynamics-ortho} documents how PCP referral networks evolve as we widen the post-move window from one to four years. The average network expands from 1.7 distinct specialists in the move year to 3.9 by year 4. The share of within-practice referral links declines from 18.4\% to 14.7\%, and mean distance increases from 10.5 to 12.7 miles, suggesting that PCPs gradually reach beyond their immediate organizational environment.
-
-Figure~\ref{fig:mfx-window-ortho} presents the estimated marginal effects by window. Practice affiliation dominates immediately after relocation but declines monotonically, falling from roughly 39 percentage points in the move year to approximately 15 percentage points by year 4. Gender concordance also dissipates over time, while geographic distance retains a persistent penalty throughout.
-
-As discussed in Section \ref{sec:dynamics-method}, a potential concern with cumulative windows is that attenuation may reflect compositional dilution rather than genuine behavioral change. We address this in two ways. First, the supplemental appendix decomposes each window's links into persisting and newly formed ties. If attenuation were purely mechanical, new links in later windows would show concordance rates similar to those of persisting links. Instead, newly formed ties exhibit progressively lower organizational and demographic concordance. Second, the supplemental appendix presents period-specific (non-cumulative) estimates in which the model is estimated separately on referrals made in each individual post-move year. These estimates show a similar pattern of attenuation, providing further evidence that the decline reflects genuine behavioral change.
+\paragraph{Dermatology.} Dermatology referrals are based on the same new-patient E\&M CPT codes used for cardiology. The majority of dermatology referrals are for relatively lower-acuity conditions such as skin checks, rashes, and acne, though skin cancer screening and evaluation can carry higher clinical stakes. Dermatology is the most gender-balanced specialty in our analysis, with 56\% male specialists, and dermatologists tend to practice independently or in single-specialty groups. Only 1.2\% of PCP-containing practice groups include a dermatologist, the lowest co-location rate of the three specialties. This organizational separation makes dermatology a useful contrast to cardiology, where multispecialty group integration is more common. We identify approximately 1.60 million PCP-specialist pairs, roughly 116,000 unique PCPs, around 13,000 unique specialists, and 4,664 PCP movers.
 
 
-\section{Cardiology}
-\label{sec:cardio}
+%%% RESULTS
 
-\subsection{Data and Institutional Context}
-
-Cardiology referrals in our data are based on new-patient E\&M office visits (CPT codes 99201--99205) performed by cardiologists and clinical cardiac electrophysiologists. Unlike orthopedic surgery, these are initial consultations for evaluation rather than discrete surgical procedures, ranging from routine assessments (e.g., lipid management, hypertension follow-up) to more urgent evaluations (e.g., chest pain, arrhythmia workup). We focus on E\&M visits rather than cardiac procedures because the PCP-to-surgeon referral chain for cardiology procedures is less direct, with PCPs often referring to a general cardiologist who may then refer onward for procedural care. Cardiology is predominantly male (88\% of specialists), though less so than orthopedic surgery. Among PCP-containing practice groups, 3.5\% also include a cardiologist, the highest co-location rate of the three specialties we study, reflecting the integration of cardiology into hospital-based and multispecialty group practices. We identify 1.67 million PCP-specialist pairs, roughly 113,000 unique PCPs, around 23,000 unique specialists, and 5,071 PCP movers. The larger sample reflects the broader volume of cardiology E\&M visits relative to orthopedic surgeries.
+\section{Results}
+\label{sec:results}
 
 \subsection{Descriptive Statistics}
+\label{sec:desc}
 
-Table \ref{tab:desc-cardioem} summarizes the cardiology referral data. PCPs refer to a median of 3 distinct cardiologists, compared to 2 for orthopedic surgery, consistent with the higher frequency of cardiology consultations. Movers are younger (46 years) and less male (59\%) than the overall PCP population. Table~\ref{tab:link-stats-cardioem} further contrasts established and non-established referral links. Same-practice rates are notably higher than in orthopedic surgery, with 24.8\% of linked pairs sharing a practice group (versus 3.4\% of non-links). Distance patterns are similar, with established links averaging 11 miles versus 33 miles for non-links. Finally, demographic concordance is lower overall than in orthopedic surgery, reflecting the more diverse composition of both PCPs and cardiologists in this sample.
+Table~\ref{tab:desc} summarizes physician and referral characteristics for each specialty. Across all three, PCP movers are younger and less male than the full PCP population, consistent with younger physicians being more geographically mobile. The typical PCP refers to 2--3 distinct specialists, with movers initially referring to fewer specialists immediately after relocating. Specialist characteristics vary with the specialty’s demographic composition: orthopedic surgeons are nearly all male (98\%), cardiologists are predominantly male (88\%), and dermatologists are roughly gender-balanced (56\% male). Dermatologists have the highest median in-degree (27 referring PCPs), consistent with fewer dermatologists serving larger catchment areas.
 
-\subsection{Initial Network Formation}
-
-Table~\ref{tab:logit-twfe-cardioem} presents the estimation results for cardiology referrals. Practice affiliation remains the dominant predictor, but the marginal effect is considerably smaller than in orthopedic surgery at approximately 15 percentage points. This is notable given that cardiology has the highest co-location rate of the three specialties (24.8\% of linked pairs share a practice group), suggesting that the prevalence of same-practice ties does not mechanically determine the magnitude of the practice affiliation effect. Distance lowers the referral probability by roughly 2 percentage points per 5 miles, a smaller penalty than in orthopedic surgery, perhaps reflecting the less geographically concentrated nature of cardiology office visits relative to inpatient surgical procedures. Gender and race concordance are both negligible, with point estimates near zero, but with 88\% of cardiologists being male, there is also limited variation in the specialist pool for gender concordance to operate on. As with orthopedic surgery, age and experience differences play no meaningful role.
-
-\subsection{Dynamics in Network Formation}
-
-Table~\ref{tab:dynamics-cardioem} documents the evolution of cardiology referral networks. Networks expand more rapidly than in orthopedic surgery, from 2.4 specialists in the move year to 6.2 by year 4, reflecting the higher frequency of cardiology consultations. The share of within-practice referral links declines modestly from 24.8\% to 22.1\%, a smaller absolute decline than in orthopedic surgery.
-
-Figure~\ref{fig:mfx-window-cardioem} presents the marginal effects by window. Practice affiliation attenuates over time, though the decline is less pronounced than in orthopedic surgery, reflecting the stronger organizational integration of cardiology into multispecialty practice groups. Gender and race concordance remain near zero throughout. The link decomposition in the appendix confirms that this attenuation is not driven by compositional dilution.
-
-
-\section{Dermatology}
-\label{sec:derm}
-
-\subsection{Data and Institutional Context}
-
-Dermatology referrals are based on new-patient E\&M office visits, the same CPT codes used for cardiology. The majority of dermatology referrals are for relatively lower-acuity conditions such as skin checks, rashes, and acne, though skin cancer screening and evaluation can carry higher clinical stakes. Dermatology is the most gender-balanced specialty in our analysis, with 56\% male specialists, and dermatologists tend to practice independently or in single-specialty groups. Only 1.2\% of PCP-containing practice groups include a dermatologist, the lowest co-location rate of the three specialties. This organizational separation makes dermatology a useful contrast to cardiology, where multispecialty group integration is more common.
-
-We identify approximately 1.60 million PCP-specialist pairs, roughly 116,000 unique PCPs, around 13,000 unique specialists, and 4,664 PCP movers. The larger number of movers relative to orthopedic surgery reflects the broader volume of dermatology E\&M visits and the larger PCP pool with at least one dermatology referral.
-
-\subsection{Descriptive Statistics}
-
-Table \ref{tab:desc-derm} summarizes the dermatology referral data. PCPs refer to a median of 3 distinct dermatologists, and movers are younger (46 years) and less male (56\%) than the overall PCP population. Dermatologists have the highest median in-degree of the three specialties (27 referring PCPs), consistent with fewer dermatologists serving larger catchment areas. Table~\ref{tab:link-stats-derm} contrasts established and non-established links. Same-practice rates are the lowest of the three specialties, at 12.2\% of linked pairs versus 2.0\% of non-links, as expected given the low co-location rate. Distance patterns are similar to the other specialties, with established links averaging 10 miles versus 29 miles for non-links.
+Table~\ref{tab:link-stats} contrasts observable concordance between established and non-established referral links across all three specialties. Organizational proximity and geography dominate the contrast in every specialty. Same-practice rates among established links range from 12.2\% in dermatology to 24.8\% in cardiology, compared to 2--3\% among non-links. Average distance is roughly 10--11 miles for established links versus 29--42 miles for non-links. Demographic concordance differs more modestly between established and non-established links, with gender and race concordance gaps of 1--5 percentage points.
 
 \subsection{Initial Network Formation}
+\label{sec:formation}
 
-Table~\ref{tab:logit-twfe-derm} presents the estimation results. Practice affiliation is again the dominant predictor, with a marginal effect of approximately 32 percentage points. Despite dermatology having the lowest co-location rate among the three specialties, the practice affiliation effect is larger than in cardiology and closer to orthopedic surgery. This further illustrates that the marginal effect of practice affiliation does not simply mirror co-location prevalence. Distance lowers the referral probability by roughly 3 percentage points per 5 miles.
+Table~\ref{tab:logit-twfe} presents the estimation results for all three specialties. Columns (1)--(3) report odds ratios from the full-specification Jochmans estimator, while columns (4)--(6) present the corresponding average marginal effects from our two-stage procedure. Progressive specifications are available in the supplemental appendix. We focus our discussion on the marginal effects.
 
-Gender concordance is small but positive at approximately 1 percentage point, and race concordance is similarly small at less than 1 percentage point. The small gender effect is notable in light of dermatology being the most gender-balanced specialty in our analysis. If gender concordance were primarily a function of available variation in the specialist pool, one might expect the largest effects where specialists are most gender-diverse. Instead, the largest gender effect appears in orthopedic surgery, where nearly all specialists are male.
+\paragraph{Practice affiliation.} Sharing a practice group is the dominant predictor of referral formation in all three specialties, but the magnitude varies substantially. The marginal effect is largest in orthopedic surgery (39 percentage points), followed by dermatology (32) and cardiology (15). This ordering does not simply mirror co-location rates. Cardiology has the highest share of same-practice links (24.8\%) yet the smallest marginal effect, while orthopedic surgery has an intermediate co-location rate (18.9\%) and the largest effect. How organizational ties translate into referral decisions appears to depend on institutional features that differ across specialties, such as the nature of the referral (surgical vs.\ consultative), the degree of integration into multispecialty groups, and the clinical urgency of the referral. Because practice affiliation is so dominant, the supplemental appendix presents a robustness specification that drops it entirely, isolating the ``reaching outside the practice’’ decision. In that specification, distance and gender concordance retain their signs and significance across all three specialties, confirming that these factors operate independently of organizational co-location.
+
+\paragraph{Geographic proximity.} Distance is a robust and persistent predictor across all three specialties, with marginal effects ranging from 2 to 5 percentage points per five miles. The penalty is largest in orthopedic surgery, perhaps reflecting the geographic concentration of surgical referrals relative to office-based consultations.
+
+\paragraph{Demographic concordance.} Gender concordance is largest in orthopedic surgery (6 percentage points), small in dermatology (1 percentage point), and negligible in cardiology. This pattern does not scale with the degree of gender variation in the specialist pool. Orthopedic surgery, where specialists are nearly all male, shows the largest gender effect, while dermatology, with a roughly gender-balanced specialist pool, shows a much smaller effect. Race concordance is imprecisely estimated in all three specialties. Age and experience play no meaningful role anywhere.
+
+Figure~\ref{fig:mfx-cross} summarizes these cross-specialty patterns in a forest plot of the full-specification marginal effects.
 
 \subsection{Dynamics in Network Formation}
+\label{sec:dynamics}
 
-Table~\ref{tab:dynamics-derm} documents the evolution of dermatology referral networks. Networks expand from 2.3 specialists in the move year to 5.9 by year 4. The share of within-practice referral links declines from 12.1\% to 10.3\%. Figure~\ref{fig:mfx-window-derm} again presents the marginal effects by window. Practice affiliation attenuates over time, declining from roughly 32 percentage points to approximately 20 by year 4. The rate of decline is similar to that observed in orthopedic surgery, despite the very different institutional settings. Gender and race concordance remain small throughout. As with the other specialties, the link decomposition in the supplemental appendix confirms that this attenuation is not driven by compositional dilution.
+Table~\ref{tab:dynamics} documents how PCP referral networks evolve as we widen the post-move window from one to four years. Across all three specialties, networks expand substantially: from 1.7 to 3.9 distinct specialists in orthopedic surgery, 2.4 to 6.2 in cardiology, and 2.3 to 5.9 in dermatology. The faster expansion in cardiology and dermatology reflects the higher frequency of E\&M consultations relative to inpatient surgical procedures. In all three specialties, the share of within-practice referral links declines as networks mature, and mean distance increases, suggesting that PCPs gradually reach beyond their immediate organizational environment.
 
+Figure~\ref{fig:mfx-window-cross} presents the estimated marginal effects by referral window across all three specialties. The attenuation of practice affiliation over the first four post-move years is the most consistent finding. The effect declines in all three, with the largest absolute decline in orthopedic surgery (from roughly 39 to 15 percentage points). In cardiology, the decline is less pronounced, reflecting the stronger organizational integration of cardiology into multispecialty practice groups. Gender concordance dissipates over time in orthopedic surgery, while geographic distance retains a persistent penalty across all specialties.
 
-%%% CROSS-SPECIALTY COMPARISON
-
-\section{Cross-Specialty Comparison}
-\label{sec:cross-specialty}
-
-Figure~\ref{fig:mfx-cross} presents a forest plot of the full-specification marginal effects from Tables \ref{tab:logit-twfe-ortho}--\ref{tab:logit-twfe-derm}. Several patterns emerge. First, practice affiliation is the dominant predictor of referral formation in all three specialties, but the magnitude varies substantially. The marginal effect is largest in orthopedic surgery (39 percentage points), followed by dermatology (32) and cardiology (15). This ordering does not simply mirror co-location rates, as cardiology has the highest share of same-practice links (24.8\%) yet the smallest marginal effect, while orthopedic surgery has an intermediate co-location rate (18.9\%) and the largest effect. How organizational ties translate into referral decisions appears to depend on institutional features that differ across specialties, such as the nature of the referral (surgical vs.\ consultative), the degree of integration into multispecialty groups, and the clinical urgency of the referral. Second, geographic proximity is a robust and persistent predictor across all three specialties, with marginal effects ranging from 2 to 5 percentage points per five miles. Third, the role of demographic concordance differs across specialties. Gender concordance is largest in orthopedic surgery (6 percentage points), small in dermatology (1 percentage point), and negligible in cardiology. This pattern does not scale with the degree of gender variation in the specialist pool. Orthopedic surgery, where specialists are nearly all male, shows the largest gender effect, while dermatology, with a roughly gender-balanced specialist pool, shows a much smaller effect. Race concordance is imprecisely estimated in all three specialties. Age and experience play no meaningful role anywhere.
-
-Figure~\ref{fig:mfx-window-cross} presents the dynamics of marginal effects across specialties. The attenuation of practice affiliation over the first four post-move years is the most consistent finding across specialties. The effect declines in all three, with the largest absolute decline in orthopedic surgery. This pattern is consistent with organizational convenience playing a diminishing role as PCPs accumulate local experience and develop referral relationships outside their immediate practice environment.
+As discussed in Section \ref{sec:dynamics-method}, a potential concern with cumulative windows is that attenuation may reflect compositional dilution rather than genuine behavioral change. We address this in two ways. First, the supplemental appendix decomposes each window’s links into persisting and newly formed ties. If attenuation were purely mechanical, new links in later windows would show concordance rates similar to those of persisting links. Instead, newly formed ties exhibit progressively lower organizational and demographic concordance across all three specialties. Second, the supplemental appendix presents period-specific (non-cumulative) estimates in which the model is estimated separately on referrals made in each individual post-move year. These estimates show a similar pattern of attenuation, providing further evidence that the decline reflects genuine behavioral change.
 
 
 %%% MECHANISMS
@@ -261,9 +214,7 @@ Practice affiliation is the dominant predictor of referral formation across all 
 
 For each mover, we measure the pre-arrival referral patterns of incumbent PCPs in the mover's new practice. Specifically, for each specialist in the mover's choice set, we count how many other PCPs in the same practice group referred to that specialist in the year before the mover arrived. This lagged measure captures the practice's established referral network at the time the mover enters, avoiding contamination from the mover's own referral decisions.
 
-Table~\ref{tab:peer-ortho} presents the results for orthopedic surgery using a conditional logit specification with PCP fixed effects. Column (1) reproduces the baseline specification without peer referrals. Column (2) adds the peer referral measure alongside practice affiliation. The marginal effect of practice affiliation drops from 6.6 percentage points to 3.2 percentage points, a decline of roughly half. The peer referral variable is positive and significant, with each additional referring peer raising the referral probability by approximately 0.5 percentage points. Column (3) drops practice affiliation entirely and shows that the peer referral coefficient is largely unchanged, suggesting that the two variables capture overlapping but not identical variation.
-
-Tables~\ref{tab:peer-cardioem} and \ref{tab:peer-derm} present analogous results for cardiology and dermatology. The pattern is consistent across all three specialties. Adding peer referrals reduces the practice affiliation effect by roughly half in cardiology (from 7.5 to 2.6 percentage points) and by nearly 80\% in dermatology (from 10.5 to 2.2 percentage points).
+Table~\ref{tab:peer} presents the results across all three specialties using a conditional logit specification with PCP fixed effects. For each specialty, column (1) reproduces the baseline specification without peer referrals, column (2) adds the peer referral measure alongside practice affiliation, and column (3) drops practice affiliation entirely. The pattern is consistent across all three specialties. Adding peer referrals reduces the practice affiliation effect by roughly half in orthopedic surgery (from 6.6 to 3.2 percentage points) and cardiology (from 7.5 to 2.6 percentage points), and by nearly 80\% in dermatology (from 10.5 to 2.2 percentage points). The peer referral variable is positive and significant in all specifications, and its coefficient is largely unchanged when practice affiliation is dropped, suggesting that the two variables capture overlapping but not identical variation.
 
 These results suggest that a substantial share of the practice affiliation effect operates through the referral behavior of incumbent colleagues. However, we note that peer referral patterns and organizational structure are not easily separable. If a practice has policies or norms that channel referrals to specific specialists, then all PCPs in the practice will exhibit similar referral patterns, and the peer referral variable will absorb what is fundamentally an organizational effect. The residual practice affiliation coefficient in column (2) captures the portion of organizational influence that operates beyond peer referral patterns, but the peer referral coefficient itself reflects a combination of information transmission and shared organizational channeling.
 
@@ -323,18 +274,18 @@ We conclude with three policy observations. First, while increasing horizontal i
 \end{figure}
 
 
-%%% ORTHOPEDIC SURGERY FIGURES AND TABLES
+%%% COMBINED TABLES AND FIGURES
 
 \clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{PCP and Specialist Summary Statistics -- Orthopedic Surgery}\footnote{Panel A (B) reports summary statistics for doctors who send (receive) at least one referral for orthopedic surgery over our time period. ``All referrals’’ denotes the complete set of referrals, while ``PCP movers’’ restricts the sample to PCPs observed in the year they first move to a new HRR. Network size is measured as out-degree for doctors and in-degree for specialists; age is calculated from year of birth; gender and race shares are proportions of male, White, Black, Hispanic physicians, respectively. Observation counts correspond to the number of distinct physicians in each category.}}
+\caption[caption]{\textbf{PCP and Specialist Summary Statistics}\footnote{For each specialty, Panel A (B) reports summary statistics for doctors who send (receive) at least one referral over our time period. ``All referrals’’ denotes the complete set of referrals, while ``PCP movers’’ restricts the sample to PCPs observed in the year they first move to a new HRR. Network size is measured as out-degree for doctors and in-degree for specialists; age is calculated from year of birth; gender and race shares are proportions of male, White, Black, Hispanic physicians, respectively. Observation counts correspond to the number of distinct physicians in each category.}}
 \centerline{%
-     \input{../results/tables/desc_ortho.tex}
+     \input{../results/tables/desc_all.tex}
 }
-\label{tab:desc-ortho}
+\label{tab:desc}
 \end{minipage}
 \end{table}
 
@@ -343,11 +294,11 @@ We conclude with three policy observations. First, while increasing horizontal i
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Referral Network Summary Statistics -- Orthopedic Surgery}\footnote{Descriptive statistics for referral networks of PCP movers in orthopedic surgery. ``Established links’’ are PCP-specialist pairs for which at least one referral is observed, and ``Non-established links’’ are pairs that lie in the same HRR-year choice set but exhibit no referrals. Percentages report the share of pairs matching on the indicated attribute. Distance (miles) is the straight-line distance between ZIP-code centroids. Experience (yr) is the absolute gap between graduation years.}}
+\caption[caption]{\textbf{Referral Network Summary Statistics}\footnote{Descriptive statistics for referral networks of PCP movers across all three specialties. ``Established links’’ are PCP-specialist pairs for which at least one referral is observed, and ``Non-established links’’ are pairs that lie in the same HRR-year choice set but exhibit no referrals. Percentages report the share of pairs matching on the indicated attribute. Distance (miles) is the straight-line distance between ZIP-code centroids. Experience (yr) is the absolute gap between graduation years.}}
 \centerline{%
-     \input{../results/tables/link_stats_ortho.tex}
+     \input{../results/tables/link_stats_all.tex}
 }
-\label{tab:link-stats-ortho}
+\label{tab:link-stats}
 \end{minipage}
 \end{table}
 
@@ -356,24 +307,11 @@ We conclude with three policy observations. First, while increasing horizontal i
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Two-Stage Logistic Regression -- Orthopedic Surgery}\footnote{Two-stage estimation results for orthopedic surgery. Columns (1)--(3) report structural coefficients (log-odds) from the \cite{jochmans2018} quadruple-based estimator with standard errors clustered by HRR. Columns (4)--(6) report average marginal effects computed via first-difference using fixed effects recovered in the second stage, with delta-method standard errors. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. ``Quartet obs'' is the number of discordant quadruples used in the first stage; ``Choice-set obs'' is the number of non-separated PCP-specialist pairs used for the second-stage marginal effects.}}
+\caption[caption]{\textbf{Two-Stage Estimation Results}\footnote{Two-stage estimation results for the full specification across all three specialties. Columns (1)--(3) report odds ratios from the \cite{jochmans2018} quadruple-based estimator with standard errors clustered by HRR. Columns (4)--(6) report average marginal effects computed via first-difference using fixed effects recovered in the second stage, with delta-method standard errors. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Progressive specifications are presented in the supplemental appendix.}}
 \centerline{%
-    \input{../results/tables/logit_twfe_mfx_ortho.tex}
+    \input{../results/tables/logit_twfe_main.tex}
 }
-\label{tab:logit-twfe-ortho}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Network Summary Statistics by Referral Window -- Orthopedic Surgery}\footnote{Summary statistics for orthopedic surgery referral networks as the post-move window widens from one to four years. Each column includes all referral links observed up to and including the indicated year. Same practice, same gender, and same race report the share of links matching on the indicated attribute. Mean distance is the straight-line distance (miles) between ZIP-code centroids. PCP network size is the average number of distinct specialists per PCP. New (dropped) specialists denote the average number of specialists added to (removed from) the network relative to the previous window.}}
-\centerline{%
-     \input{../results/tables/link_stats_by_window_ortho.tex}
-}
-\label{tab:dynamics-ortho}
+\label{tab:logit-twfe}
 \end{minipage}
 \end{table}
 
@@ -381,162 +319,26 @@ We conclude with three policy observations. First, while increasing horizontal i
 \begin{figure}[h]
 \centering
 \begin{minipage}[h]{6in}
-\caption[caption]{Effects by Referral Window -- Orthopedic Surgery\footnote{Average marginal effects from separate two-stage estimates for each referral window (one through four years post-relocation). Stage 1 estimates structural coefficients via the \cite{jochmans2018} quadruple-based estimator; Stage 2 recovers doctor and specialist fixed effects. For binary covariates, the effect is the change in predicted referral probability when the indicator switches from 0 to 1; for distance, the effect corresponds to a 5-mile increase. Vertical bands are 95\% confidence intervals based on delta-method standard errors.}}
-\centerline{%
-    \includegraphics{../results/figures/mfx_by_window_ortho.png}
-}
-\label{fig:mfx-window-ortho}
-\end{minipage}
-\end{figure}
-
-
-%%% CARDIOLOGY FIGURES AND TABLES
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{PCP and Specialist Summary Statistics -- Cardiology}\footnote{Panel A (B) reports summary statistics for doctors who send (receive) at least one referral for cardiology E\&M visits over our time period. See Table \ref{tab:desc-ortho} footnote for details.}}
-\centerline{%
-     \input{../results/tables/desc_cardioem.tex}
-}
-\label{tab:desc-cardioem}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Referral Network Summary Statistics -- Cardiology}\footnote{Descriptive statistics for referral networks of PCP movers in cardiology. See Table \ref{tab:link-stats-ortho} footnote for details.}}
-\centerline{%
-     \input{../results/tables/link_stats_cardioem.tex}
-}
-\label{tab:link-stats-cardioem}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Two-Stage Logistic Regression -- Cardiology}\footnote{Two-stage estimation results for cardiology. See Table \ref{tab:logit-twfe-ortho} footnote for details.}}
-\centerline{%
-    \input{../results/tables/logit_twfe_mfx_cardioem.tex}
-}
-\label{tab:logit-twfe-cardioem}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Network Summary Statistics by Referral Window -- Cardiology}\footnote{Summary statistics for cardiology referral networks by post-move window. See Table \ref{tab:dynamics-ortho} footnote for details.}}
-\centerline{%
-     \input{../results/tables/link_stats_by_window_cardioem.tex}
-}
-\label{tab:dynamics-cardioem}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{figure}[h]
-\centering
-\begin{minipage}[h]{6in}
-\caption[caption]{Effects by Referral Window -- Cardiology\footnote{Average marginal effects by referral window for cardiology. See Figure \ref{fig:mfx-window-ortho} footnote for details.}}
-\centerline{%
-    \includegraphics{../results/figures/mfx_by_window_cardioem.png}
-}
-\label{fig:mfx-window-cardioem}
-\end{minipage}
-\end{figure}
-
-
-%%% DERMATOLOGY FIGURES AND TABLES
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{PCP and Specialist Summary Statistics -- Dermatology}\footnote{Panel A (B) reports summary statistics for doctors who send (receive) at least one referral for dermatology E\&M visits over our time period. See Table \ref{tab:desc-ortho} footnote for details.}}
-\centerline{%
-     \input{../results/tables/desc_derm.tex}
-}
-\label{tab:desc-derm}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Referral Network Summary Statistics -- Dermatology}\footnote{Descriptive statistics for referral networks of PCP movers in dermatology. See Table \ref{tab:link-stats-ortho} footnote for details.}}
-\centerline{%
-     \input{../results/tables/link_stats_derm.tex}
-}
-\label{tab:link-stats-derm}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Two-Stage Logistic Regression -- Dermatology}\footnote{Two-stage estimation results for dermatology. See Table \ref{tab:logit-twfe-ortho} footnote for details.}}
-\centerline{%
-    \input{../results/tables/logit_twfe_mfx_derm.tex}
-}
-\label{tab:logit-twfe-derm}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Network Summary Statistics by Referral Window -- Dermatology}\footnote{Summary statistics for dermatology referral networks by post-move window. See Table \ref{tab:dynamics-ortho} footnote for details.}}
-\centerline{%
-     \input{../results/tables/link_stats_by_window_derm.tex}
-}
-\label{tab:dynamics-derm}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{figure}[h]
-\centering
-\begin{minipage}[h]{6in}
-\caption[caption]{Effects by Referral Window -- Dermatology\footnote{Average marginal effects by referral window for dermatology. See Figure \ref{fig:mfx-window-ortho} footnote for details.}}
-\centerline{%
-    \includegraphics{../results/figures/mfx_by_window_derm.png}
-}
-\label{fig:mfx-window-derm}
-\end{minipage}
-\end{figure}
-
-
-%%% CROSS-SPECIALTY FIGURES
-
-\clearpage
-\begin{figure}[h]
-\centering
-\begin{minipage}[h]{6in}
-\caption[caption]{Marginal Effects Across Specialties\footnote{Forest plot of average marginal effects from the full-specification two-stage model (Tables \ref{tab:logit-twfe-ortho}--\ref{tab:logit-twfe-derm}, column 6) for orthopedic surgery, cardiology, and dermatology. Horizontal bars are 95\% confidence intervals based on delta-method standard errors.}}
+\caption[caption]{Marginal Effects Across Specialties\footnote{Forest plot of average marginal effects from the full-specification two-stage model (Table~\ref{tab:logit-twfe}) for orthopedic surgery, cardiology, and dermatology. Horizontal bars are 95\% confidence intervals based on delta-method standard errors.}}
 \centerline{%
     \includegraphics{../results/figures/mfx_cross_specialty.png}
 }
 \label{fig:mfx-cross}
 \end{minipage}
 \end{figure}
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Network Summary Statistics by Referral Window}\footnote{Summary statistics for referral networks as the post-move window widens from one to four years. Each column includes all referral links observed up to and including the indicated year. Same practice, same gender, and same race report the share of links matching on the indicated attribute. Mean distance is the straight-line distance (miles) between ZIP-code centroids. PCP network size is the average number of distinct specialists per PCP. New (dropped) specialists denote the average number of specialists added to (removed from) the network relative to the previous window.}}
+\centerline{%
+     \input{../results/tables/dynamics_all.tex}
+}
+\label{tab:dynamics}
+\end{minipage}
+\end{table}
 
 \clearpage
 \begin{figure}[h]
@@ -550,45 +352,16 @@ We conclude with three policy observations. First, while increasing horizontal i
 \end{minipage}
 \end{figure}
 
-
-%%% PEER REFERRAL TABLES
-
 \clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Peer Referrals and Practice Affiliation -- Orthopedic Surgery}\footnote{Conditional logit with PCP and year fixed effects. Column (1) is the baseline specification. Column (2) adds the count of practice peers who referred to that specialist in the year before the mover arrived. Column (3) drops practice affiliation. Marginal effects computed via first-difference with delta-method standard errors.}}
+\caption[caption]{\textbf{Peer Referrals and Practice Affiliation}\footnote{Conditional logit with PCP and year fixed effects. For each specialty, column (1) is the baseline specification, column (2) adds the count of practice peers who referred to that specialist in the year before the mover arrived, and column (3) drops practice affiliation. Marginal effects computed via first-difference with delta-method standard errors.}}
 \centerline{%
-    \input{../results/tables/peer_referrals_ortho.tex}
+    \input{../results/tables/peer_referrals_all.tex}
 }
-\label{tab:peer-ortho}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Peer Referrals and Practice Affiliation -- Cardiology}\footnote{Conditional logit with PCP and year fixed effects. See Table \ref{tab:peer-ortho} footnote for details.}}
-\centerline{%
-    \input{../results/tables/peer_referrals_cardioem.tex}
-}
-\label{tab:peer-cardioem}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Peer Referrals and Practice Affiliation -- Dermatology}\footnote{Conditional logit with PCP and year fixed effects. See Table \ref{tab:peer-ortho} footnote for details.}}
-\centerline{%
-    \input{../results/tables/peer_referrals_derm.tex}
-}
-\label{tab:peer-derm}
+\label{tab:peer}
 \end{minipage}
 \end{table}
 

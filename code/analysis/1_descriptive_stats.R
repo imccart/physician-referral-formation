@@ -105,30 +105,47 @@ flows_top %>% summarize(total_movers = sum(n_movers)) # total number of movers
 ## helper that computes degree, age, gender & race shares
 ## Uses data.table for the inner grouped summarise (dplyr crashes with 200K+ groups)
 side_stats <- function(df, id_var, partner_var, sex_var, race_var, birth_var, dist_var) {
-  dt <- copy(as.data.table(df))
-  # Use .SD column access to avoid get() scoping issues with locked bindings
-  keep_cols <- c(id_var, "Year", partner_var, birth_var, sex_var, race_var, dist_var)
-  agg <- dt[, .(
-    deg      = uniqueN(.SD[[partner_var]]),
-    age      = mean(Year - .SD[[birth_var]], na.rm = TRUE),
-    male     = .SD[[sex_var]][1L] == "M",
-    race     = .SD[[race_var]][1L],
-    distance = mean(.SD[[dist_var]], na.rm = TRUE)
-  ), by = c(id_var, "Year"), .SDcols = keep_cols] %>% as_tibble()
+  dt <- data.table(
+    id       = as.character(df[[id_var]]),
+    year     = df[["Year"]],
+    partner  = df[[partner_var]],
+    birth    = df[[birth_var]],
+    sex      = df[[sex_var]],
+    race     = df[[race_var]],
+    distance = df[[dist_var]]
+  )
 
-  agg %>%
-    summarise(
-      "Network Degree (Mean)"   = mean(deg),
-      "Network Degree (SD)"     = sd(deg),
-      "Network Degree (Median)" = median(deg),
-      "Mean Age"                = mean(age, na.rm = TRUE),
-      "Mean Distance (mi)"      = mean(distance, na.rm = TRUE),
-      "Percent Male"            = mean(male, na.rm = TRUE),
-      "Percent White"           = mean(race == "white",    na.rm = TRUE),
-      "Percent Black"           = mean(race == "black",    na.rm = TRUE),
-      "Percent Hispanic"        = mean(race == "hispanic", na.rm = TRUE),
-      "Observations"            = n_distinct(.data[[id_var]])
-    )
+  # Unlock 'by' if locked by rlang (prevents forderv crash)
+  tryCatch({
+    ns <- asNamespace("rlang")
+    if (exists("by", envir = ns, inherits = FALSE)) {
+      if (environmentIsLocked(ns)) {
+        rlang::env_unlock(ns)
+        rlang::env_binding_unlock(ns, "by")
+      }
+    }
+  }, error = function(e) NULL)
+
+  agg <- dt[, .(
+    deg      = uniqueN(partner),
+    age      = mean(year - birth, na.rm = TRUE),
+    male     = sex[1L] == "M",
+    race     = race[1L],
+    distance = mean(distance, na.rm = TRUE)
+  ), keyby = .(id, year)]
+
+  tibble(
+    "Network Degree (Mean)"   = mean(agg$deg),
+    "Network Degree (SD)"     = sd(agg$deg),
+    "Network Degree (Median)" = as.double(median(agg$deg)),
+    "Mean Age"                = mean(agg$age, na.rm = TRUE),
+    "Mean Distance (mi)"      = mean(agg$distance, na.rm = TRUE),
+    "Percent Male"            = mean(agg$male, na.rm = TRUE),
+    "Percent White"           = mean(agg$race == "white", na.rm = TRUE),
+    "Percent Black"           = mean(agg$race == "black", na.rm = TRUE),
+    "Percent Hispanic"        = mean(agg$race == "hispanic", na.rm = TRUE),
+    "Observations"            = uniqueN(agg$id)
+  )
 }
 
 
@@ -187,16 +204,20 @@ table_tex %>%
 
 
 ## Distribution of network size
-deg_out <- as.data.table(df_full_referrals)[,
-  .(deg = uniqueN(specialist)), by = .(doctor, Year)] %>%
+dt_deg <- data.table(doc = df_full_referrals$doctor,
+                     spec = df_full_referrals$specialist,
+                     yr = df_full_referrals$Year)
+
+deg_out <- dt_deg[, .(deg = uniqueN(spec)), keyby = .(doc, yr)] %>%
   as_tibble() %>%
   mutate(side = "PCP (out-degree)")
 
 ## receiver-side degree: how many distinct PCPs refer to each specialist
-deg_in <- as.data.table(df_full_referrals)[,
-  .(deg = uniqueN(doctor)), by = .(specialist, Year)] %>%
+deg_in <- dt_deg[, .(deg = uniqueN(doc)), keyby = .(spec, yr)] %>%
   as_tibble() %>%
   mutate(side = "Specialist (in-degree)")
+
+rm(dt_deg)
 
 ## put them in one long data frame for facetted plotting
 deg_all <- bind_rows(deg_out, deg_in)

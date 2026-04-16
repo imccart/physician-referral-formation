@@ -1,13 +1,14 @@
 # Cross-specialty comparison figures ----------------------------------------
-# Combines MFX collected across the specialty loop in _main.R:
-#   all_mfx         — full-model MFX (spec 3) per specialty
-#   all_mfx_windows — per-window MFX per specialty
+# Reads per-specialty MFX CSVs saved by run_specialty() in _main.R
 
+specs <- c("ortho", "cardioem", "derm")
 
 # 1. MFX forest plot -------------------------------------------------------
 # Full-model MFX (6 covariates) compared across specialties
 
-df_mfx_all <- bind_rows(all_mfx)
+df_mfx_all <- map(specs, function(s) {
+  read_csv(sprintf("results/tables/mfx_%s.csv", s), show_col_types = FALSE)
+}) %>% bind_rows()
 
 coef_labels <- c(
   same_sex      = "Same gender",
@@ -62,7 +63,9 @@ ggsave("results/figures/mfx_cross_specialty.png",
 # 2. Dynamics comparison figure --------------------------------------------
 # Per-window MFX faceted by covariate, overlaid across specialties
 
-df_mfx_win_all <- bind_rows(all_mfx_windows)
+df_mfx_win_all <- map(specs, function(s) {
+  read_csv(sprintf("results/tables/mfx_window_%s.csv", s), show_col_types = FALSE)
+}) %>% bind_rows()
 
 horizon_from_label <- function(label) {
   as.integer(str_extract(label, "\\d+"))

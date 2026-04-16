@@ -1,11 +1,12 @@
 # 0-setup.R — activate renv and load packages
+options(vsc.rstudioapi = FALSE)
 source("renv/activate.R")
 
 library(tidyverse)
 library(readr)
 library(sf)
 library(spdep)
-library(zipcodeR)
+# library(zipcodeR)  # only needed for data build, not analysis
 library(geodist)
 library(ggplot2)
 library(modelsummary)
