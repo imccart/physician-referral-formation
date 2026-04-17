@@ -50,7 +50,7 @@ To assess the finite-sample performance of the two-stage estimation procedure de
 
 \paragraph{Estimators.} We compare three estimators in each replication. (1) The true $\beta$ and marginal effects computed directly from the known DGP. (2) A naive conditional logit with PCP fixed effects only, analogous to \cite{zeltzer2020}. (3) Our two-stage procedure, in which the first stage estimates $\beta$ via the Jochmans quadruple-based conditional logit and the second stage recovers both PCP and specialist fixed effects.
 
-\paragraph{Results.} Tables~\ref{tab:sim-baseline}--\ref{tab:sim-highvar} present results across three scenarios that vary the degree of fixed-effect heterogeneity and covariate correlation. In the baseline scenario (Table~\ref{tab:sim-baseline}), the naive estimator attenuates $\beta_{\text{practice}}$ by approximately 13\% and $\beta_{\text{gender}}$ by 12\%, while the two-stage procedure recovers both parameters to within 1\% of the true values. Under stronger covariate correlation (Table~\ref{tab:sim-highcorr}), attenuation in the naive estimator persists and the distance coefficient is overestimated by 23\%. Under both higher correlation and larger fixed-effect variance (Table~\ref{tab:sim-highvar}), the naive estimator attenuates $\beta_{\text{practice}}$ by 33\% and $\beta_{\text{gender}}$ by 34\%, while the two-stage estimates remain within 1\% of the truth.
+\paragraph{Results.} Table~\ref{tab:sim-all} presents results across three scenarios that vary the degree of fixed-effect heterogeneity and covariate correlation. In the baseline scenario (Panel A), the naive estimator attenuates $\beta_{\text{practice}}$ by approximately 13\% and $\beta_{\text{gender}}$ by 12\%, while the two-stage procedure recovers both parameters to within 1\% of the true values. Under stronger covariate correlation (Panel B), attenuation in the naive estimator persists and the distance coefficient is overestimated by 23\%. Under both higher correlation and larger fixed-effect variance (Panel C), the naive estimator attenuates $\beta_{\text{practice}}$ by 33\% and $\beta_{\text{gender}}$ by 34\%, while the two-stage estimates remain within 1\% of the truth.
 
 Marginal effects show smaller differences across estimators than the $\beta$ coefficients, because the naive estimator's PCP fixed effects partially compensate for the omitted specialist heterogeneity when computing predicted probabilities. Nonetheless, the two-stage procedure consistently produces marginal effects closer to the true values, particularly for distance, where the naive estimator overstates the effect by up to 60\% under higher correlation.
 
@@ -65,6 +65,20 @@ Table~\ref{tab:convergence} presents the results for each specialty. In all thre
 Because marginal effects are computed only on the non-separated subsample (where both doctor and specialist fixed effects are identified), it is important to verify that this subsample is not systematically different from the full choice set. Comparing the two groups, the non-separated subsample modestly overweights same-practice pairs and geographically closer pairs, consistent with the intuition that referral links (and thus non-separation) are more likely when organizational ties exist. However, demographic concordance (gender, race) is similar across the two groups, suggesting that our marginal effect estimates for demographic covariates are unlikely to be biased by the separation-induced sample restriction.
 
 
+\section{Race Predictions}
+\label{sec:race}
+
+Physician race is not available in national administrative data. We impute race by combining three complementary classifiers and aggregating their predictions with a random-forest ensemble. This section summarizes the methods and their accuracy; full implementation details are available from the authors.
+
+\paragraph{Individual classifiers.} We obtain race probabilities from three sources. First, NamePrism generates name-based probabilities using name embeddings trained on 57 million contact lists. Second, the WRU (``Who are You'') algorithm applies Bayes' rule to combine surname, first name, and geographic location with census-tract demographics, using the fully Bayesian Improved Surname Geocoding (fBISG) methodology. Third, we scrape physician profile photos from Zocdoc and apply the DeepFace neural network to generate image-based race probabilities. We match Zocdoc profiles to our physician sample using first name, last name, and zip code. For consistency, we harmonize race categories across methods, consolidating API and Asian into Asian, renaming Latino/Hispanic to Hispanic, and combining Indian and Middle Eastern into Other.
+
+\paragraph{Ensemble prediction.} We aggregate these individual predictions using a random-forest classifier (Ranger package). The ``Full'' model uses all three sources and attains 89\% overall accuracy for approximately 58,000 physicians. The ``Name Based'' model uses only NamePrism and WRU, reaching 82\% accuracy for nearly 1 million physicians. The tradeoff is accuracy versus coverage. We use the Full model when all three inputs are available and fall back to the Name Based model otherwise.
+
+\paragraph{Validation.} We validate predictions against verified race information from Florida voter files, Texas medical-license records, and self-reported Zocdoc profiles, matched to our physician sample by name and zip code. Table~\ref{tab:accuracy-methods} reports overall accuracy by method. Both random-forest ensembles outperform any individual classifier. Table~\ref{tab:ppv-methods} reports precision (positive predictive value) by race category. The Full model achieves the highest precision for Black and White physicians, while facial recognition alone is more precise for Asian and Hispanic physicians, reflecting the additional signal in profile photos for these groups. Table~\ref{tab:conf-all} presents confusion matrices for the two ensemble models.
+
+The primary measurement concern for our analysis is whether race prediction errors are correlated with the referral covariates (practice affiliation, distance, gender). Because our classifiers rely on names and photos rather than practice or geographic information, prediction errors are unlikely to be systematically related to the organizational and spatial variables that drive our main results. Race concordance is imprecisely estimated in all three specialties, which is consistent with some degree of measurement error in the race variable.
+
+
 \section{Progressive Specifications}
 \label{sec:progressive}
 
@@ -74,19 +88,11 @@ Tables~\ref{tab:or-progressive} and \ref{tab:mfx-progressive} present the full s
 \section{Link-level Conditional Logit}
 \label{sec:linkcl}
 
-Tables~\ref{tab:linkcl-ortho}, \ref{tab:linkcl-cardio}, and \ref{tab:linkcl-derm} present estimates from a conditional logit estimation for each specialty, analogous to Table 5 in \cite{zeltzer2020}. The dependent variable is a link dummy, set to one if a referral link is present and 0 otherwise, and covariates include demographic concordance, practice and geographic proximity, and year and PCP fixed effects. Following \cite{zeltzer2020}, this analysis does not include specialist fixed effects.
+Table~\ref{tab:linkcl-all} presents estimates from a conditional logit estimation for each specialty, analogous to Table 5 in \cite{zeltzer2020}. The dependent variable is a link dummy, set to one if a referral link is present and 0 otherwise, and covariates include demographic concordance, practice and geographic proximity, and year and PCP fixed effects. Following \cite{zeltzer2020}, this analysis does not include specialist fixed effects.
 
-Many of the estimates are broadly consistent with the results from \cite{zeltzer2020}. For example, in both sets of results, organisational proximity dominates: sharing a practice increases the probability of a link by 11--15 percentage points, close to the 30\% odds-ratio effect ($\exp(1.346)-1$) in Table 5 of \cite{zeltzer2020}. Distance enters with the expected negative sign (about --1.2 pp per mile within 50 miles), matching the quadratic distance term in \cite{zeltzer2020}, and experience, medical-school concordance, and specialist sex have only minor effects in both studies. Gender concordance, however, is economically small and imprecise in our orthopedic data, whereas \cite{zeltzer2020} finds a positive 10\% odds ratio. One possible explanation is the limited gender variation among orthopedic surgeons (98\% male), though gender concordance is also small in dermatology, where the specialist pool is roughly gender-balanced.
+Many of the estimates are broadly consistent with the results from \cite{zeltzer2020}. For example, in both sets of results, organizational proximity dominates. Sharing a practice increases the probability of a link by 7--11 percentage points, close to the 30\% odds-ratio effect ($\exp(1.346)-1$) in Table 5 of \cite{zeltzer2020}. Distance enters with the expected negative sign, matching the quadratic distance term in \cite{zeltzer2020}, and experience, medical-school concordance, and specialist sex have only minor effects in both studies. Gender concordance, however, is economically small and imprecise in our orthopedic data, whereas \cite{zeltzer2020} finds a positive 10\% odds ratio. One possible explanation is the limited gender variation among orthopedic surgeons (98\% male), though gender concordance is also small in dermatology, where the specialist pool is roughly gender-balanced.
 
-Note that the specification without practice affiliation and distance (column 1 in the orthopedic sample) yields a negative pseudo-$R^2$, indicating that demographic concordance alone fits worse than the null model. This further underscores the dominance of organizational and geographic factors in referral formation.
-
-
-\section{Link Decomposition}
-\label{sec:link-decomp}
-
-A potential concern with our cumulative-window dynamics analysis is compositional dilution. As the post-move window widens, the denominator grows as new links are added, mechanically pushing concordance shares toward population averages even if PCP behavior is unchanged. To address this, Table~\ref{tab:decomp} decomposes each window's links into persisting ties (present in the previous window) and newly formed ties.
-
-If attenuation were purely mechanical, newly formed links in later windows would show concordance rates similar to persisting links. Instead, across all three specialties, new links exhibit progressively lower same-practice rates and modestly lower demographic concordance compared to persisting links. This pattern is consistent with genuine behavioral change rather than compositional dilution.
+Note that the specification without practice affiliation and distance (column (1) in the orthopedic sample) yields a negative pseudo-$R^2$, indicating that demographic concordance alone fits worse than the null model. This further underscores the dominance of organizational and geographic factors in referral formation.
 
 
 \section{Robustness: Excluding Practice Affiliation}
@@ -95,6 +101,14 @@ If attenuation were purely mechanical, newly formed links in later windows would
 The large marginal effect of practice affiliation raises the question of whether same-practice referrals reflect physician choice or are partly mechanical consequences of employment structure. To isolate the ``reaching outside the practice'' decision, Table~\ref{tab:noprac} presents the Jochmans two-stage estimates after dropping practice affiliation from the covariates entirely.
 
 Across all three specialties, the remaining coefficients (gender concordance, distance, race, age, experience) are qualitatively similar to the full specification, though magnitudes shift modestly as variation previously absorbed by practice affiliation is redistributed. This suggests that the demographic and geographic determinants of referral formation are not artifacts of collinearity with practice affiliation.
+
+
+\section{Link Decomposition}
+\label{sec:link-decomp}
+
+A potential concern with our cumulative-window dynamics analysis is compositional dilution. As the post-move window widens, the denominator grows as new links are added, mechanically pushing concordance shares toward population averages even if PCP behavior is unchanged. To address this, Table~\ref{tab:decomp} decomposes each window's links into persisting ties (present in the previous window) and newly formed ties.
+
+If attenuation were purely mechanical, newly formed links in later windows would show concordance rates similar to persisting links. Instead, across all three specialties, new links exhibit progressively lower same-practice rates and modestly lower demographic concordance compared to persisting links. This pattern is consistent with genuine behavioral change rather than compositional dilution.
 
 
 \section{Period-Specific Estimation}
@@ -113,20 +127,6 @@ To assess the quality implications of our estimated referral preferences, we gra
 This exercise parallels earlier work that attaches performance measures to observed physician networks \citep{barnett2012mc, landon_using_2013, zeltzer2020}. Table~\ref{tab:welfare-hrr} summarizes the results. The quality-reallocation effects are generally modest. Practice affiliation and geographic distance produce the largest mean effects (0.27 and 0.29 fewer adverse outcomes per 1,000 referrals when each is zeroed out), while gender, race, age, and experience concordance produce mean effects near zero. Distance exhibits the widest cross-market dispersion (standard deviation of 4.65), with effects ranging from a worsening of roughly 4 adverse outcomes per 1,000 referrals at the 10th percentile to an improvement of more than 4 at the 90th percentile. Practice affiliation is more concentrated, with zero effect at both the 25th and 75th percentiles but a heavier right tail. These results suggest that the quality losses from homophily-driven referrals are small on average, though they may matter in specific local markets.
 
 
-\section{Race Predictions}
-\label{sec:race}
-
-Physician race is not available in national administrative data. We impute race by combining three complementary classifiers and aggregating their predictions with a random-forest ensemble. This section summarizes the methods and their accuracy; full implementation details are available from the authors.
-
-\paragraph{Individual classifiers.} We obtain race probabilities from three sources. First, NamePrism generates name-based probabilities using name embeddings trained on 57 million contact lists. Second, the WRU (``Who are You'') algorithm applies Bayes' rule to combine surname, first name, and geographic location with census-tract demographics, using the fully Bayesian Improved Surname Geocoding (fBISG) methodology. Third, we scrape physician profile photos from Zocdoc and apply the DeepFace neural network to generate image-based race probabilities. We match Zocdoc profiles to our physician sample using first name, last name, and zip code. For consistency, we harmonize race categories across methods, consolidating API and Asian into Asian, renaming Latino/Hispanic to Hispanic, and combining Indian and Middle Eastern into Other.
-
-\paragraph{Ensemble prediction.} We aggregate these individual predictions using a random-forest classifier (Ranger package). The ``Full'' model uses all three sources and attains 89\% overall accuracy for approximately 58,000 physicians. The ``Name Based'' model uses only NamePrism and WRU, reaching 82\% accuracy for nearly 1 million physicians. The tradeoff is accuracy versus coverage. We use the Full model when all three inputs are available and fall back to the Name Based model otherwise.
-
-\paragraph{Validation.} We validate predictions against verified race information from Florida voter files, Texas medical-license records, and self-reported Zocdoc profiles, matched to our physician sample by name and zip code. Table~\ref{tab:accuracy-methods} reports overall accuracy by method. Both random-forest ensembles outperform any individual classifier. Table~\ref{tab:ppv-methods} reports precision (positive predictive value) by race category. The Full model achieves the highest precision for Black and White physicians, while facial recognition alone is more precise for Asian and Hispanic physicians, reflecting the additional signal in profile photos for these groups. Tables~\ref{tab:conf_full} and \ref{tab:conf_name} present confusion matrices for the two ensemble models.
-
-The primary measurement concern for our analysis is whether race prediction errors are correlated with the referral covariates (practice affiliation, distance, gender). Because our classifiers rely on names and photos rather than practice or geographic information, prediction errors are unlikely to be systematically related to the organizational and spatial variables that drive our main results. Race concordance is imprecisely estimated in all three specialties, which is consistent with some degree of measurement error in the race variable.
-
-
 \pagebreak
 \bibliography{BibTeX_Library}
 
@@ -136,47 +136,20 @@ The primary measurement concern for our analysis is whether race prediction erro
 \clearpage
 \section*{Figures and Tables}
 
-%%% SIMULATION TABLES
+%%% SIMULATION TABLE (combined 3-panel)
 
 \clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Monte Carlo Validation -- Baseline}\footnote{Results from 100 Monte Carlo replications. True parameters are $\beta_{\text{practice}} = 2.5$, $\beta_{\text{gender}} = 0.5$, $\beta_{\text{distance}} = -0.1$. ``Naive'' is a conditional logit with PCP fixed effects only. ``Two-stage'' uses the Jochmans quadruple-based estimator followed by fixed-effect recovery. Brackets report standard deviations across replications. Fixed effects are correlated with covariates (centrality loading = 0.5, gender loading = 0.3, FE standard deviation = 1.0).}}
+\caption[caption]{\textbf{Monte Carlo Validation}\footnote{Results from 100 Monte Carlo replications in each panel. True parameters are $\beta_{\text{practice}} = 2.5$, $\beta_{\text{gender}} = 0.5$, $\beta_{\text{distance}} = -0.1$. ``Naive'' is a conditional logit with PCP fixed effects only. ``Two-stage'' uses the Jochmans quadruple-based estimator followed by fixed-effect recovery. Brackets report standard deviations across replications. Panel A is the baseline (centrality loading = 0.5, gender loading = 0.3, FE standard deviation = 1.0). Panel B increases fixed-effect--covariate correlation (centrality loading = 1.5, gender loading = 1.0, FE standard deviation = 1.0). Panel C further increases the fixed-effect variance (centrality loading = 1.5, gender loading = 1.0, FE standard deviation = 2.0).}}
 \centerline{%
-    \input{../results/tables/app_simulation_baseline.tex}
+    \input{../results/tables/app_simulation_all.tex}
 }
-\label{tab:sim-baseline}
+\label{tab:sim-all}
 \end{minipage}
 \end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Monte Carlo Validation -- Higher Correlation}\footnote{Same design as Table \ref{tab:sim-baseline} but with stronger fixed-effect--covariate correlation (centrality loading = 1.5, gender loading = 1.0, FE standard deviation = 1.0).}}
-\centerline{%
-    \input{../results/tables/app_simulation_higher_correlation.tex}
-}
-\label{tab:sim-highcorr}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Monte Carlo Validation -- Higher Correlation and Variance}\footnote{Same design as Table \ref{tab:sim-baseline} but with stronger fixed-effect--covariate correlation and larger fixed-effect variance (centrality loading = 1.5, gender loading = 1.0, FE standard deviation = 2.0).}}
-\centerline{%
-    \input{../results/tables/app_simulation_higher_corr___var.tex}
-}
-\label{tab:sim-highvar}
-\end{minipage}
-\end{table}
-
 
 
 %%% CONVERGENCE TABLE
@@ -195,87 +168,94 @@ The primary measurement concern for our analysis is whether race prediction erro
 \end{table}
 
 
-%%% PROGRESSIVE SPECIFICATION TABLES
+%%% RACE PREDICTION TABLES
 
 \clearpage
-\begin{table}[!h]
+\begin{table}[htbp]
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Progressive Specifications -- Odds Ratios}\footnote{Odds ratios from the \cite{jochmans2018} quadruple-based estimator across three progressive specifications for each specialty. Standard errors (in parentheses) are computed via the delta method from HRR-clustered standard errors on the log-odds scale. Columns (3), (6), and (9) correspond to the full specification reported in the main text.}}
+\centering
+\caption[caption]{\textbf{Random Forest Accuracy}\footnote{Accuracy rates and sample size are shown for each prediction method. Accuracy is calculated as the number of correct predictions divided by the total number of predictions.}}
+\label{tab:accuracy-methods}
+\centerline{%
+    \input{../results/tables/app_method_accuracy}
+}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Prediction Precision}\footnote{Positive Prediction Value for each race is shown for each prediction method. Positive Prediction Value is calculated as the number of true positive divided by the sum of true positives and false positives. In other words, it is the correct predictions of race $i$ divided by all times race $i$ was predicted.}}
+\label{tab:ppv-methods}
+\centerline{%
+    \input{../results/tables/app_race_accuracy}
+}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\centering
+\caption[caption]{\textbf{Confusion Matrices for Random Forest Ensembles}\footnote{Rows represent the true race and columns represent the predicted race. Each cell in row $i$ and column $j$ shows the number of observations of true race $i$ predicted to be of race $j$.}}
+\label{tab:conf-all}
+\centerline{%
+    \input{../results/tables/app_conf_all}
+}
+\end{minipage}
+\end{table}
+
+
+%%% PROGRESSIVE SPECIFICATION TABLES (landscape)
+
+\begin{landscape}
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{9in}
+\caption[caption]{\textbf{Progressive Specifications -- Odds Ratios}\footnote{Odds ratios from the \cite{jochmans2018} quadruple-based estimator across four progressive specifications for each specialty. Standard errors (in parentheses) are computed via the delta method from HRR-clustered standard errors on the log-odds scale. Columns (4), (8), and (12) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_or_progressive.tex}
 }
 \label{tab:or-progressive}
 \end{minipage}
 \end{table}
+\end{landscape}
 
-\clearpage
+\begin{landscape}
 \begin{table}[!h]
 \centering
 \footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across three progressive specifications for each specialty. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (3), (6), and (9) correspond to the full specification reported in the main text.}}
+\begin{minipage}[h]{9in}
+\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across four progressive specifications for each specialty. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (4), (8), and (12) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_mfx_progressive.tex}
 }
 \label{tab:mfx-progressive}
 \end{minipage}
 \end{table}
+\end{landscape}
 
 
-%%% LINK-LEVEL CONDITIONAL LOGIT TABLE
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Link-level Conditional Logistic Regression -- Orthopedic Surgery}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
-\centerline{%
-    \input{../results/tables/app_logit_race_mfx_ortho.tex}
-}
-\label{tab:linkcl-ortho}
-\end{minipage}
-\end{table}
-
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Link-level Conditional Logistic Regression -- Cardiology}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
-\centerline{%
-    \input{../results/tables/app_logit_race_mfx_cardioem.tex}
-}
-\label{tab:linkcl-cardio}
-\end{minipage}
-\end{table}
-
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Link-level Conditional Logistic Regression -- Dermatology}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020}. Standard errors are robust to heteroskedasticity.}}
-\centerline{%
-    \input{../results/tables/app_logit_race_mfx_derm.tex}
-}
-\label{tab:linkcl-derm}
-\end{minipage}
-\end{table}
-
-
-%%% LINK DECOMPOSITION TABLE
+%%% LINK-LEVEL CONDITIONAL LOGIT (combined 9-col)
 
 \clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Link Decomposition}\footnote{For each cumulative window $k = 2, \ldots, 4$, referral links are classified as ``persisting'' (present in window $k-1$) or ``new'' (not present in $k-1$). Year 1 links are all new by definition. Columns report the share of links matching on each attribute and mean distance. Results shown for each specialty.}}
+\caption[caption]{\textbf{Link-level Conditional Logistic Regression}\footnote{Marginal effects from a logistic regression following \cite{zeltzer2020} for each specialty. For each specialty, columns (1)--(3) build up the covariate set. Standard errors are robust to heteroskedasticity.}}
 \centerline{%
-    \input{../results/tables/app_link_decomposition_all.tex}
+    \input{../results/tables/app_logit_race_mfx_all.tex}
 }
-\label{tab:decomp}
+\label{tab:linkcl-all}
 \end{minipage}
 \end{table}
 
@@ -296,13 +276,30 @@ The primary measurement concern for our analysis is whether race prediction erro
 \end{table}
 
 
-%%% PERIOD-SPECIFIC FIGURE
+%%% LINK DECOMPOSITION TABLE
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Link Decomposition}\footnote{For each cumulative window $k = 2, \ldots, 4$, referral links are classified as ``persisting'' (present in window $k-1$) or ``new'' (not present in $k-1$). Year 1 links are all new by definition. Columns report the share of links matching on each attribute and mean distance. Results shown for each specialty.}}
+\centerline{%
+    \input{../results/tables/app_link_decomposition_all.tex}
+}
+\label{tab:decomp}
+\end{minipage}
+\end{table}
+
+
+%%% PERIOD-SPECIFIC FIGURE (centerline)
 
 \clearpage
 \begin{figure}[p]
 \centering
 \begin{minipage}[h]{6in}
 \caption[caption]{Period-Specific Marginal Effects\footnote{Average marginal effects from separate two-stage estimates for each individual post-move year (non-cumulative). Stage 1 estimates structural coefficients via the \cite{jochmans2018} estimator; Stage 2 recovers doctor and specialist fixed effects. Vertical bands are 95\% confidence intervals.}}
+\centerline{%
 \begin{tabular}{c}
 \includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_ortho.png} \\
 (a) Orthopedic Surgery \\[2pt]
@@ -311,6 +308,7 @@ The primary measurement concern for our analysis is whether race prediction erro
 \includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_derm.png} \\
 (c) Dermatology
 \end{tabular}
+}
 \label{fig:period}
 \end{minipage}
 \end{figure}
@@ -328,57 +326,6 @@ The primary measurement concern for our analysis is whether race prediction erro
     \input{../results/tables/welfare_summary_ortho.tex}
 }
 \label{tab:welfare-hrr}
-\end{minipage}
-\end{table}
-
-
-%%% RACE PREDICTION TABLES
-
-\clearpage
-\begin{table}[htbp]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\centering
-\caption[caption]{\textbf{Random Forest Accuracy}\footnote{Accuracy rates and sample size are shown for each prediction method. Accuracy is calculated as the number of correct predictions divided by the total number of predictions.}}
-\label{tab:accuracy-methods}
-\input{../results/tables/app_method_accuracy}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[htbp]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\centering
-\caption[caption]{\textbf{Prediction Precision}\footnote{Positive Prediction Value for each race is shown for each prediction method. Positive Prediction Value is calculated as the number of true positive divided by the sum of true positives and false positives. In other words, it is the correct predictions of race $i$ divided by all times race $i$ was predicted.}}
-\label{tab:ppv-methods}
-\input{../results/tables/app_race_accuracy}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[htbp]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\centering
-\caption[caption]{\textbf{Confusion Matrix for Full Random Forest}\footnote{The rows in this matrix represent the true race while columns represent the race predicted by the Full random forest model. Each cell in row $i$ and column $j$ shows the number of observations of true race $i$ that were predicted to be of race $j$.}}
-\label{tab:conf_full}
-\input{../results/tables/app_conf_full}
-\end{minipage}
-\end{table}
-
-\clearpage
-\begin{table}[htbp]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\centering
-\caption[caption]{\textbf{Confusion Matrix for Name Based Random Forest}\footnote{The rows in this matrix represent the true race while columns represent the race predicted by the Name Based random forest model. Each cell in row $i$ and column $j$ shows the number of observations of true race $i$ that were predicted to be of race $j$.}}
-\label{tab:conf_name}
-\input{../results/tables/app_conf_name}
 \end{minipage}
 \end{table}
 

@@ -440,30 +440,129 @@ writeLines(conv_combined, "results/tables/app_convergence_all.tex")
 
 
 # ============================================================
-# 12. Appendix: Link-level conditional logit — stacked or 9 cols
+# 12. Appendix: Link-level conditional logit — 9 cols side-by-side
 # ============================================================
 
-linkcl_panels <- map(specs, function(s) {
-  body <- read_tabular_body(sprintf("results/tables/app_logit_race_mfx_%s.tex", s))
-  c(sprintf("\\addlinespace[0.5em]"),
-    sprintf("\\multicolumn{4}{l}{\\textbf{%s}}\\\\", spec_labels[s]),
-    body)
-}) %>% unlist()
+# Parse each per-specialty file into a list of (label, cells) rows.
+# All three files have the same row order by construction.
+parse_linkcl <- function(path) {
+  lines <- readLines(path)
+  start <- grep("\\\\midrule", lines)[1]
+  end   <- grep("\\\\bottomrule", lines)[1]
+  body  <- lines[(start + 1):(end - 1)]
+  # Drop internal \midrule separators
+  body  <- body[!grepl("^\\s*\\\\midrule", body)]
+  body  <- body[nchar(trimws(body)) > 0]
+  map(body, function(line) {
+    stripped <- trimws(gsub("\\\\\\\\", "", line))
+    parts <- trimws(strsplit(stripped, "&")[[1]])
+    list(label = parts[1], cells = parts[-1])
+  })
+}
 
-# Read header from ortho version (skip \begin{tabular} and any blank lines before it)
-linkcl_header <- readLines("results/tables/app_logit_race_mfx_ortho.tex")
-linkcl_header_begin <- grep("\\\\begin\\{tabular\\}", linkcl_header)[1] + 1
-linkcl_header_end <- grep("\\\\midrule", linkcl_header)[1]
-linkcl_header_lines <- linkcl_header[linkcl_header_begin:linkcl_header_end]
+linkcl_ortho  <- parse_linkcl("results/tables/app_logit_race_mfx_ortho.tex")
+linkcl_cardio <- parse_linkcl("results/tables/app_logit_race_mfx_cardioem.tex")
+linkcl_derm   <- parse_linkcl("results/tables/app_logit_race_mfx_derm.tex")
+
+n_rows <- length(linkcl_ortho)
+linkcl_rows <- map_chr(seq_len(n_rows), function(i) {
+  lab <- linkcl_ortho[[i]]$label
+  cells <- c(linkcl_ortho[[i]]$cells,
+             linkcl_cardio[[i]]$cells,
+             linkcl_derm[[i]]$cells)
+  paste0(lab, " & ", paste(cells, collapse = " & "), "\\\\")
+})
+
+# Insert \midrule before "Year FE" and between FE block and Observations block
+midrule_before <- which(sapply(linkcl_ortho, function(r) grepl("^Year FE", r$label)))[1]
+obs_start      <- which(sapply(linkcl_ortho, function(r) grepl("^Observations", r$label)))[1]
+
+linkcl_body <- c(
+  linkcl_rows[1:(midrule_before - 1)],
+  "\\midrule",
+  linkcl_rows[midrule_before:(obs_start - 1)],
+  "\\midrule\\\\",
+  linkcl_rows[obs_start:n_rows]
+)
+
+linkcl_col_nums <- paste(paste0("(", 1:9, ")"), collapse = " & ")
 
 linkcl_combined <- c(
-  "\\begin{tabular}{lrrr}",
-  linkcl_header_lines,
-  linkcl_panels,
+  "\\begin{tabular}{lrrrrrrrrr}",
+  "\\toprule",
+  "\\multicolumn{1}{c}{ } & \\multicolumn{3}{c}{Ortho} & \\multicolumn{3}{c}{Cardio} & \\multicolumn{3}{c}{Derm} \\\\",
+  "\\cmidrule(l{3pt}r{3pt}){2-4} \\cmidrule(l{3pt}r{3pt}){5-7} \\cmidrule(l{3pt}r{3pt}){8-10}",
+  paste0(" & ", linkcl_col_nums, "\\\\"),
+  "\\midrule",
+  linkcl_body,
   "\\bottomrule",
   "\\end{tabular}"
 )
 writeLines(linkcl_combined, "results/tables/app_logit_race_mfx_all.tex")
+
+
+# ============================================================
+# 13. Appendix: Monte Carlo simulation — 3 stacked panels
+# ============================================================
+
+sim_files <- c(baseline = "app_simulation_baseline.tex",
+               highcorr = "app_simulation_higher_correlation.tex",
+               highvar  = "app_simulation_higher_corr___var.tex")
+sim_labels <- c(baseline = "Panel A. Baseline",
+                highcorr = "Panel B. Higher Correlation",
+                highvar  = "Panel C. Higher Correlation and Variance")
+
+sim_panels <- map(names(sim_files), function(k) {
+  body <- read_tabular_body(sprintf("results/tables/%s", sim_files[k]))
+  c(sprintf("\\addlinespace[0.5em]"),
+    sprintf("\\multicolumn{7}{l}{\\textbf{%s}}\\\\", sim_labels[k]),
+    body)
+}) %>% unlist()
+
+sim_combined <- c(
+  "\\begin{tabular}{lrrrrrr}",
+  "\\toprule",
+  "\\multicolumn{1}{c}{ } & \\multicolumn{3}{c}{$\\beta$ (log-odds)} & \\multicolumn{3}{c}{Avg. marginal effects} \\\\",
+  "\\cmidrule(l{3pt}r{3pt}){2-4} \\cmidrule(l{3pt}r{3pt}){5-7}",
+  " & True & Naive & Two-stage & True & Naive & Two-stage\\\\",
+  "\\midrule",
+  sim_panels,
+  "\\bottomrule",
+  "\\end{tabular}"
+)
+writeLines(sim_combined, "results/tables/app_simulation_all.tex")
+
+
+# ============================================================
+# 14. Appendix: Confusion matrices — 2 stacked panels
+# ============================================================
+
+parse_conf <- function(path) {
+  lines <- readLines(path)
+  hl_idx <- grep("\\\\hline", lines)
+  # Body is between the 2nd and 3rd \hline
+  body <- lines[(hl_idx[2] + 1):(hl_idx[3] - 1)]
+  trimws(body)
+}
+
+conf_full <- parse_conf("results/tables/app_conf_full.tex")
+conf_name <- parse_conf("results/tables/app_conf_name.tex")
+
+conf_combined <- c(
+  "\\begin{tabular}{lrrrrr}",
+  "\\toprule",
+  " & Asian & Black & Hispanic & Other & White\\\\",
+  "\\midrule",
+  "\\addlinespace[0.5em]",
+  "\\multicolumn{6}{l}{\\textbf{Panel A. Full Random Forest}}\\\\",
+  conf_full,
+  "\\addlinespace[0.5em]",
+  "\\multicolumn{6}{l}{\\textbf{Panel B. Name Based Random Forest}}\\\\",
+  conf_name,
+  "\\bottomrule",
+  "\\end{tabular}"
+)
+writeLines(conf_combined, "results/tables/app_conf_all.tex")
 
 
 message("All combined tables written to results/tables/")

@@ -1,81 +1,31 @@
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrrrrrrr}
 \toprule
-  & (1) & (2) & (3)\\
+\multicolumn{1}{c}{ } & \multicolumn{3}{c}{Ortho} & \multicolumn{3}{c}{Cardio} & \multicolumn{3}{c}{Derm} \\
+\cmidrule(l{3pt}r{3pt}){2-4} \cmidrule(l{3pt}r{3pt}){5-7} \cmidrule(l{3pt}r{3pt}){8-10}
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9)\\
 \midrule
-\addlinespace[0.5em]
-\multicolumn{4}{l}{\textbf{Orthopedic Surgery}}\\
-Same gender & -0.000 & 0.002 & 0.002\\
- & (0.005) & (0.005) & \vphantom{1} (0.005)\\
-Male specialist & 0.005 & 0.004 & 0.004\\
- & (0.005) & (0.005) & (0.005)\\
-Specialist experience (10 years) & -0.001 & -0.000 & 0.001\\
- & (0.001) & (0.001) & (0.001)\\
-Same practice group &  & 0.066 & 0.066\\
- &  & (0.013) & (0.013)\\
-Same race & 0.007 & 0.006 & 0.006\\
- & (0.003) & (0.003) & (0.003)\\
-Distance (miles) &  & -0.002 & -0.002\\
- &  & (0.000) & (0.000)\\
-Similar age &  &  & -0.000\\
- &  &  & \vphantom{1} (0.000)\\
-Similar experience &  &  & -0.000\\
- &  &  & (0.000)\\
+Same gender & -0.000 & 0.002 & 0.002 & 0.002 & 0.002 & 0.002 & 0.004 & 0.003 & 0.003\\
+ & (0.005) & (0.005) & \vphantom{1} (0.005) & (0.001) & (0.001) & \vphantom{1} (0.001) & (0.001) & (0.001) & \vphantom{2} (0.001)\\
+Male specialist & 0.005 & 0.004 & 0.004 & 0.001 & 0.002 & 0.002 & 0.010 & 0.010 & 0.010\\
+ & (0.005) & (0.005) & (0.005) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & \vphantom{1} (0.001)\\
+Specialist experience (10 years) & -0.001 & -0.000 & 0.001 & -0.002 & -0.002 & -0.002 & -0.004 & -0.003 & -0.003\\
+ & (0.001) & (0.001) & (0.001) & (0.000) & (0.000) & \vphantom{1} (0.000) & (0.000) & (0.000) & (0.000)\\
+Same practice group &  & 0.066 & 0.066 &  & 0.075 & 0.075 &  & 0.105 & 0.105\\
+ &  & (0.013) & (0.013) &  & (0.005) & (0.005) &  & (0.007) & (0.008)\\
+Same race & 0.007 & 0.006 & 0.006 & 0.002 & 0.001 & 0.001 & 0.002 & 0.002 & 0.002\\
+ & (0.003) & (0.003) & (0.003) & (0.000) & (0.000) & (0.000) & (0.001) & (0.001) & (0.001)\\
+Distance (miles) &  & -0.002 & -0.002 &  & -0.001 & -0.001 &  & -0.003 & -0.003\\
+ &  & (0.000) & (0.000) &  & (0.000) & (0.000) &  & (0.000) & (0.000)\\
+Similar age &  &  & -0.000 &  &  & -0.000 &  &  & 0.000\\
+ &  &  & \vphantom{1} (0.000) &  &  & \vphantom{1} (0.000) &  &  & \vphantom{1} (0.000)\\
+Similar experience &  &  & -0.000 &  &  & 0.000 &  &  & -0.000\\
+ &  &  & (0.000) &  &  & (0.000) &  &  & (0.000)\\
 \midrule
-Year FE & Yes & Yes & Yes\\
-Doctor FE & Yes & Yes & Yes\\
-Specialist FE & No & No & No\\
+Year FE & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes\\
+Doctor FE & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes\\
+Specialist FE & No & No & No & No & No & No & No & No & No\\
 \midrule\\
-Observations & 67,899 & 66,649 & 66,617\\
-Pseudo-$R^2$ & -0.017 & 0.14 & 0.14\\
-\addlinespace[0.5em]
-\multicolumn{4}{l}{\textbf{Cardiology}}\\
-Same gender & 0.002 & 0.002 & 0.002\\
- & (0.001) & (0.001) & \vphantom{1} (0.001)\\
-Male specialist & 0.001 & 0.002 & 0.002\\
- & (0.001) & (0.001) & (0.001)\\
-Specialist experience (10 years) & -0.002 & -0.002 & -0.002\\
- & (0.000) & (0.000) & \vphantom{1} (0.000)\\
-Same practice group &  & 0.075 & 0.075\\
- &  & (0.005) & (0.005)\\
-Same race & 0.002 & 0.001 & 0.001\\
- & (0.000) & (0.000) & (0.000)\\
-Distance (miles) &  & -0.001 & -0.001\\
- &  & (0.000) & (0.000)\\
-Similar age &  &  & -0.000\\
- &  &  & \vphantom{1} (0.000)\\
-Similar experience &  &  & 0.000\\
- &  &  & (0.000)\\
-\midrule
-Year FE & Yes & Yes & Yes\\
-Doctor FE & Yes & Yes & Yes\\
-Specialist FE & No & No & No\\
-\midrule\\
-Observations & 632,359 & 608,009 & 604,620\\
-Pseudo-$R^2$ & 0.06 & 0.21 & 0.21\\
-\addlinespace[0.5em]
-\multicolumn{4}{l}{\textbf{Dermatology}}\\
-Same gender & 0.004 & 0.003 & 0.003\\
- & (0.001) & (0.001) & \vphantom{2} (0.001)\\
-Male specialist & 0.010 & 0.010 & 0.010\\
- & (0.001) & (0.001) & \vphantom{1} (0.001)\\
-Specialist experience (10 years) & -0.004 & -0.003 & -0.003\\
- & (0.000) & (0.000) & (0.000)\\
-Same practice group &  & 0.105 & 0.105\\
- &  & (0.007) & (0.008)\\
-Same race & 0.002 & 0.002 & 0.002\\
- & (0.001) & (0.001) & (0.001)\\
-Distance (miles) &  & -0.003 & -0.003\\
- &  & (0.000) & (0.000)\\
-Similar age &  &  & 0.000\\
- &  &  & \vphantom{1} (0.000)\\
-Similar experience &  &  & -0.000\\
- &  &  & (0.000)\\
-\midrule
-Year FE & Yes & Yes & Yes\\
-Doctor FE & Yes & Yes & Yes\\
-Specialist FE & No & No & No\\
-\midrule\\
-Observations & 340,682 & 329,807 & 328,082\\
-Pseudo-$R^2$ & 0.066 & 0.2 & 0.2\\
+Observations & 67,899 & 66,649 & 66,617 & 632,359 & 608,009 & 604,620 & 340,682 & 329,807 & 328,082\\
+Pseudo-$R^2$ & -0.017 & 0.14 & 0.14 & 0.06 & 0.21 & 0.21 & 0.066 & 0.2 & 0.2\\
 \bottomrule
 \end{tabular}
