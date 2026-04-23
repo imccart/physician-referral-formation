@@ -116,7 +116,7 @@ source("code/analysis/build_peer_referrals.R")
 source("code/analysis/1_descriptive_stats.R")
 source("code/analysis/2_logit_twfe.R")
 
-write_csv(mfx3 %>% mutate(specialty = current_specialty),
+write_csv(mfx4 %>% mutate(specialty = current_specialty),
           sprintf("results/tables/mfx_%s.csv", current_specialty))
 
 source("code/analysis/app_quad_comparison.R")
@@ -125,10 +125,10 @@ source("code/analysis/app_convergence.R")
 
 rm(list = intersect(ls(), c(
   "df_full_referrals", "df_logit", "df_logit_twfe", "df_initial_referrals",
-  "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4",
+  "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4", "logit_twfe5",
   "logit_race1", "logit_race2", "logit_race3",
-  "stage2_1", "stage2_2", "stage2_3", "stage2_4",
-  "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4")))
+  "stage2_1", "stage2_2", "stage2_3", "stage2_4", "stage2_5",
+  "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4", "mfx5")))
 gc()
 
 source("code/analysis/3_referral_windows.R")

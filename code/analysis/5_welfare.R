@@ -8,9 +8,9 @@ current_specialty <- "ortho"
 covars <- c("same_sex", "same_prac", "diff_dist",
             "same_race", "diff_age", "diff_gradyear")
 
-## Read estimates from spec 3 (without peer referrals — the welfare-relevant spec)
+## Read estimates from spec 4 (race + demographics, without peer referrals — the welfare-relevant spec)
 est <- read_csv("results/tables/estimates_ortho.csv", show_col_types = FALSE) %>%
-  filter(spec == 3)
+  filter(spec == 4)
 beta_hat <- setNames(est$beta, est$term)
 
 ## Read ortho choice set data

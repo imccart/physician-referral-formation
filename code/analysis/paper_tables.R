@@ -114,8 +114,8 @@ var_labels <- c(same_sex = "Same gender", same_prac = "Same practice group",
 fmt <- function(x) ifelse(is.na(x), " ", sprintf("%.3f", x))
 fmt_se_fn <- function(x) ifelse(is.na(x), " ", paste0("(", sprintf("%.3f", abs(x)), ")"))
 
-# Full specification only (spec 4 = includes peer referrals)
-full <- est %>% filter(spec == 4)
+# Full specification only (spec 5 = includes peer referrals)
+full <- est %>% filter(spec == 5)
 
 main_rows <- character(0)
 for (v in vars_order) {
@@ -181,7 +181,7 @@ writeLines(main_table, "results/tables/logit_twfe_main.tex")
 # 4. Progressive specs — OR (12 cols, appendix)
 # ============================================================
 
-n_specs <- 4
+n_specs <- 5
 prog_or_rows <- character(0)
 for (v in vars_order) {
   vals <- map_chr(specs, function(s) {
