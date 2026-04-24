@@ -9,7 +9,7 @@
 \setlength{\droptitle}{-50pt}
 \begin{document}
 
-\title{Formation of Physician Referral Networks: Drivers and Potential Consequences \\
+\title{The Formation of Physician Referral Networks: Evidence from Physician Movers \\
 SUPPLEMENTAL APPENDIX}
 \author{%
   \setlength{\tabcolsep}{2em}           % horizontal gap between columns
@@ -70,7 +70,7 @@ Because marginal effects are computed only on the non-separated subsample (where
 
 Physician race is not available in national administrative data. We impute race by combining three complementary classifiers and aggregating their predictions with a random-forest ensemble. This section summarizes the methods and their accuracy; full implementation details are available from the authors.
 
-\paragraph{Individual classifiers.} We obtain race probabilities from three sources. First, NamePrism generates name-based probabilities using name embeddings trained on 57 million contact lists. Second, the WRU (``Who are You'') algorithm applies Bayes' rule to combine surname, first name, and geographic location with census-tract demographics, using the fully Bayesian Improved Surname Geocoding (fBISG) methodology. Third, we scrape physician profile photos from Zocdoc and apply the DeepFace neural network to generate image-based race probabilities. We match Zocdoc profiles to our physician sample using first name, last name, and zip code. For consistency, we harmonize race categories across methods, consolidating API and Asian into Asian, renaming Latino/Hispanic to Hispanic, and combining Indian and Middle Eastern into Other.
+\paragraph{Individual classifiers.} We obtain race probabilities from three sources. First, NamePrism generates name-based probabilities using name embeddings trained on 57 million contact lists. Second, the WRU (``Who are You'') algorithm applies Bayes' rule to combine surname, first name, and geographic location with census-tract demographics, using the fully Bayesian Improved Surname Geocoding (fBISG) methodology. Third, we obtain physician profile photos from publicly available Zocdoc profile pages and apply the DeepFace neural network to generate image-based race probabilities. We match Zocdoc profiles to our physician sample using first name, last name, and zip code. For consistency, we harmonize race categories across methods, consolidating API and Asian into Asian, renaming Latino/Hispanic to Hispanic, and combining Indian and Middle Eastern into Other.
 
 \paragraph{Ensemble prediction.} We aggregate these individual predictions using a random-forest classifier (Ranger package). The ``Full'' model uses all three sources and attains 89\% overall accuracy for approximately 58,000 physicians. The ``Name Based'' model uses only NamePrism and WRU, reaching 82\% accuracy for nearly 1 million physicians. The tradeoff is accuracy versus coverage. We use the Full model when all three inputs are available and fall back to the Name Based model otherwise.
 

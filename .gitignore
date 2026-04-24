@@ -42,6 +42,9 @@ CLAUDE.md
 .claude/
 _emails/
 
+# Submission folders (internal; contain cover letters, letterhead, disclosure)
+papers/submissions/
+
 # OS files
 .DS_Store
 Thumbs.db
