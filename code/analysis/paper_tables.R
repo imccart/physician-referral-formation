@@ -105,7 +105,7 @@ est <- map(specs, function(s) {
 }) %>% bind_rows()
 
 vars_order <- c("same_sex", "same_prac", "same_race",
-                "diff_dist", "diff_age", "diff_gradyear", "peer_referrals")
+                "diff_dist", "diff_age", "diff_gradyear")
 var_labels <- c(same_sex = "Same gender", same_prac = "Same practice group",
                 same_race = "Same race", diff_dist = "Distance",
                 diff_age = "Age difference", diff_gradyear = "Experience difference",
@@ -114,8 +114,11 @@ var_labels <- c(same_sex = "Same gender", same_prac = "Same practice group",
 fmt <- function(x) ifelse(is.na(x), " ", sprintf("%.3f", x))
 fmt_se_fn <- function(x) ifelse(is.na(x), " ", paste0("(", sprintf("%.3f", abs(x)), ")"))
 
-# Full specification only (spec 5 = includes peer referrals)
-full <- est %>% filter(spec == 5)
+# Headline specification (spec 4 = demographics + practice + distance).
+# Peer referrals enter only in the dedicated peer-referrals section (Table 6),
+# so they are excluded from vars_order and from both the headline and progressive
+# tables. The progressive ladder below therefore stops at spec 4.
+full <- est %>% filter(spec == 4)
 
 main_rows <- character(0)
 for (v in vars_order) {
@@ -181,7 +184,7 @@ writeLines(main_table, "results/tables/logit_twfe_main.tex")
 # 4. Progressive specs — OR (12 cols, appendix)
 # ============================================================
 
-n_specs <- 5
+n_specs <- 4
 prog_or_rows <- character(0)
 for (v in vars_order) {
   vals <- map_chr(specs, function(s) {

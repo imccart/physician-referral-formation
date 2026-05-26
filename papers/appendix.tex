@@ -82,7 +82,7 @@ The primary measurement concern for our analysis is whether race prediction erro
 \section{Progressive Specifications}
 \label{sec:progressive}
 
-Tables~\ref{tab:or-progressive} and \ref{tab:mfx-progressive} present the full set of progressive specifications across all three specialties. For each specialty, columns (1)--(3) build up the covariate set from a baseline of gender, practice affiliation, and distance through a specification that adds age and experience differences and finally race concordance. The full-specification results (columns 3, 6, and 9) correspond to the odds ratios and marginal effects reported in the main text.
+Tables~\ref{tab:or-progressive} and \ref{tab:mfx-progressive} present the full set of progressive specifications across all three specialties. For each specialty, columns (1)--(4) build up the covariate set from a baseline of gender, practice affiliation, and distance, adding age differences, then experience differences, and finally race concordance. The full-specification results (columns 4, 8, and 12) correspond to the odds ratios and marginal effects reported in the main text.
 
 
 \section{Link-level Conditional Logit}
@@ -220,7 +220,7 @@ This exercise parallels earlier work that attaches performance measures to obser
 \centering
 \scriptsize
 \begin{minipage}[h]{9in}
-\caption[caption]{\textbf{Progressive Specifications -- Odds Ratios}\footnote{Odds ratios from the \cite{jochmans2018} quadruple-based estimator across five progressive specifications for each specialty. Columns (2), (7), and (12) add age only, whereas columns (3), (8), and (13) add both age and experience, permitting a check for collinearity between the two. Standard errors (in parentheses) are computed via the delta method from HRR-clustered standard errors on the log-odds scale. Columns (5), (10), and (15) correspond to the full specification reported in the main text.}}
+\caption[caption]{\textbf{Progressive Specifications -- Odds Ratios}\footnote{Odds ratios from the \cite{jochmans2018} quadruple-based estimator across four progressive specifications for each specialty. Columns (2), (6), and (10) add age only, whereas columns (3), (7), and (11) add both age and experience, permitting a check for collinearity between the two. Standard errors (in parentheses) are computed via the delta method from HRR-clustered standard errors on the log-odds scale. Columns (4), (8), and (12) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_or_progressive.tex}
 }
@@ -234,7 +234,7 @@ This exercise parallels earlier work that attaches performance measures to obser
 \centering
 \scriptsize
 \begin{minipage}[h]{9in}
-\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across five progressive specifications for each specialty. Columns (2), (7), and (12) add age only, whereas columns (3), (8), and (13) add both age and experience, permitting a check for collinearity between the two. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (5), (10), and (15) correspond to the full specification reported in the main text.}}
+\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across four progressive specifications for each specialty. Columns (2), (6), and (10) add age only, whereas columns (3), (7), and (11) add both age and experience, permitting a check for collinearity between the two. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (4), (8), and (12) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_mfx_progressive.tex}
 }
