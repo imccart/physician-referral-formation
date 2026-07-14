@@ -55,10 +55,12 @@ To assess the finite-sample performance of the two-stage estimation procedure de
 Marginal effects show smaller differences across estimators than the $\beta$ coefficients, because the naive estimator's PCP fixed effects partially compensate for the omitted specialist heterogeneity when computing predicted probabilities. Nonetheless, the two-stage procedure consistently produces marginal effects closer to the true values, particularly for distance, where the naive estimator overstates the effect by up to 60\% under higher correlation.
 
 
-\section{Convergence Stability and Non-Separated Subsample}
+\section{Estimation Sample and Fixed-Effect Recovery}
 \label{sec:convergence}
 
-Our two-stage estimation procedure recovers doctor and specialist fixed effects by estimating a logit model with the Jochmans structural index entered as an offset. Because the referral network is sparse (a large share of doctor--specialist pairs in the choice set exhibit no referral), many fixed effects are not separately identified, and the second-stage model does not formally converge. To verify that this non-convergence does not affect our results, we run the second-stage estimation at iteration counts of 10, 25, 50, 100, and 250 and compare the resulting average marginal effects.
+\paragraph{First-stage identifying sample.} The Jochmans quadruple estimator identifies $\beta$ from discordant quadruples, namely pairs of movers who refer to two specialists in opposite directions. Because identification comes only from pairs in which referral choices vary, and referrals are concentrated among organizationally and geographically proximate specialists, the pairs entering the estimation are more likely to be same-practice and, in orthopedic surgery, geographically closer than the full choice set. Table~\ref{tab:quadsample} reports these comparisons. This pattern is inherent to any within-group estimator, which draws identification from observations that exhibit outcome variation, and it does not bias the estimated coefficients. The specialists and PCPs entering the estimation are otherwise similar to those excluded on quality, experience, and demographic composition, so the estimated relationships are not identified from an unrepresentative subpopulation of physicians. The one systematic difference among providers is that included PCPs and specialists have modestly higher patient volume, a mechanical consequence of the fact that forming a discordant quadruple requires observed referrals.
+
+\paragraph{Second-stage fixed-effect recovery.} Our two-stage estimation procedure recovers doctor and specialist fixed effects by estimating a logit model with the Jochmans structural index entered as an offset. Because the referral network is sparse (a large share of doctor--specialist pairs in the choice set exhibit no referral), many fixed effects are not separately identified, and the second-stage model does not formally converge. To verify that this non-convergence does not affect our results, we run the second-stage estimation at iteration counts of 10, 25, 50, 100, and 250 and compare the resulting average marginal effects.
 
 Table~\ref{tab:convergence} presents the results for each specialty. In all three cases, marginal effects stabilize well before the maximum iteration count, with differences smaller than 0.001 percentage points across higher iteration counts. Model deviance also stabilizes, while the standard deviations of the recovered fixed effects continue to grow, consistent with separated fixed effects diverging to $\pm\infty$ while the informative subset of observations has already stabilized.
 
@@ -151,6 +153,21 @@ This exercise parallels earlier work that attaches performance measures to obser
 \end{minipage}
 \end{table}
 
+
+%%% ESTIMATION SAMPLE TABLE
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Estimation-Sample Comparison}\footnote{Compares providers and pairs entering the discordant-quadruple estimation sample (``Incl.'') with the excluded remainder (``Excl.''), separately by specialty. Panels A and B are at the provider level, Panel C at the PCP--specialist pair level. Specialist quality is measured only for orthopedic surgery.}}
+\centerline{%
+    \input{../results/tables/quad_comparison_all.tex}
+}
+\label{tab:quadsample}
+\end{minipage}
+\end{table}
 
 %%% CONVERGENCE TABLE
 
