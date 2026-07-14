@@ -39,6 +39,8 @@ results/refreport_*
 
 # Local
 CLAUDE.md
+MEMORY.md
+agent_history.md
 .claude/
 _emails/
 
