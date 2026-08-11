@@ -12,7 +12,6 @@
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, data.table, fixest, sf, spdep, geodist,
                modelsummary, marginaleffects, knitr, kableExtra, scales, broom)
-options(vsc.rstudioapi = FALSE)
 options(modelsummary_factory_default = "kableExtra")
 
 # Shared data -------------------------------------------------------------
@@ -150,9 +149,10 @@ source("code/vrdc-outcomes/2_quality_reallocation.R")
 source("code/vrdc-outcomes/3_reallocation_table.R")
 
 # Combined, self-contained appendix/table scripts (read all specialties; run once)
-source("code/analysis/app_quad_comparison.R")
 #source("code/analysis/app_simulation.R")
+source("code/analysis/app_quad_comparison.R")
 source("code/analysis/app_mover_selection.R")
 source("code/analysis/app_sensitivity.R")
 source("code/analysis/paper_tables.R")
+
 
