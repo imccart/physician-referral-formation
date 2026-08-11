@@ -2,7 +2,8 @@
 #   (1) mover_markets.tex     -- each mover's origin vs destination market
 #   (2) mover_disposition.tex -- movers (pre-move) vs non-movers referral behavior
 # Reads the MD-PPAS practice-size/composition lookup from results/tables/prac_comp_lookup.csv.
-suppressMessages(library(data.table))
+# Sourced by _main.R in the post-estimation app-scripts block; data.table is provided by the
+# driver's pacman::p_load (self-contained: reads its own CSVs, loops all three specialties).
 
 specs <- c("ortho","cardioem","derm")
 size  <- fread("results/tables/prac_comp_lookup.csv"); size[, gk := as.character(group1)]

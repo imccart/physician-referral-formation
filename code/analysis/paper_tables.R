@@ -2,10 +2,7 @@
 # paper_tables.R — Build combined cross-specialty tables for paper and appendix
 # Reads per-specialty CSVs and .tex files, produces combined versions
 # Can be sourced from _main.R or run standalone after all specialties have run
-
-if (!exists("map", mode = "function")) {
-  library(tidyverse)
-}
+# (packages are provided by the _main.R driver via pacman::p_load).
 
 specs <- c("ortho", "cardioem", "derm")
 spec_labels <- c(ortho = "Orthopedic Surgery", cardioem = "Cardiology",

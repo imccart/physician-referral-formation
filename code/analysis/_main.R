@@ -80,56 +80,64 @@ gc()
 
 
 # =========================================================================
-# Specialty-specific analyses "ortho", "cardioem", "derm"
+# Specialty-specific analyses: loops over all three specialties.
+# To run a single specialty (e.g. an overnight re-run of just one), set
+# `specialties` to that one value, e.g. specialties <- c("ortho").
 # =========================================================================
 
-current_specialty <- "derm"
+specialties <- c("ortho", "cardioem", "derm")
 
-df_full_referrals <- read_csv(sprintf("data/output/df_full_referrals_%s.csv", current_specialty)) %>%
-  filter(doc_hrr == spec_hrr)
+for (current_specialty in specialties) {
 
-df_initial_referrals <- read_csv(sprintf("data/output/df_initial_referrals_%s.csv", current_specialty))
+  message("=== specialty: ", current_specialty, " (", format(Sys.time()), ") ===")
 
-df_logit <- read_csv(sprintf("data/output/df_logit_movers_%s.csv", current_specialty)) %>%
-  mutate(doc_male = as.numeric(doc_sex == "M"), spec_male = as.numeric(spec_sex == "M"),
-         exp_spec = (Year - spec_grad_year) / 10,
-         doctor = as.factor(doctor),
-         specialist = as.factor(specialist))
+  df_full_referrals <- read_csv(sprintf("data/output/df_full_referrals_%s.csv", current_specialty)) %>%
+    filter(doc_hrr == spec_hrr)
 
-df_logit_twfe <- read_csv(sprintf("data/output/df_jochmans_%s.csv", current_specialty))
+  df_initial_referrals <- read_csv(sprintf("data/output/df_initial_referrals_%s.csv", current_specialty))
 
-ref_windows <- read_csv(sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty))
+  df_logit <- read_csv(sprintf("data/output/df_logit_movers_%s.csv", current_specialty)) %>%
+    mutate(doc_male = as.numeric(doc_sex == "M"), spec_male = as.numeric(spec_sex == "M"),
+           exp_spec = (Year - spec_grad_year) / 10,
+           doctor = as.factor(doctor),
+           specialist = as.factor(specialist))
 
-movers <- df_initial_referrals %>%
-  distinct(doctor, .keep_all = TRUE) %>%
-  select(doctor, origin, destination)
+  df_logit_twfe <- read_csv(sprintf("data/output/df_jochmans_%s.csv", current_specialty))
 
-source("code/analysis/build_peer_referrals.R")
-source("code/analysis/1_descriptive_stats.R")
-source("code/analysis/specialist_fe.R")
-source("code/analysis/2_logit_twfe.R")
+  ref_windows <- read_csv(sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty))
 
-write_csv(mfx4 %>% mutate(specialty = current_specialty),
-          sprintf("results/tables/mfx_%s.csv", current_specialty))
+  movers <- df_initial_referrals %>%
+    distinct(doctor, .keep_all = TRUE) %>%
+    select(doctor, origin, destination)
 
-source("code/analysis/app_quad_comparison.R")
-source("code/analysis/app_robustness_noprac.R")
-source("code/analysis/app_convergence.R")
+  source("code/analysis/build_peer_referrals.R")
+  source("code/analysis/1_descriptive_stats.R")
+  source("code/analysis/specialist_fe.R")
+  source("code/analysis/2_logit_twfe.R")
 
-rm(list = intersect(ls(), c(
-  "df_full_referrals", "df_logit", "df_logit_twfe", "df_initial_referrals",
-  "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4", "logit_twfe5",
-  "logit_race1", "logit_race2", "logit_race3",
-  "stage2_1", "stage2_2", "stage2_3", "stage2_4", "stage2_5",
-  "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4", "mfx5")))
-gc()
+  write_csv(mfx4 %>% mutate(specialty = current_specialty),
+            sprintf("results/tables/mfx_%s.csv", current_specialty))
 
-source("code/analysis/3_referral_windows.R")
+  source("code/analysis/app_robustness_noprac.R")
+  source("code/analysis/app_convergence.R")
 
-write_csv(mfx_period %>% mutate(specialty = current_specialty),
-          sprintf("results/tables/mfx_period_%s.csv", current_specialty))
+  rm(list = intersect(ls(), c(
+    "df_full_referrals", "df_logit", "df_logit_twfe", "df_initial_referrals",
+    "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4", "logit_twfe5",
+    "logit_race1", "logit_race2", "logit_race3",
+    "stage2_1", "stage2_2", "stage2_3", "stage2_4", "stage2_5",
+    "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4", "mfx5")))
+  gc()
 
-source("code/analysis/app_link_decomposition.R")
+  source("code/analysis/3_referral_windows.R")
+
+  write_csv(mfx_period %>% mutate(specialty = current_specialty),
+            sprintf("results/tables/mfx_period_%s.csv", current_specialty))
+
+  source("code/analysis/app_link_decomposition.R")
+
+  gc()
+}
 
 # =========================================================================
 # Cross-specialty and post-estimation
@@ -141,7 +149,10 @@ source("code/vrdc-outcomes/1_specialist_quality_eb.R")
 source("code/vrdc-outcomes/2_quality_reallocation.R")
 source("code/vrdc-outcomes/3_reallocation_table.R")
 
+# Combined, self-contained appendix/table scripts (read all specialties; run once)
+source("code/analysis/app_quad_comparison.R")
 #source("code/analysis/app_simulation.R")
+source("code/analysis/app_mover_selection.R")
 source("code/analysis/app_sensitivity.R")
 source("code/analysis/paper_tables.R")
 
