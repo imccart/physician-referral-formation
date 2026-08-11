@@ -139,6 +139,7 @@ source("code/analysis/4_cross_specialty.R")
 source("code/analysis/5_persistence.R")
 source("code/vrdc-outcomes/1_specialist_quality_eb.R")
 source("code/vrdc-outcomes/2_quality_reallocation.R")
+source("code/vrdc-outcomes/3_reallocation_table.R")
 
 #source("code/analysis/app_simulation.R")
 source("code/analysis/app_sensitivity.R")
