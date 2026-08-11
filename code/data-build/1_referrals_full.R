@@ -18,7 +18,7 @@ df_full_referrals <- df_referrals %>%
   left_join(zip_ll, by = c("spec_zip" = "zip"))  %>%
   rename(lat_spec = lat, lon_spec = lon) %>%
   mutate(
-    dist_km = geodist::geodist(
+    dist_km = geodist(
                 cbind(lon_doc,  lat_doc),
                 cbind(lon_spec, lat_spec),
                 paired  = TRUE,                # element-wise, not all-pairs

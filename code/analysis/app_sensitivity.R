@@ -68,7 +68,7 @@ run_sensitivity <- function(delta_vals, rho_prac = 0.5, rho_dist = 0.3) {
     dat_sens <- df_logit_twfe %>%
       mutate(z_hidden = z_diff)
 
-    mod <- fixest::feglm(
+    mod <- feglm(
       referral ~ same_sex + same_prac + diff_dist + same_race +
         diff_age + diff_gradyear + z_hidden | year,
       data = dat_sens,

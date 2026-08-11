@@ -44,6 +44,9 @@ agent_history.md
 .claude/
 _emails/
 
+# Working notes (AI session logs, review outputs, planning)
+notes/
+
 # Submission folders (internal; contain cover letters, letterhead, disclosure)
 papers/submissions/
 

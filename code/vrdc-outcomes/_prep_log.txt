@@ -1,0 +1,14 @@
+  ortho: recovering FEs...
+NOTE: 61/10,760 fixed-effects (55,084 observations) removed because of only 0 or only 1 outcomes or singletons.
+NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.
+  cardioem: recovering FEs...
+NOTE: 91/14,727 fixed-effects (380,428 observations) removed because of only 0 or only 1 outcomes or singletons.
+NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.
+  derm: recovering FEs...
+NOTE: 83/7,145 fixed-effects (174,788 observations) removed because of only 0 or only 1 outcomes or singletons.
+NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.
+Warning messages:
+1: Absence of convergence: Maximum number of iterations reached (200). Final deviance: 8,723.4. 
+2: Absence of convergence: Maximum number of iterations reached (200). Final deviance: 59,553.7. 
+3: Absence of convergence: Maximum number of iterations reached (200). Final deviance: 66,004.6. 
+Wrote data/output/vrdc_referral_network_weights.csv: 396020 rows across 3 specialties, 6423 PCPs, 12973 specialists

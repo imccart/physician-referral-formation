@@ -12,23 +12,45 @@ PCP movers,5071
 Pct movers with same-practice specialist,0.412
 Unique PCPs in quartets,4413
 Unique specialists in quartets,6230
-Pct non-separated (MFX sample),0.376
-Non-sep same_prac,0.048
+Pct non-separated (MFX sample),0.992
+Non-sep same_prac,0.036
 Full same_prac,0.036
-Non-sep same_sex,0.567
+Non-sep same_sex,0.562
 Full same_sex,0.561
-Non-sep same_race,0.51
+Non-sep same_race,0.507
 Full same_race,0.507
-Non-sep mean_dist,34.381
+Non-sep mean_dist,32.151
 Full mean_dist,32.227
 Unique PCPs in quartets,4413
 Unique specialists in quartets,6230
-Pct non-separated (MFX sample),0.376
-Non-sep same_prac,0.048
+Pct non-separated (MFX sample),0.992
+Non-sep same_prac,0.036
 Full same_prac,0.036
-Non-sep same_sex,0.567
+Non-sep same_sex,0.562
 Full same_sex,0.561
-Non-sep same_race,0.51
+Non-sep same_race,0.507
 Full same_race,0.507
-Non-sep mean_dist,34.381
+Non-sep mean_dist,32.151
+Full mean_dist,32.227
+Unique PCPs in quartets,4413
+Unique specialists in quartets,6230
+Pct non-separated (MFX sample),0.992
+Non-sep same_prac,0.036
+Full same_prac,0.036
+Non-sep same_sex,0.562
+Full same_sex,0.561
+Non-sep same_race,0.507
+Full same_race,0.507
+Non-sep mean_dist,32.151
+Full mean_dist,32.227
+Unique PCPs in quartets,4413
+Unique specialists in quartets,6230
+Pct non-separated (MFX sample),0.992
+Non-sep same_prac,0.036
+Full same_prac,0.036
+Non-sep same_sex,0.562
+Full same_sex,0.561
+Non-sep same_race,0.507
+Full same_race,0.507
+Non-sep mean_dist,32.151
 Full mean_dist,32.227

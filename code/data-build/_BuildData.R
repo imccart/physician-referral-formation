@@ -6,7 +6,12 @@
 
 
 # Preliminaries -----------------------------------------------------------
-source("code/0-setup.R")
+# Packages loaded here at the driver top; renv auto-activates via .Rprofile.
+# zipcodeR is called qualified (zipcodeR::) rather than attached, to avoid its
+# terra C++ loading issue.
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(tidyverse, data.table, sf, spdep, geodist)
+options(vsc.rstudioapi = FALSE)
 
 # Import data -------------------------------------------------------------
 

@@ -226,7 +226,7 @@ deg_plot <- deg_all %>%
   mutate(deg_bin = if_else(deg > 20, ">20", as.character(deg))) %>%
   mutate(deg_bin = factor(deg_bin,
                           levels = c(as.character(0:20), ">20"))) %>%
-  dplyr::count(side, deg_bin)
+  count(side, deg_bin)
 
 p <- ggplot(deg_plot, aes(deg_bin, n)) +
   geom_col(fill = "grey60") +
@@ -414,7 +414,7 @@ dropped_stats <- map(1:5, function(y) {
   dropped_per_doc <- prev %>%
     filter(doctor %in% both_docs) %>%
     anti_join(curr, by = c("doctor", "specialist")) %>%
-    dplyr::count(doctor, name = "dropped")
+    count(doctor, name = "dropped")
 
   all_both <- tibble(doctor = both_docs) %>%
     left_join(dropped_per_doc, by = "doctor") %>%

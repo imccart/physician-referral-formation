@@ -37,7 +37,7 @@ SUPPLEMENTAL APPENDIX}
   \end{tabular}}
 
 \date{%
-May 2026
+July 2026
 }
 \maketitle
 
@@ -48,7 +48,7 @@ To assess the finite-sample performance of the two-stage estimation procedure de
 
 \paragraph{Data-generating process.} Each replication generates a network of PCPs and specialists assigned to HRR-year cells. We draw PCP fixed effects $\alpha_i$ and specialist fixed effects $\gamma_j$ that are correlated with the covariates, so that omitting specialist fixed effects produces genuine omitted-variable bias rather than merely adding noise. Specifically, physicians closer to the center of the HRR receive higher fixed effects, and male specialists receive higher $\gamma_j$. The referral outcome $y_{ij}$ is drawn from a Bernoulli distribution with probability $\text{logit}^{-1}(x_{ij}'\beta + \alpha_i + \gamma_j)$, where the true parameters are $\beta_{\text{practice}} = 2.5$, $\beta_{\text{gender}} = 0.5$, and $\beta_{\text{distance}} = -0.1$.
 
-\paragraph{Estimators.} We compare three estimators in each replication. (1) The true $\beta$ and marginal effects computed directly from the known DGP. (2) A naive conditional logit with PCP fixed effects only, analogous to \cite{zeltzer2020}. (3) Our two-stage procedure, in which the first stage estimates $\beta$ via the Jochmans quadruple-based conditional logit and the second stage recovers both PCP and specialist fixed effects.
+\paragraph{Estimators.} We compare three estimators in each replication. (1) The true $\beta$ and marginal effects computed directly from the known DGP. (2) A naive conditional logit with PCP fixed effects only, analogous to \cite{zeltzer2020}. (3) Our two-stage procedure, in which the first stage estimates $\beta$ via the Jochmans quadruple-based conditional logit and the second stage recovers the PCP and specialist fixed effects. Every specialist in the simulation is referred to by some PCP, so the separation that motivates estimating the specialist effects on the full sample in the main text does not arise, and the fixed effects are recovered together.
 
 \paragraph{Results.} Table~\ref{tab:sim-all} presents results across three scenarios that vary the degree of fixed-effect heterogeneity and covariate correlation. In the baseline scenario (Panel A), the naive estimator attenuates $\beta_{\text{practice}}$ by approximately 13\% and $\beta_{\text{gender}}$ by 12\%, while the two-stage procedure recovers both parameters to within 1\% of the true values. Under stronger covariate correlation (Panel B), attenuation in the naive estimator persists and the distance coefficient is overestimated by 23\%. Under both higher correlation and larger fixed-effect variance (Panel C), the naive estimator attenuates $\beta_{\text{practice}}$ by 33\% and $\beta_{\text{gender}}$ by 34\%, while the two-stage estimates remain within 1\% of the truth.
 
@@ -60,11 +60,45 @@ Marginal effects show smaller differences across estimators than the $\beta$ coe
 
 \paragraph{First-stage identifying sample.} The Jochmans quadruple estimator identifies $\beta$ from discordant quadruples, namely pairs of movers who refer to two specialists in opposite directions. Because identification comes only from pairs in which referral choices vary, and referrals are concentrated among organizationally and geographically proximate specialists, the pairs entering the estimation are more likely to be same-practice and, in orthopedic surgery, geographically closer than the full choice set. Table~\ref{tab:quadsample} reports these comparisons. This pattern is inherent to any within-group estimator, which draws identification from observations that exhibit outcome variation, and it does not bias the estimated coefficients. The specialists and PCPs entering the estimation are otherwise similar to those excluded on quality, experience, and demographic composition, so the estimated relationships are not identified from an unrepresentative subpopulation of physicians. The one systematic difference among providers is that included PCPs and specialists have modestly higher patient volume, a mechanical consequence of the fact that forming a discordant quadruple requires observed referrals.
 
-\paragraph{Second-stage fixed-effect recovery.} Our two-stage estimation procedure recovers doctor and specialist fixed effects by estimating a logit model with the Jochmans structural index entered as an offset. Because the referral network is sparse (a large share of doctor--specialist pairs in the choice set exhibit no referral), many fixed effects are not separately identified, and the second-stage model does not formally converge. To verify that this non-convergence does not affect our results, we run the second-stage estimation at iteration counts of 10, 25, 50, 100, and 250 and compare the resulting average marginal effects.
+\paragraph{Second-stage fixed-effect recovery.} Holding $\hat{\beta}$ fixed as an offset, we recover the fixed effects in two steps. Because movers make only a handful of referrals each, most specialists are never referred to by any mover and their effects cannot be recovered from the mover sample alone. We therefore estimate the specialist effects on the full sample of referring PCPs, movers and non-movers alike, where a specialist referred to at least once is identified, and winsorize at $\pm 6$ log-odds the small number of effects that remain perfectly separated even in the full sample. Holding these specialist effects fixed, we then recover the doctor effects on the mover sample, which converges cleanly. Two checks support this procedure. First, we test whether the full-sample specialist effects transfer to movers' referrals by entering them into the mover-referral model as a single regressor with coefficient $\lambda$, holding the structural index as an offset, recovering the doctor effects, and clustering the standard error by HRR. A coefficient $\lambda = 0$ would indicate that the effects carry no information for movers, and $\lambda = 1$ that they transfer at full strength, which is the common-specialist-effect assumption the model maintains. We estimate $\lambda = 0.99$ in orthopedic surgery, $0.95$ in dermatology, and $0.92$ in cardiology, each precisely estimated and far from zero ($p < 0.001$). We cannot reject $\lambda = 1$ in orthopedic surgery ($p = 0.79$) or dermatology ($p = 0.18$), and in cardiology $\lambda$ is modestly below one ($p = 0.003$), so the full-sample effects transfer to movers at close to, if not exactly, full strength. Second, we run the doctor-effect recovery at iteration counts of 10, 25, 50, 100, and 250 and compare the resulting average marginal effects.
 
-Table~\ref{tab:convergence} presents the results for each specialty. In all three cases, marginal effects stabilize well before the maximum iteration count, with differences smaller than 0.001 percentage points across higher iteration counts. Model deviance also stabilizes, while the standard deviations of the recovered fixed effects continue to grow, consistent with separated fixed effects diverging to $\pm\infty$ while the informative subset of observations has already stabilized.
+Table~\ref{tab:convergence} presents the results for each specialty. In all three cases the average marginal effects, the model deviance, and the standard deviation of the recovered doctor effects all stabilize well before the maximum iteration count, confirming that the recovery is insensitive to the convergence criterion.
 
-Because marginal effects are computed only on the non-separated subsample (where both doctor and specialist fixed effects are identified), it is important to verify that this subsample is not systematically different from the full choice set. Comparing the two groups, the non-separated subsample modestly overweights same-practice pairs and geographically closer pairs, consistent with the intuition that referral links (and thus non-separation) are more likely when organizational ties exist. However, demographic concordance (gender, race) is similar across the two groups, suggesting that our marginal effect estimates for demographic covariates are unlikely to be biased by the separation-induced sample restriction.
+With the specialist effects estimated on the full sample, the separation that would drop most specialists from a mover-only recovery no longer arises, and the marginal effects are computed over the mover choice set as a whole rather than on a same-practice-tilted non-separated subsample. Because the choice set is dominated by pairs with negligible referral probability, we weight each pair by its predicted referral probability when averaging, so that the reported effect reflects pairs where a referral is otherwise plausible rather than being diluted over pairs that would almost never form.
+
+
+\section{Mover Selection}
+\label{sec:app-moverselect}
+
+The mover design assumes that a physician's relocation is not driven by the referral opportunities available in the destination. We assess this in two ways. We first ask whether movers relocate to systematically different markets, and then whether movers are systematically different referrers before they move.
+
+Table~\ref{tab:mover-markets} compares each mover's destination market to their origin market. Movers relocate to larger and more specialist-dense markets, with more specialists, more PCPs, and more specialists per PCP, as expected of physicians moving to new and often larger areas. On the dimensions that would bias our estimates, destinations instead resemble origins. The share of referrals made within a practice, the share of PCPs with a same-practice specialist available, and mean practice size are each slightly lower at the destination rather than higher. Movers do not relocate to markets that are more organizationally integrated or more oriented toward within-practice referral.
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Mover Origin versus Destination Markets}\footnote{Each mover's origin and destination market, averaged across movers. Market characteristics are computed at the HRR level over all referrals. The upper panel reports measures of how much the market facilitates within-practice referral, and the lower panel reports market size and specialist density.}}
+\centerline{%
+    \input{../results/tables/mover_markets.tex}
+}
+\label{tab:mover-markets}
+\end{minipage}
+\end{table}
+
+Table~\ref{tab:mover-disp} compares movers to non-movers on referral behavior, measured for movers in the years before they relocate. Across organizational, demographic, and intensity dimensions, movers are similar to or lighter than non-movers. They refer within their own practice no more often, match specialists on gender and race no more often, and refer to fewer distinct specialists per patient. The one dimension on which they differ is geographic, in that movers refer somewhat more across region boundaries, which reflects the sparser markets they come from and runs opposite to a physician relocating to make referrals more convenient.
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Mover versus Non-mover Referral Behavior}\footnote{Referral behavior of movers, measured in the years before relocation, compared with non-movers. The adjusted difference is the coefficient on a mover indicator from a regression that also controls for physician gender, age, experience, panel size, practice size, and specialty. The cross-region share is the fraction of a physician's referrals made to a specialist in a different HRR.}}
+\centerline{%
+    \input{../results/tables/mover_disposition.tex}
+}
+\label{tab:mover-disp}
+\end{minipage}
+\end{table}
 
 
 \section{Race Predictions}
@@ -108,26 +142,27 @@ Across all three specialties, the remaining coefficients (gender concordance, di
 \section{Link Decomposition}
 \label{sec:link-decomp}
 
-A potential concern with our cumulative-window dynamics analysis is compositional dilution. As the post-move window widens, the denominator grows as new links are added, mechanically pushing concordance shares toward population averages even if PCP behavior is unchanged. To address this, Table~\ref{tab:decomp} decomposes each window's links into persisting ties (present in the previous window) and newly formed ties.
+Our year-by-year dynamics estimate the network formation model separately on the referrals made in each post-move year. A natural question is whether the resulting change in the determinants reflects a genuine shift in behavior or a change in the composition of the links formed across years. To address this, Table~\ref{tab:decomp} decomposes the link stock at each post-move year into persisting ties, present in the previous year, and newly formed ties.
 
-If attenuation were purely mechanical, newly formed links in later windows would show concordance rates similar to persisting links. Instead, across all three specialties, new links exhibit progressively lower same-practice rates and modestly lower demographic concordance compared to persisting links. This pattern is consistent with genuine behavioral change rather than compositional dilution.
+If the change were compositional, newly formed links in later years would show concordance rates similar to persisting links. Instead, across all three specialties, newly formed links exhibit progressively lower same-practice rates and modestly lower demographic concordance than persisting links. This pattern is consistent with a genuine shift in how PCPs form new links rather than a mechanical change in link composition.
 
 
-\section{Period-Specific Estimation}
+\section{Dynamics by Specialty}
 \label{sec:period-specific}
 
-As a further check on the dynamics results, Figure~\ref{fig:period} presents period-specific estimates. The model is estimated separately on referrals made in each individual post-move year rather than on cumulative windows, so each year's choice set is independent and compositional dilution cannot arise.
+The main text overlays the year-by-year marginal effects across the three specialties. Figure~\ref{fig:period} presents the same estimates one specialty at a time, showing every covariate for each specialty. The model is estimated separately on the referrals made in each individual post-move year, so each year's choice set is independent.
 
-The period-specific estimates are noisier due to smaller per-period sample sizes, but the qualitative pattern is consistent with the cumulative results. Practice affiliation is largest in the first post-move year and attenuates in subsequent years across all three specialties.
+The per-specialty view makes the heterogeneity in the practice-affiliation dynamics explicit. In orthopedic surgery the effect of practice affiliation is largest in the first post-move year and attenuates thereafter, whereas in cardiology and dermatology it does not decline. The per-year estimates are noisier than the pooled first-year estimate because each year's sample is smaller.
 
 
-\section{Quality Reallocation}
+\section{Measuring Specialist Quality}
 \label{sec:welfare}
 
-To assess the quality implications of our estimated referral preferences, we graft an external measure of surgeon performance (surgeon quality as measured by the CMS Comprehensive Care for Joint Replacement Model and the National Quality Forum).\footnote{Surgeon quality derives from mortality, readmissions, and complications. Some complications are identified only in the inpatient stay or only within 30 days, but no outcome measure extends beyond 90 days of discharge.} This exercise is limited to orthopedic surgery, the only specialty in our analysis with a well-defined surgical outcome measure. For each referral determinant, we set its estimated coefficient to zero, recompute referral probabilities using the two-stage predicted index, and calculate the change in expected adverse patient outcomes per 1,000 referrals within each HRR. Positive values indicate fewer expected adverse outcomes when the channel is removed (i.e., a quality improvement); negative values indicate worsening quality.
+\paragraph{Measuring specialist quality.} We measure the quality of each specialist from the risk-adjusted outcomes of the Medicare patients they treat. For every specialist in our analysis, we identify the patients they saw between 2010 and 2016 in the 100\% Medicare fee-for-service claims and follow each patient for two years after the encounter. Over that window we construct three outcomes, namely total spending across inpatient, outpatient, and carrier claims, non-elective admissions (those not coded as elective), and two-year mortality. Total spending and non-elective admissions serve as our primary measures, since they are the most reliably estimated. We report two-year mortality as a check that reallocation does no harm on the most severe outcome.
 
-This exercise parallels earlier work that attaches performance measures to observed physician networks \citep{barnett2012mc, landon_using_2013, zeltzer2020}. Table~\ref{tab:welfare-hrr} summarizes the results. The quality-reallocation effects are generally modest. Practice affiliation and geographic distance produce the largest mean effects (0.27 and 0.29 fewer adverse outcomes per 1,000 referrals when each is zeroed out), while gender, race, age, and experience concordance produce mean effects near zero. Distance exhibits the widest cross-market dispersion (standard deviation of 4.65), with effects ranging from a worsening of roughly 4 adverse outcomes per 1,000 referrals at the 10th percentile to an improvement of more than 4 at the 90th percentile. Practice affiliation is more concentrated, with zero effect at both the 25th and 75th percentiles but a heavier right tail. These results suggest that the quality losses from homophily-driven referrals are small on average, though they may matter in specific local markets.
+\paragraph{Risk adjustment.} Because sicker patients sort to specialists in ways unrelated to specialist performance, we adjust each outcome for patient case mix. We regress each outcome on the Charlson comorbidity index, constructed from the diagnosis codes on each patient's claims prior to the encounter, together with age, sex, race, and dual-eligibility status, and we retain the residual. This residual is the portion of a patient's outcome not explained by their observed health and demographics. We estimate the adjustment separately within each specialty, so that a specialist's quality is measured relative to other physicians treating comparable patients in the same specialty.
 
+\paragraph{Specialist-level measure.} We average each patient's risk-adjusted outcome to the treating specialist, giving a mean residual per specialist on each of the three outcomes. A specialist whose patients have systematically lower spending or fewer admissions than their case mix would predict receives a lower value, which we read as better performance. We compute the measure only for specialists with at least eleven patients, a threshold that retains 99.7\% of patients while dropping the smallest-volume specialists. Because averages over few patients are noisy, we apply empirical-Bayes shrinkage within each specialty, pulling each specialist's mean toward the specialty average in proportion to its imprecision, so that low-volume specialists are not spuriously placed at the extremes. The resulting measure is descriptive. It summarizes the outcomes experienced by a specialist's patients net of observed case mix, and we do not interpret it as the causal effect of seeing a particular specialist.
 
 \pagebreak
 \bibliography{BibTeX_Library}
@@ -176,7 +211,7 @@ This exercise parallels earlier work that attaches performance measures to obser
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Convergence Stability}\footnote{Panel A reports average marginal effects from the two-stage procedure at varying second-stage iteration counts. Panel B reports model diagnostics. The stability of marginal effects from iteration 50 onward confirms that non-convergence of separated fixed effects does not affect the estimates. Results shown for each specialty.}}
+\caption[caption]{\textbf{Convergence Stability}\footnote{Panel A reports referral-probability-weighted average marginal effects from the doctor-effect recovery, with the specialist effects held fixed, at varying second-stage iteration counts. Panel B reports model diagnostics. The stability of the marginal effects, the deviance, and the dispersion of the recovered doctor effects across iteration counts confirms that the recovery is insensitive to the convergence criterion. Results shown for each specialty.}}
 \centerline{%
     \input{../results/tables/app_convergence_all.tex}
 }
@@ -251,7 +286,7 @@ This exercise parallels earlier work that attaches performance measures to obser
 \centering
 \scriptsize
 \begin{minipage}[h]{9in}
-\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Average marginal effects from the two-stage procedure across four progressive specifications for each specialty. Columns (2), (6), and (10) add age only, whereas columns (3), (7), and (11) add both age and experience, permitting a check for collinearity between the two. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (4), (8), and (12) correspond to the full specification reported in the main text.}}
+\caption[caption]{\textbf{Progressive Specifications -- Average Marginal Effects}\footnote{Referral-probability-weighted average marginal effects from the two-stage procedure across four progressive specifications for each specialty. Columns (2), (6), and (10) add age only, whereas columns (3), (7), and (11) add both age and experience, permitting a check for collinearity between the two. For distance, the marginal effect corresponds to a 5-mile increase. For binary covariates, the marginal effect is the change in predicted probability when the indicator switches from 0 to 1. Delta-method standard errors in parentheses. Columns (4), (8), and (12) correspond to the full specification reported in the main text.}}
 \centerline{%
     \input{../results/tables/logit_twfe_mfx_progressive.tex}
 }
@@ -284,7 +319,7 @@ This exercise parallels earlier work that attaches performance measures to obser
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Two-Stage Estimation Without Practice Affiliation}\footnote{Two-stage estimation results after dropping practice affiliation from the covariates, for each specialty. For each specialty, column 1 reports structural coefficients (log-odds) from the \cite{jochmans2018} estimator and column 2 reports average marginal effects from the second stage.}}
+\caption[caption]{\textbf{Two-Stage Estimation Without Practice Affiliation}\footnote{Two-stage estimation results after dropping practice affiliation from the covariates, for each specialty. For each specialty, column 1 reports structural coefficients (log-odds) from the \cite{jochmans2018} estimator and column 2 reports referral-probability-weighted average marginal effects from the second stage.}}
 \centerline{%
     \input{../results/tables/app_robustness_noprac_all.tex}
 }
@@ -300,7 +335,7 @@ This exercise parallels earlier work that attaches performance measures to obser
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Link Decomposition}\footnote{For each cumulative window $k = 2, \ldots, 4$, referral links are classified as ``persisting'' (present in window $k-1$) or ``new'' (not present in $k-1$). Year 1 links are all new by definition. Columns report the share of links matching on each attribute and mean distance. Results shown for each specialty.}}
+\caption[caption]{\textbf{Link Decomposition}\footnote{For each post-move year $k = 2, \ldots, 4$, referral links are classified as ``persisting'' (present in year $k-1$) or ``new'' (not present in year $k-1$). Year 1 links are all new by definition. Columns report the share of links matching on each attribute and mean distance. Results shown for each specialty.}}
 \centerline{%
     \input{../results/tables/app_link_decomposition_all.tex}
 }
@@ -315,14 +350,14 @@ This exercise parallels earlier work that attaches performance measures to obser
 \begin{figure}[p]
 \centering
 \begin{minipage}[h]{6in}
-\caption[caption]{Period-Specific Marginal Effects\footnote{Average marginal effects from separate two-stage estimates for each individual post-move year (non-cumulative). Stage 1 estimates structural coefficients via the \cite{jochmans2018} estimator; Stage 2 recovers doctor and specialist fixed effects. Vertical bands are 95\% confidence intervals.}}
+\caption[caption]{Marginal Effects by Post-Move Year and Specialty\footnote{Referral-probability-weighted average marginal effects from separate two-stage estimates for each individual post-move year. Stage 1 estimates structural coefficients via the \cite{jochmans2018} estimator; Stage 2 recovers the doctor effects with the specialist effects held fixed. Vertical bands are 95\% confidence intervals.}}
 \centerline{%
 \begin{tabular}{c}
-\includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_ortho.png} \\
+\includegraphics[width=4.0in]{../results/figures/mfx_by_window_ortho.png} \\
 (a) Orthopedic Surgery \\[2pt]
-\includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_cardioem.png} \\
+\includegraphics[width=4.0in]{../results/figures/mfx_by_window_cardioem.png} \\
 (b) Cardiology \\[2pt]
-\includegraphics[width=4.0in]{../results/figures/mfx_by_window_period_derm.png} \\
+\includegraphics[width=4.0in]{../results/figures/mfx_by_window_derm.png} \\
 (c) Dermatology
 \end{tabular}
 }
@@ -331,20 +366,6 @@ This exercise parallels earlier work that attaches performance measures to obser
 \end{figure}
 
 
-%%% WELFARE TABLE
-
-\clearpage
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Effects on Quality of Patient Care -- Orthopedic Surgery}\footnote{For each referral determinant we set its estimated coefficient to zero, recompute referral probabilities using the two-stage predicted index, and calculate (for each HRR) the change in expected adverse patient outcomes per 1,000 referrals. The columns report the mean, standard deviation, and selected percentiles of the HRR-level quality effect. Positive values indicate fewer expected adverse outcomes when the channel is removed.}}
-\centerline{%
-    \input{../results/tables/welfare_summary_ortho.tex}
-}
-\label{tab:welfare-hrr}
-\end{minipage}
-\end{table}
 
 
 \end{document}

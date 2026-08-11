@@ -2,8 +2,7 @@
 # Reads existing df_logit_windows_{spec}.csv, extracts year-specific subsets,
 # builds quartets. No need to re-run the full data build.
 #
-# Usage: source after 0-setup.R, with current_specialty set.
-#   source("code/0-setup.R")
+# Usage: source after the _BuildData.R driver has loaded packages, with current_specialty set.
 #   for (current_specialty in c("ortho", "cardioem", "derm")) {
 #     source("code/data-build/6_period_windows.R")
 #   }

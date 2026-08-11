@@ -1,21 +1,21 @@
 
 # Baseline logit with race (Zeltzer-style, doctor FE only) -------------------
 
-logit_race1 <- fixest::feglm(
+logit_race1 <- feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec | Year + doctor,
   data = df_logit,
   vcov = ~doctor,
   family = binomial(link = "logit")
 )
 
-logit_race2 <- fixest::feglm(
+logit_race2 <- feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles | Year + doctor,
   data = df_logit,
   vcov = ~doctor,
   family = binomial(link = "logit")
 )
 
-logit_race3 <- fixest::feglm(
+logit_race3 <- feglm(
   referral ~ same_sex + same_race + spec_male + exp_spec + same_prac + dist_miles + diff_age + diff_gradyear | Year + doctor,
   data = df_logit,
   vcov = ~doctor,
@@ -163,35 +163,35 @@ covars <- c("same_sex", "same_prac", "diff_dist",
 
 message("Stage 1: Jochmans quartet estimation...")
 
-logit_twfe1 <- fixest::feglm(
+logit_twfe1 <- feglm(
   referral ~ same_sex + same_prac + diff_dist | year,
   data = df_logit_twfe,
   vcov = ~hrr,
   family = binomial("logit")
 )
 
-logit_twfe2 <- fixest::feglm(
+logit_twfe2 <- feglm(
   referral ~ same_sex + same_prac + diff_dist + diff_age | year,
   data = df_logit_twfe,
   vcov = ~hrr,
   family = binomial("logit")
 )
 
-logit_twfe3 <- fixest::feglm(
+logit_twfe3 <- feglm(
   referral ~ same_sex + same_prac + diff_dist + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
   vcov = ~hrr,
   family = binomial("logit")
 )
 
-logit_twfe4 <- fixest::feglm(
+logit_twfe4 <- feglm(
   referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear | year,
   data = df_logit_twfe,
   vcov = ~hrr,
   family = binomial("logit")
 )
 
-logit_twfe5 <- fixest::feglm(
+logit_twfe5 <- feglm(
   referral ~ same_sex + same_prac + diff_dist + same_race + diff_age + diff_gradyear + peer_referrals | year,
   data = df_logit_twfe,
   vcov = ~hrr,
@@ -208,14 +208,32 @@ Xmat <- as.matrix(df_logit[, covars])
 na_mask <- complete.cases(Xmat)
 dat_fe <- df_logit[na_mask, ]
 
-# Helper: recover FEs for a given Jochmans model
+# Specialist fixed effects estimated on the full sample (specialist_fe.R); held
+# fixed here so only the doctor effects are recovered on the movers. Specialists
+# absent from the table (never estimable) default to the mean, which is 0 since
+# the table is centered.
+spec_fe_tab <- read_csv(sprintf("data/output/specialist_fe_%s.csv", current_specialty),
+                        show_col_types = FALSE) %>%
+  transmute(spec_key = as.character(specialist), gamma_j)
+dat_fe <- dat_fe %>%
+  mutate(spec_key = as.character(specialist)) %>%
+  left_join(spec_fe_tab, by = "spec_key")
+message("  Specialist FE match: ",
+        format(sum(!is.na(dat_fe$gamma_j)), big.mark = ","), " of ",
+        format(nrow(dat_fe), big.mark = ","), " choice-set rows (",
+        sprintf("%.1f%%", 100 * mean(!is.na(dat_fe$gamma_j))), ")")
+dat_fe <- dat_fe %>%
+  mutate(gamma_spec = coalesce(gamma_j, 0)) %>%
+  select(-spec_key, -gamma_j)
+
+# Helper: recover doctor FEs for a given Jochmans model, specialist FE held fixed
 recover_fes <- function(joch_model, spec_covars) {
   beta <- coef(joch_model)[spec_covars]
-  Xbeta <- drop(as.matrix(dat_fe[, spec_covars]) %*% beta)
+  Xbeta <- drop(as.matrix(dat_fe[, spec_covars]) %*% beta) + dat_fe$gamma_spec
   dat_tmp <- dat_fe %>% mutate(.Xbeta = Xbeta)
 
-  fe_mod <- fixest::feglm(
-    referral ~ 1 | doctor + specialist,
+  fe_mod <- feglm(
+    referral ~ 1 | doctor,
     data = dat_tmp,
     offset = ~.Xbeta,
     family = binomial("logit"),
@@ -223,10 +241,9 @@ recover_fes <- function(joch_model, spec_covars) {
   )
 
   fes <- fixef(fe_mod)
-  doc_fe  <- fes$doctor[as.character(dat_fe$doctor)]
-  spec_fe <- fes$specialist[as.character(dat_fe$specialist)]
-  eta     <- Xbeta + doc_fe + spec_fe
-  valid   <- !is.na(eta)
+  doc_fe <- fes$doctor[as.character(dat_fe$doctor)]
+  eta    <- Xbeta + doc_fe          # Xbeta already includes the specialist effect
+  valid  <- !is.na(eta)
 
   list(beta = beta, eta = eta, valid = valid, n_valid = sum(valid),
        fe_mod = fe_mod, fes = fes)
@@ -263,6 +280,14 @@ compute_mfx <- function(stage2, joch_model, spec_covars) {
   # Subset vcov to spec_covars (Jochmans model may have year FEs in vcov)
   V <- V[spec_covars, spec_covars]
 
+  # Referral-probability weight: predicted probability with same-practice off.
+  # Averaging marginal effects with this weight (rather than a flat mean over the
+  # full choice set) gives the effect among pairs where a referral is otherwise
+  # plausible, and avoids diluting it over the ~99.7% near-impossible pairs. The
+  # same weight is applied to every covariate and held fixed for the delta-method SE.
+  w_base <- plogis(eta - beta[["same_prac"]] * dat_v[["same_prac"]])
+  w_base <- w_base / sum(w_base)
+
   map(spec_covars, function(v) {
     is_bin <- v %in% c("same_sex", "same_prac", "same_race")
     delta  <- if (v == "diff_dist") 5 else 1
@@ -277,7 +302,7 @@ compute_mfx <- function(stage2, joch_model, spec_covars) {
 
     p1 <- plogis(eta1)
     p0 <- plogis(eta0)
-    dp <- mean(p1 - p0)
+    dp <- sum(w_base * (p1 - p0))
 
     # Delta-method gradient: ∂MFX/∂β_k
     # For each obs i: ∂(p1_i - p0_i)/∂β_k
@@ -303,7 +328,7 @@ compute_mfx <- function(stage2, joch_model, spec_covars) {
       grad_i[, k] <- (p1 * (1 - p1)) * deta1_dk - (p0 * (1 - p0)) * deta0_dk
     }
 
-    g_bar <- colMeans(grad_i)
+    g_bar <- colSums(grad_i * w_base)
     se <- sqrt(as.numeric(t(g_bar) %*% V %*% g_bar))
 
     tibble(term = v, estimate = dp, std.error = se)

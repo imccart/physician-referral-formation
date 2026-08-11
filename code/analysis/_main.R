@@ -8,7 +8,12 @@
 
 
 # Preliminaries -----------------------------------------------------------
-source("code/0-setup.R")
+# Packages loaded here at the driver top; renv auto-activates via .Rprofile.
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(tidyverse, data.table, fixest, sf, spdep, geodist,
+               modelsummary, marginaleffects, knitr, kableExtra, scales, broom)
+options(vsc.rstudioapi = FALSE)
+options(modelsummary_factory_default = "kableExtra")
 
 # Shared data -------------------------------------------------------------
 
@@ -95,25 +100,13 @@ df_logit_twfe <- read_csv(sprintf("data/output/df_jochmans_%s.csv", current_spec
 
 ref_windows <- read_csv(sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty))
 
-df_logit_windows <- read_csv(sprintf("data/output/df_jochmans_windows_%s.csv", current_specialty))
-
-base_cols <- c("Year", "doctor", "specialist", "referral",
-               "same_sex", "same_race", "same_prac", "diff_dist",
-               "diff_age", "diff_gradyear", "doc_hrr", "window")
-
-df_choiceset_windows <- read_csv(
-  sprintf("data/output/df_logit_windows_%s.csv", current_specialty),
-  col_select = all_of(base_cols)
-) %>%
-  mutate(doctor     = as.factor(doctor),
-         specialist = as.factor(specialist))
-
 movers <- df_initial_referrals %>%
   distinct(doctor, .keep_all = TRUE) %>%
   select(doctor, origin, destination)
 
 source("code/analysis/build_peer_referrals.R")
 source("code/analysis/1_descriptive_stats.R")
+source("code/analysis/specialist_fe.R")
 source("code/analysis/2_logit_twfe.R")
 
 write_csv(mfx4 %>% mutate(specialty = current_specialty),
@@ -133,18 +126,19 @@ gc()
 
 source("code/analysis/3_referral_windows.R")
 
-write_csv(mfx_window %>% mutate(specialty = current_specialty),
-          sprintf("results/tables/mfx_window_%s.csv", current_specialty))
+write_csv(mfx_period %>% mutate(specialty = current_specialty),
+          sprintf("results/tables/mfx_period_%s.csv", current_specialty))
 
 source("code/analysis/app_link_decomposition.R")
-source("code/analysis/app_period_windows.R")
 
 # =========================================================================
 # Cross-specialty and post-estimation
 # =========================================================================
 
 source("code/analysis/4_cross_specialty.R")
-source("code/analysis/5_welfare.R")
+source("code/analysis/5_persistence.R")
+source("code/vrdc-outcomes/1_specialist_quality_eb.R")
+source("code/vrdc-outcomes/2_quality_reallocation.R")
 
 #source("code/analysis/app_simulation.R")
 source("code/analysis/app_sensitivity.R")

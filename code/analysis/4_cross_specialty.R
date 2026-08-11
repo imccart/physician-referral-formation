@@ -61,10 +61,10 @@ ggsave("results/figures/mfx_cross_specialty.png",
 
 
 # 2. Dynamics comparison figure --------------------------------------------
-# Per-window MFX faceted by covariate, overlaid across specialties
+# Year-by-year (non-cumulative) MFX faceted by covariate, overlaid across specialties
 
 df_mfx_win_all <- map(specs, function(s) {
-  read_csv(sprintf("results/tables/mfx_window_%s.csv", s), show_col_types = FALSE)
+  read_csv(sprintf("results/tables/mfx_period_%s.csv", s), show_col_types = FALSE)
 }) %>% bind_rows()
 
 horizon_from_label <- function(label) {

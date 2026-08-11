@@ -56,7 +56,7 @@ decomp_results <- bind_rows(yr1, decomp_results)
 # Reshape for LaTeX table
 decomp_wide <- decomp_results %>%
   mutate(across(c(same_prac, same_gender, same_race),
-                ~ scales::percent(.x, accuracy = 0.1)),
+                ~ percent(.x, accuracy = 0.1)),
          mean_dist = round(mean_dist, 1)) %>%
   select(window, type, same_prac, same_gender, same_race, mean_dist, n_links) %>%
   arrange(window, desc(type))

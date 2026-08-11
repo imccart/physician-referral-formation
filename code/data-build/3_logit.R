@@ -1,17 +1,35 @@
 # Construct logit data set for everyone -------------------------------------------
+# The full cross of every PCP by every specialist runs to hundreds of millions
+# of rows, so for the full choice set we keep all movers plus a 3% sample of
+# non-movers. Movers are kept in full, so the mover choice set below is
+# unaffected; the sample only thins the non-movers used to pin specialist FEs,
+# which stay dense (hundreds of referring PCPs per specialist).
+set.seed(1234)
+# Non-mover sample rate for the full choice set, set per specialty so the
+# full-sample specialist recovery has few separated specialists (< ~1% capped).
+# The sparser ortho network needs a much higher rate than the denser cardio/derm.
+frac <- if (exists("nonmover_frac")) {
+  nonmover_frac
+} else {
+  c(ortho = 0.30, cardioem = 0.03, derm = 0.03)[[current_specialty]]
+}
+doc_pool   <- df_full_referrals %>% filter(doc_hrr == spec_hrr) %>% distinct(doctor) %>% pull(doctor)
+non_movers <- setdiff(doc_pool, unique(df_movers$npi))
+keep_docs  <- c(unique(df_movers$npi), sample(non_movers, round(frac * length(non_movers))))
+
 df_ref_big <-
   df_full_referrals %>%
-  filter(doc_hrr==spec_hrr) %>%                           
+  filter(doc_hrr==spec_hrr) %>%
   group_by(Year, doc_hrr) %>%
   summarise(
     combos = list(expand_grid(
-      doctor     = unique(doctor),
+      doctor     = intersect(unique(doctor), keep_docs),
       specialist = unique(specialist)
     )),
     .groups = "drop"
   ) %>%
   select(Year, combos) %>%      # discard hrr_doc; keep only the list-col
-  unnest(combos)  
+  unnest(combos)
 
 df_ref_big <- df_ref_big %>%
   left_join(df_mdppas %>% mutate(across(c(sex, birth, spec, zip, group, hrr, hrrcity, hrrstate), ~., .names = "doc_{.col}")) %>% select(starts_with("doc_"), npi, year), 
@@ -31,7 +49,7 @@ df_ref_big <- df_ref_big %>%
   left_join(zip_ll, by = c("spec_zip" = "zip"))  %>%
   rename(lat_spec = lat, lon_spec = lon) %>%
   mutate(
-    dist_km = geodist::geodist(
+    dist_km = geodist(
                 cbind(lon_doc,  lat_doc),
                 cbind(lon_spec, lat_spec),
                 paired  = TRUE,                # element-wise, not all-pairs
@@ -69,6 +87,9 @@ final_ref_big <-
   left_join(spec_quality, by = "specialist")
 
 rm(df_ref_big); gc()
+
+# Full choice set (movers and non-movers) for specialist fixed-effect estimation
+write.csv(final_ref_big, sprintf("data/output/df_logit_full_%s.csv", current_specialty), row.names=FALSE)
 
 # Construct logit data set for movers ---------------------------------------------
 
