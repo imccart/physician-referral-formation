@@ -772,3 +772,41 @@ claims:
     status: PASS
     explanation:
     last_verified: 2026-08-12
+
+  # ---- Secondary identification: co-location off specialist moves (6_specialist_moves.R) ----
+  # Two-way (PCP + specialist) FE LPM on the mover-menu sample; CoPresent is co-location
+  # set by the overlap of the mover's arrival with the specialist's tenure. Prose section
+  # (specialist-move identification) is forthcoming; entries added at build time.
+  - id: sm-copresent-cardioem
+    claim: "co-location raises referral probability by about 6.5 pp in cardiology (specialist-move design)"
+    location: "Sec identifying-practice-affiliation (sec:practice-id); Table tab:specmoves"
+    script: code/analysis/6_specialist_moves.R
+    artifact: results/tables/specialist_moves_est.csv
+    artifact_key: "specialty=cardioem,col=copresent"
+    expected_value: 0.0649
+    tolerance: 0.005
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: sm-copresent-derm
+    claim: "co-location raises referral probability by about 8.0 pp in dermatology (specialist-move design)"
+    location: "Sec identifying-practice-affiliation (sec:practice-id); Table tab:specmoves"
+    script: code/analysis/6_specialist_moves.R
+    artifact: results/tables/specialist_moves_est.csv
+    artifact_key: "specialty=derm,col=copresent"
+    expected_value: 0.0795
+    tolerance: 0.005
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: sm-copresent-ortho
+    claim: "co-location effect about 10.7 pp in orthopedic surgery, imprecisely estimated (specialist-move design)"
+    location: "Sec identifying-practice-affiliation (sec:practice-id); Table tab:specmoves"
+    script: code/analysis/6_specialist_moves.R
+    artifact: results/tables/specialist_moves_est.csv
+    artifact_key: "specialty=ortho,col=copresent"
+    expected_value: 0.1070
+    tolerance: 0.01
+    status: PASS
+    explanation: "Imprecise (thin mover sample, 498 movers); not statistically significant."
+    last_verified: 2026-08-12

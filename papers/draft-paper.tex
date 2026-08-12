@@ -218,6 +218,82 @@ While we cannot definitively separate this durability from a stable underlying m
 
 %%% MECHANISMS
 
+\section{Identifying the Practice-Affiliation Effect}
+\label{sec:practice-id}
+
+Practice affiliation is the dominant determinant of referral formation, and reading it as a
+causal channel rather than as sorting rests on more than one piece of evidence. The mover
+design in Section~\ref{sec:identification} strips out the accumulated ties and habit that
+confound established relationships, and our comparison of movers to the broader physician
+population, in Section~\ref{sec:data} and the supplemental appendix, shows that movers are not
+a distinctive slice of PCPs. The concern that remains is specific to practice affiliation. A
+mover who selects a practice for its roster of specialists would refer within it regardless of
+any organizational channel, so the same-practice coefficient conflates co-location with the
+sorting of PCPs across practices. We address this concern directly with a design that does not
+rely on the mover's choice of practice, exploiting instead the specialists' own moves between
+practices.
+
+A mover's co-location with a given specialist is set by the overlap of two independent
+timelines, the mover's arrival and the specialist's tenure in the practice the mover joins. We
+restrict the arrival choice set to specialists who occupied the mover's destination practice at
+some point in the sample, and we let $\mathrm{CoPresent}_{ij}$ equal one if specialist $j$ is a
+member of that practice in the year mover $i$ arrives, that is, if $i$'s arrival falls within
+$j$'s tenure spell there. On this sample we estimate the linear probability model
+\begin{equation}\label{eq:specmoves}
+ y_{ij} = \delta\,\mathrm{CoPresent}_{ij} + x_{ij}'\beta + \alpha_i + \alpha_j + \varepsilon_{ij},
+\end{equation}
+where $y_{ij}$ equals one if $i$ refers to $j$ in the arrival year, $x_{ij}$ collects distance
+and demographic concordance, and $\alpha_i$ and $\alpha_j$ are PCP and specialist fixed
+effects. Equation~\eqref{eq:specmoves} retains the two-sided fixed-effect structure of our
+formation model, and because it is linear the effects enter directly without the
+incidental-parameters problem that requires the quadruple estimator in
+Section~\ref{sec:estimation}. The parameter $\delta$ is the effect of co-location on the
+referral probability, identified within specialist from the timing of the specialist's own move
+rather than from the mover's choice of practice. We cluster standard errors by Hospital Referral
+Region.
+
+The identifying assumption is that a mover's arrival year is independent of when the specialist
+moved into or out of the destination practice, conditional on the specialist having been there
+at some point. A violation would require movers to time their relocation to a specialist's
+presence, which would show up as elevated referral among movers who arrive before the specialist
+joins, and we use those before-join movers as a placebo. The variation comes only from mobile
+specialists, so $\delta$ is a local effect for pairs involving specialists who moved rather than
+the population same-practice effect from our main model. The supplemental appendix compares the
+mobile specialists to the stayers and finds them broadly similar in demographics and in
+risk-adjusted quality, so the specialists supplying this variation are not a sharply selected
+group.
+
+Table~\ref{tab:specmoves} reports the results. Net of specialist and PCP fixed effects,
+co-location raises the referral probability by 6.5 percentage points in cardiology and 8.0
+percentage points in dermatology, both statistically significant, and by 10.7 percentage points
+in orthopedic surgery, where the smaller mover sample leaves the estimate imprecise. The placebo
+is clean in all three specialties. Movers who arrive before the specialist joins refer at the
+baseline rate, 7.5, 6.2, and 8.5 percent, well below the 11.8, 15.6, and 16.8 percent among
+movers who arrive while the specialist is present, and referral falls back toward baseline among
+movers who arrive after the specialist has left. Because co-location here is set by the
+specialist's own move rather than the mover's choice of practice, these estimates corroborate
+the practice-affiliation effect on variation orthogonal to the practice-selection concern, even
+as they speak only to the co-location margin and to the subpopulation of mobile specialists.
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Co-location Identified from Specialist Moves}\footnote{Estimates from
+Equation~\eqref{eq:specmoves}, a two-sided (PCP and specialist) fixed-effects linear probability
+model on the sample of mover-specialist pairs in which the specialist occupied the mover's
+destination practice at some point. The Co-location column reports $\widehat{\delta}$ in
+percentage points, with standard errors clustered by Hospital Referral Region in parentheses.
+The Before-join, Co-present, and After-left columns report the raw share of pairs with an
+observed referral among movers who arrive before the specialist joins the practice, while the
+specialist is present, and after the specialist leaves. An asterisk denotes significance at the
+5 percent level.}}
+\label{tab:specmoves}
+\centerline{\input{../results/tables/specialist_moves_all.tex}}
+\end{minipage}
+\end{table}
+
+
 \section{Peer Referrals and Practice Affiliation}
 \label{sec:mechanisms}
 
@@ -232,7 +308,7 @@ These results indicate that only a modest share of the practice affiliation effe
 
 %%% WELFARE
 
-\section{Quality Reallocation}
+\section{The Cost of Convenience}
 \label{sec:welfare}
 
 Our results indicate that practice affiliation is the dominant driver of referral formation, raising a natural question for policy. Do convenience-driven referral patterns come at a cost to patient care? If PCPs form referral ties on the basis of organizational proximity rather than clinical quality, the resulting allocation of patients across specialists may be inefficient, along the lines of the allocative inefficiency documented in \cite{chandra2020qje} for hospital-level treatment decisions.
@@ -244,6 +320,8 @@ Table~\ref{tab:realloc} reports the estimated quality effect of each determinant
 By contrast, concordance in gender, race, age, and experience produces quality effects that are economically negligible in all three specialties, orders of magnitude smaller than those for organizational affiliation and geographic proximity and amounting at most to a fraction of an admission per referral volume. The quality consequences of convenience-driven referral formation therefore operate through organizational affiliation and geographic proximity rather than through demographic homophily. Mortality effects are small, with confidence intervals that generally include zero, so the additional spending and admissions associated with these ties do not correspond to a consistent difference in survival.
 
 We interpret these estimates as descriptive of the quality composition of referrals rather than as causal effects of specialist choice, since our research design identifies the determinants of referral formation but not the counterfactual outcome a patient would experience under an alternative specialist. Specifically, these results summarize the implications for the average patient of PCPs' reliance on organizational, geographic, and demographic convenience in constructing their initial referral networks. The determinants appear to operate differently across the three clinical settings, as seen in the differing signs of the effects for orthopedic surgery referrals. Identifying the mechanisms behind such differences would require comparing a much broader range of clinical settings, which we leave to future work.
+
+Because the initial network is durable, these quality consequences are not confined to the year of formation. The persistence documented in Section~\ref{sec:dynamics} implies that a meaningful share of the ties a PCP forms on arrival continues to route patients in later years, so the reliance on organizational and geographic convenience at entry exposes patients to a portion of these costs well beyond the first year, even as the pull of the initial network fades.
 
 
 %%% DISCUSSION
