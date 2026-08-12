@@ -121,4 +121,36 @@ p_dynamics <- ggplot(df_win_plot,
 ggsave("results/figures/mfx_by_window_cross.png",
        plot = p_dynamics, width = 8, height = 5.5, dpi = 300)
 
-message("Cross-specialty figures saved.")
+
+# 3. Cross-specialty dynamics test -----------------------------------------
+# Tests whether the same-practice attenuation from year 1 to year 4 differs
+# across specialties. Per-specialty samples are disjoint, so the cross-specialty
+# estimates are independent and Var(a - b) = Var(a) + Var(b). The within-specialty
+# change ignores the (positive) cross-year covariance, which makes the test
+# conservative.
+
+xspec_within <- df_mfx_win_all %>%
+  filter(term == "same_prac", model %in% c("Year 1 only", "Year 4 only")) %>%
+  mutate(yr = ifelse(model == "Year 1 only", "y1", "y4")) %>%
+  select(specialty, yr, estimate, std.error) %>%
+  pivot_wider(names_from = yr, values_from = c(estimate, std.error)) %>%
+  mutate(delta    = estimate_y4 - estimate_y1,
+         se_delta = sqrt(std.error_y4^2 + std.error_y1^2),
+         z        = delta / se_delta,
+         p        = 2 * pnorm(-abs(z)))
+
+xspec_pairs <- map_dfr(
+  list(c("ortho", "cardioem"), c("ortho", "derm"), c("cardioem", "derm")),
+  function(pr) {
+    a <- xspec_within %>% filter(specialty == pr[1])
+    b <- xspec_within %>% filter(specialty == pr[2])
+    dd <- a$delta - b$delta
+    se <- sqrt(a$se_delta^2 + b$se_delta^2)
+    tibble(pair = paste(pr, collapse = "_vs_"),
+           diff_of_deltas = dd, se = se, z = dd / se, p = 2 * pnorm(-abs(dd / se)))
+  })
+
+write_csv(xspec_within, "results/tables/xspec_dynamics_within.csv")
+write_csv(xspec_pairs,  "results/tables/xspec_dynamics_pairs.csv")
+
+message("Cross-specialty figures and dynamics test saved.")

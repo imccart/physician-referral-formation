@@ -735,3 +735,40 @@ claims:
     status: PASS
     explanation:
     last_verified: 2026-08-12
+
+  # ---- Sec dynamics: cross-specialty test of same-practice attenuation (4_cross_specialty.R) ----
+  # Per-specialty samples are disjoint, so cross-specialty estimates are independent; the
+  # year1->year4 change ignores cross-year covariance, which makes the test conservative.
+  - id: xspec-dyn-ortho-decline-p
+    claim: "orthopedic same-practice decline year 1 to year 4 is significant, p = 0.004"
+    location: "Results sec:dynamics"
+    script: code/analysis/4_cross_specialty.R
+    artifact: results/tables/xspec_dynamics_within.csv
+    artifact_key: "specialty=ortho,col=p"
+    expected_value: 0.0043
+    tolerance: 0.001
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: xspec-dyn-ortho-vs-cardioem-p
+    claim: "ortho decline significantly steeper than cardiology, difference p = 0.002"
+    location: "Results sec:dynamics"
+    script: code/analysis/4_cross_specialty.R
+    artifact: results/tables/xspec_dynamics_pairs.csv
+    artifact_key: "pair=ortho_vs_cardioem,col=p"
+    expected_value: 0.0017
+    tolerance: 0.001
+    status: PASS
+    explanation: "Prose rounds 0.0017 to p = 0.002."
+    last_verified: 2026-08-12
+  - id: xspec-dyn-ortho-vs-derm-p
+    claim: "ortho vs dermatology difference only marginal, p = 0.07"
+    location: "Results sec:dynamics"
+    script: code/analysis/4_cross_specialty.R
+    artifact: results/tables/xspec_dynamics_pairs.csv
+    artifact_key: "pair=ortho_vs_derm,col=p"
+    expected_value: 0.0657
+    tolerance: 0.005
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
