@@ -109,7 +109,6 @@ for (current_specialty in specialties) {
     distinct(doctor, .keep_all = TRUE) %>%
     select(doctor, origin, destination)
 
-  source("code/analysis/build_peer_referrals.R")
   source("code/analysis/1_descriptive_stats.R")
   source("code/analysis/specialist_fe.R")
   source("code/analysis/2_logit_twfe.R")
@@ -122,10 +121,10 @@ for (current_specialty in specialties) {
 
   rm(list = intersect(ls(), c(
     "df_full_referrals", "df_logit", "df_logit_twfe", "df_initial_referrals",
-    "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4", "logit_twfe5",
+    "logit_twfe1", "logit_twfe2", "logit_twfe3", "logit_twfe4",
     "logit_race1", "logit_race2", "logit_race3",
-    "stage2_1", "stage2_2", "stage2_3", "stage2_4", "stage2_5",
-    "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4", "mfx5")))
+    "stage2_1", "stage2_2", "stage2_3", "stage2_4",
+    "dat_fe", "movers", "mfx1", "mfx2", "mfx3", "mfx4")))
   gc()
 
   source("code/analysis/3_referral_windows.R")
@@ -144,6 +143,7 @@ for (current_specialty in specialties) {
 
 source("code/analysis/4_cross_specialty.R")
 source("code/analysis/5_persistence.R")
+source("code/analysis/5_peer_referrals.R")
 source("code/vrdc-outcomes/1_specialist_quality_eb.R")
 source("code/vrdc-outcomes/2_quality_reallocation.R")
 source("code/vrdc-outcomes/3_reallocation_table.R")
