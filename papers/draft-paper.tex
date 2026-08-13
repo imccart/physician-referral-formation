@@ -229,9 +229,15 @@ population, in Section~\ref{sec:data} and the supplemental appendix, shows that 
 a distinctive slice of PCPs. The concern that remains is specific to practice affiliation. A
 mover who selects a practice for its roster of specialists would refer within it regardless of
 any organizational channel, so the same-practice coefficient conflates co-location with the
-sorting of PCPs across practices. We address this concern directly with a design that does not
-rely on the mover's choice of practice, exploiting instead the specialists' own moves between
-practices.
+sorting of PCPs across practices. We address this concern with two designs, neither of which
+relies on the mover's choice of practice. The first exploits the specialists' own moves between
+practices, holding the practice fixed and varying a mover's co-location through the specialist's
+arrival. The second holds the mover fixed and asks whether the pull toward in-house specialists
+follows the specialties in which the mover's new practice happens to run deep, net of proximity,
+concordance, and specialist quality.
+
+\subsection{Specialist Moves}
+\label{sec:specmoves}
 
 A mover's co-location with a given specialist is set by the overlap of two independent
 timelines, the mover's arrival and the specialist's tenure in the practice the mover joins. We
@@ -290,6 +296,69 @@ specialist is present, and after the specialist leaves. An asterisk denotes sign
 5 percent level.}}
 \label{tab:specmoves}
 \centerline{\input{../results/tables/specialist_moves_all.tex}}
+\end{minipage}
+\end{table}
+
+\subsection{Cross-Specialty Availability}
+\label{sec:availability}
+
+The specialist-move design isolates the co-location margin among mobile specialists. Our second
+design keeps the full mover sample and draws instead on how the destination practice is composed
+across specialties. Each mover refers to all three specialties, and their own practice runs deep
+in some and thin in others. Collapsing the choice set to the mover-by-specialty level, we let
+$\pi_{is}$ denote the share of mover $i$'s specialty-$s$ referrals that go to a specialist inside
+$i$'s practice, and $a_{is}$ the share of the local specialty-$s$ choice set that sits inside that
+practice. We estimate
+\begin{equation}\label{eq:avail}
+ \pi_{is} = \lambda\,a_{is} + \alpha_i + u_{is},
+\end{equation}
+where $\alpha_i$ is a PCP fixed effect, so that $\lambda$ is identified within mover from the
+difference in in-house availability across their specialties. Under random allocation across the
+choice set the in-house share equals in-house availability in expectation, so the relevant null is
+$\lambda = 1$ rather than zero, and a slope above one is over-referral to in-house specialists
+beyond what their availability alone delivers. We cluster standard errors by Hospital Referral
+Region.
+
+A slope above one does not by itself establish practice affiliation, since in-house specialists
+tend to be closer and may differ in quality, either of which would raise the in-house share above
+availability without any organizational channel. We separate these channels with a benchmark. We
+fit a referral model on distance, demographic concordance, and risk-adjusted specialist quality
+while excluding practice affiliation, and we aggregate its predictions into a benchmark in-house
+share for each mover-specialty. Because the actual share equals this benchmark plus a residual, the
+availability slope splits additively into the part the observables deliver and the part
+attributable to practice affiliation. The identifying assumption is that, within a mover, the
+destination practice's specialty composition is not chosen to match the mover's own propensity to
+refer in-house in each specialty. A mover takes the roster of the practice they join as given, set
+by the incumbents and by the system's recruiting rather than by the arriving mover.
+
+Table~\ref{tab:avail} reports the decomposition. The average mover sends 19.3 percent of referrals
+in-house while only 5.1 percent of the local choice set is in-house, and the benchmark accounts for
+9.1 percent, leaving an excess of 10.1 percentage points (standard error 0.6). The within-mover
+slope of the in-house share on availability is 2.01, well above the null of one, of which distance,
+concordance, and quality together account for 1.28 and the residual attributable to practice
+affiliation is 0.73 (standard error 0.15), identified from the 3,280 movers who appear in more than
+one specialty. The affiliation component is unchanged whether or not specialist quality enters the
+benchmark, so the excess does not reflect in-house specialists being more desirable on measured
+outcomes. Drawing on variation the specialist-move design does not use, this design points to the
+same conclusion, that the pull toward in-house specialists reflects the practice tie rather than
+proximity, concordance, or quality.
+
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Cross-Specialty Availability}\footnote{Estimates from Equation~\eqref{eq:avail},
+a PCP fixed-effects regression at the mover-by-specialty level. The dependent variable is the share
+of a mover's specialty-specific referrals directed to a specialist in the mover's own practice, and
+availability is the share of the mover's local choice set for that specialty inside the practice.
+Standard errors clustered by Hospital Referral Region are in parentheses. The benchmark row reports
+the availability slope of the in-house share predicted by a referral model on distance, demographic
+concordance, and risk-adjusted specialist quality but not practice affiliation, and the affiliation
+row is the residual, with the two summing to the total. Excess in-house share is the mean difference
+between the actual and benchmark in-house shares among movers who appear in more than one specialty.
+Under random allocation the availability slope equals one.}}
+\label{tab:avail}
+\centerline{\input{../results/tables/within_pcp_avail_all.tex}}
 \end{minipage}
 \end{table}
 

@@ -810,3 +810,130 @@ claims:
     status: PASS
     explanation: "Imprecise (thin mover sample, 498 movers); not statistically significant."
     last_verified: 2026-08-12
+
+  # ---- Secondary identification: cross-specialty availability (7_within_pcp_avail.R) ----
+  # Collapsed mover-by-specialty LPM, PCP FE, in-house referral share on in-house
+  # availability (null slope = 1). Total slope decomposes into a distance/concordance/
+  # quality benchmark and a practice-affiliation residual. Sec cross-specialty
+  # availability (sec:availability); Table tab:avail; Eq eq:avail.
+  - id: wpa-slope-total
+    claim: "within-mover slope of in-house referral share on availability is 2.01 (null of one)"
+    location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=slope_total"
+    expected_value: 2.008
+    tolerance: 0.05
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-slope-bench
+    claim: "distance, concordance, and quality account for an availability slope of 1.28"
+    location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=slope_bench"
+    expected_value: 1.282
+    tolerance: 0.05
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-slope-affil
+    claim: "practice-affiliation residual availability slope is 0.73"
+    location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=slope_affil"
+    expected_value: 0.726
+    tolerance: 0.03
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-affil-se
+    claim: "standard error on the affiliation slope is 0.15"
+    location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=se_affil"
+    expected_value: 0.147
+    tolerance: 0.01
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-slope-affil-noqual
+    claim: "the affiliation slope is unchanged when specialist quality is excluded from the benchmark"
+    location: "Subsec cross-specialty availability (sec:availability)"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=slope_affil_nq"
+    expected_value: 0.722
+    tolerance: 0.03
+    status: PASS
+    explanation: "0.722 without quality vs 0.726 with quality; backs the unchanged-with-or-without-quality claim."
+    last_verified: 2026-08-12
+  - id: wpa-excess-pp
+    claim: "in-house referrals exceed the distance/quality benchmark by 10.1 percentage points"
+    location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=excess_pp"
+    expected_value: 10.14
+    tolerance: 0.3
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-excess-se
+    claim: "standard error on the excess in-house share is 0.6 percentage points"
+    location: "Subsec cross-specialty availability (sec:availability)"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=excess_pp_se"
+    expected_value: 0.646
+    tolerance: 0.05
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-share-in
+    claim: "the average mover sends 19.3 percent of referrals in-house"
+    location: "Subsec cross-specialty availability (sec:availability)"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=mean_pi"
+    expected_value: 0.1935
+    tolerance: 0.003
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-share-avail
+    claim: "in-house specialists are 5.1 percent of the average mover's local choice set"
+    location: "Subsec cross-specialty availability (sec:availability)"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=mean_avail"
+    expected_value: 0.0515
+    tolerance: 0.003
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-share-bench
+    claim: "the distance, concordance, and quality benchmark predicts a 9.1 percent in-house share"
+    location: "Subsec cross-specialty availability (sec:availability)"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=mean_bench"
+    expected_value: 0.0910
+    tolerance: 0.003
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
+  - id: wpa-movers
+    claim: "the availability slope is identified from 3,280 movers who appear in more than one specialty"
+    location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
+    script: code/analysis/7_within_pcp_avail.R
+    artifact: results/tables/within_pcp_avail.csv
+    artifact_key: "col=n_movers"
+    expected_value: 3280
+    tolerance: 0
+    status: PASS
+    explanation:
+    last_verified: 2026-08-12
