@@ -29,7 +29,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-same-prac-ci-ortho
     claim: "95% CI: 33 to 56 (percentage points)"
     location: "Intro"
@@ -40,7 +40,7 @@ claims:
     tolerance: 0.02
     status: PASS
     explanation: "CI is mfx (0.4462) +/- 1.96*mfx_se; artifact stores mfx and mfx_se, [0.330, 0.563]."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-same-prac-mfx-derm
     claim: "followed by dermatology (41 percentage points)"
     location: "Intro; Table 1 MFX Derm"
@@ -51,7 +51,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-same-prac-mfx-cardioem
     claim: "and cardiology (25 percentage points)"
     location: "Intro; Table 1 MFX Cardio"
@@ -62,7 +62,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Main results: same-practice odds ratios (spec 4) ----
   - id: main-same-prac-or-ortho
@@ -75,7 +75,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-same-prac-or-cardioem
     claim: "cardiology OR 6.78"
     location: "Table 1 OR Cardio"
@@ -86,7 +86,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-same-prac-or-derm
     claim: "dermatology OR 16.40"
     location: "Table 1 OR Derm"
@@ -97,7 +97,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Main results: gender concordance MFX (spec 4) ----
   - id: main-same-sex-mfx-ortho
@@ -110,7 +110,7 @@ claims:
     tolerance: 0.008
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-same-sex-mfx-derm
     claim: "small but positive in dermatology (2 percentage points)"
     location: "Intro; Results sec:formation"
@@ -121,7 +121,7 @@ claims:
     tolerance: 0.008
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Main results: distance MFX per 5 miles (spec 4) ----
   - id: main-dist-mfx-ortho
@@ -134,7 +134,7 @@ claims:
     tolerance: 0.008
     status: PASS
     explanation: "Paper reports range 4 to 7 pp per five miles across specialties."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-dist-mfx-cardioem
     claim: "cardiology about 4 pp per five miles"
     location: "Results sec:formation Geographic proximity"
@@ -145,7 +145,7 @@ claims:
     tolerance: 0.008
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: main-dist-mfx-derm
     claim: "dermatology about 7 pp per five miles (largest)"
     location: "Results sec:formation Geographic proximity"
@@ -156,7 +156,7 @@ claims:
     tolerance: 0.008
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Sample sizes (main table footer) ----
   - id: n-choiceset-ortho
@@ -169,7 +169,7 @@ claims:
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: n-choiceset-cardioem
     claim: "Choice-set obs Cardio 604,620"
     location: "Table 1 footer"
@@ -180,7 +180,7 @@ claims:
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: n-choiceset-derm
     claim: "Choice-set obs Derm 328,082"
     location: "Table 1 footer"
@@ -191,40 +191,40 @@ claims:
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: n-quartet-ortho
     claim: "Quartet obs Ortho 4,350"
     location: "Table 1 footer"
     script: code/analysis/2_logit_twfe.R
     artifact: results/tables/estimates_ortho.csv
-    artifact_key: "col=n_quartet (constant)"
+    artifact_key: "spec=4,term=same_prac,col=n_quartet"
     expected_value: 4350
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: n-quartet-cardioem
     claim: "Quartet obs Cardio 92,990"
     location: "Table 1 footer"
     script: code/analysis/2_logit_twfe.R
     artifact: results/tables/estimates_cardioem.csv
-    artifact_key: "col=n_quartet (constant)"
+    artifact_key: "spec=4,term=same_prac,col=n_quartet"
     expected_value: 92990
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: n-quartet-derm
     claim: "Quartet obs Derm 62,373"
     location: "Table 1 footer"
     script: code/analysis/2_logit_twfe.R
     artifact: results/tables/estimates_derm.csv
-    artifact_key: "col=n_quartet (constant)"
+    artifact_key: "spec=4,term=same_prac,col=n_quartet"
     expected_value: 62373
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Transfer test (lambda) ----
   - id: lambda-ortho
@@ -237,7 +237,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: lambda-derm
     claim: "0.95 in dermatology"
     location: "Appendix sec:convergence"
@@ -248,7 +248,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: lambda-cardioem
     claim: "and 0.92 in cardiology"
     location: "Appendix sec:convergence"
@@ -259,7 +259,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: lambda-p1-ortho
     claim: "cannot reject lambda = 1 in orthopedic surgery (p = 0.79)"
     location: "Appendix sec:convergence"
@@ -270,7 +270,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: lambda-p1-derm
     claim: "or dermatology (p = 0.18)"
     location: "Appendix sec:convergence"
@@ -281,7 +281,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: lambda-p1-cardioem
     claim: "in cardiology lambda is modestly below one (p = 0.003)"
     location: "Appendix sec:convergence"
@@ -292,7 +292,7 @@ claims:
     tolerance: 0.001
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Dynamics: same-practice by post-move year (year-by-year) ----
   - id: dyn-same-prac-ortho-yr1
@@ -305,7 +305,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: dyn-same-prac-ortho-yr4
     claim: "to about 20 by the fourth year (ortho)"
     location: "Intro; Results sec:dynamics"
@@ -316,7 +316,7 @@ claims:
     tolerance: 0.02
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: dyn-same-prac-cardioem-yr1
     claim: "cardiology strengthening from about 25 (year 1)"
     location: "Results sec:dynamics"
@@ -327,7 +327,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: dyn-same-prac-cardioem-yr4
     claim: "to 35 percentage points (cardiology year 4)"
     location: "Results sec:dynamics"
@@ -338,7 +338,7 @@ claims:
     tolerance: 0.02
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: dyn-same-prac-derm-yr1
     claim: "holding near 40 percentage points in dermatology (year 1)"
     location: "Results sec:dynamics"
@@ -349,7 +349,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: dyn-same-prac-derm-yr4
     claim: "still near 40 in dermatology by year 4"
     location: "Results sec:dynamics"
@@ -360,7 +360,7 @@ claims:
     tolerance: 0.02
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Quality reallocation (Sec 6) — scaled values in quality_realloc_all.tex ----
   - id: realloc-derm-prac-spend
@@ -373,7 +373,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-derm-prac-adm
     claim: "and 41 more non-elective admissions per 10,000 referrals (dermatology practice)"
     location: "Sec welfare; Table tab:realloc"
@@ -384,7 +384,7 @@ claims:
     tolerance: 1.0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-cardio-prac-adm
     claim: "cardiology practice affiliation 43 more non-elective admissions per 10,000"
     location: "Sec welfare; Table tab:realloc"
@@ -395,7 +395,7 @@ claims:
     tolerance: 1.0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-cardio-prac-spend
     claim: "cardiology practice affiliation about $0.5 million additional spending"
     location: "Sec welfare; Table tab:realloc"
@@ -406,7 +406,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-cardio-dist-spend
     claim: "proximity higher spending in cardiology ($0.6 million per 10,000)"
     location: "Sec welfare; Table tab:realloc"
@@ -417,7 +417,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-derm-dist-spend
     claim: "proximity higher spending in dermatology ($0.8 million per 10,000)"
     location: "Sec welfare; Table tab:realloc"
@@ -428,7 +428,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-ortho-dist-spend
     claim: "lower spending in orthopedic surgery ($0.21 million per 2,000 referrals)"
     location: "Sec welfare; Table tab:realloc"
@@ -439,7 +439,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-derm-dist-adm
     claim: "proximity more non-elective admissions in dermatology (25 per 10,000)"
     location: "Sec welfare; Table tab:realloc"
@@ -450,7 +450,7 @@ claims:
     tolerance: 1.0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: realloc-cardio-dist-adm
     claim: "and cardiology (12 per 10,000)"
     location: "Sec welfare; Table tab:realloc"
@@ -461,7 +461,7 @@ claims:
     tolerance: 1.0
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Persistence (Sec 5) — persist.tex has NO generator script (orphan) ----
   - id: persist-firsttie-ortho
@@ -474,7 +474,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation: "from code/analysis/5_persistence.R (promoted from scratch 2026-08-10)."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: persist-firsttie-derm
     claim: "to 23 percentage points (derm high end)"
     location: "Table tab:persist"
@@ -485,7 +485,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation: "from code/analysis/5_persistence.R (promoted from scratch 2026-08-10)."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: persist-withchar-ortho
     claim: "falls to 15 ... points once we add the characteristics (ortho low end)"
     location: "Table tab:persist"
@@ -496,7 +496,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation: "from code/analysis/5_persistence.R (promoted from scratch 2026-08-10)."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: persist-yr4-ortho
     claim: "declining ... to 11 to 14 percentage points by the fourth (ortho low end)"
     location: "Table tab:persist By post-move year"
@@ -507,7 +507,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation: "from code/analysis/5_persistence.R (promoted from scratch 2026-08-10)."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: persist-yr4-derm
     claim: "11 to 14 percentage points by the fourth (derm/cardio high end)"
     location: "Table tab:persist By post-move year"
@@ -518,7 +518,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation: "from code/analysis/5_persistence.R (promoted from scratch 2026-08-10)."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Descriptive: same-practice link rates (established links) ----
   - id: link-same-prac-ortho
@@ -531,7 +531,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: link-same-prac-cardioem
     claim: "cardiology highest share of same-practice links (24.8%)"
     location: "Results sec:formation; Table tab:link-stats"
@@ -542,7 +542,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: link-same-prac-derm
     claim: "12.2% in dermatology"
     location: "Results sec:formation; Table tab:link-stats"
@@ -553,7 +553,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Descriptive: network expansion (distinct specialists, yr1 -> yr4) ----
   - id: netsize-ortho-yr1
@@ -566,7 +566,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: netsize-ortho-yr4
     claim: "to 3.9 distinct specialists (ortho year 4)"
     location: "Results sec:dynamics; Table tab:dynamics"
@@ -577,7 +577,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: netsize-cardioem-yr4
     claim: "2.4 to 6.2 in cardiology"
     location: "Results sec:dynamics; Table tab:dynamics"
@@ -588,7 +588,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: netsize-derm-yr4
     claim: "2.3 to 5.9 in dermatology"
     location: "Results sec:dynamics; Table tab:dynamics"
@@ -599,7 +599,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Descriptive: practice composition (share of PCP groups with each specialist) ----
   - id: practice-comp-cardioem
@@ -612,7 +612,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation: "Artifact stores proportion 0.034938 (x100 = 3.49); paper states 3.5%. Re-verified 2026-08-11 against the current artifact; value matches within tolerance. The earlier STALE flag was a spurious mtime skew (the 08:46 _main.R edit only added the 3_reallocation_table.R source line, not the practice-composition block, per git diff); artifact mtime refreshed to clear it."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: practice-comp-ortho
     claim: "2.8% include an orthopedic surgeon"
     location: "Data sec:data"
@@ -623,7 +623,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation: "Artifact stores proportion 0.028379 (x100 = 2.84); paper states 2.8%. Re-verified 2026-08-11 against the current artifact; value matches within tolerance. The earlier STALE flag was a spurious mtime skew (the 08:46 _main.R edit only added the 3_reallocation_table.R source line, not the practice-composition block, per git diff); artifact mtime refreshed to clear it."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
   - id: practice-comp-derm
     claim: "only 1.2% include a dermatologist"
     location: "Data sec:data"
@@ -634,7 +634,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation: "Artifact stores proportion 0.011975 (x100 = 1.20); paper states 1.2%. Re-verified 2026-08-11 against the current artifact; value matches within tolerance. The earlier STALE flag was a spurious mtime skew (the 08:46 _main.R edit only added the 3_reallocation_table.R source line, not the practice-composition block, per git diff); artifact mtime refreshed to clear it."
-    last_verified: 2026-08-11
+    last_verified: 2026-08-17
 
   # ---- Appendix: race-imputation accuracy tables (EXTERNAL SOURCE, not built by _main.R) ----
   # app_method_accuracy.tex and app_race_accuracy.tex are display-only appendix tables
@@ -679,7 +679,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation: "Estimated by 5_peer_referrals.R (PCP+year FE, full-sample specialist FE as offset); combined into peer_referrals_all.tex by paper_tables.R with x100 pp scaling."
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: peer-same-prac-ortho-peer
     claim: "orthopedic surgery same-practice ME falls to 8.1 pp with peer referrals (about a fifth reduction)"
     location: "Sec mechanisms; Table tab:peer col (2)"
@@ -690,7 +690,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: peer-same-prac-cardioem-base
     claim: "cardiology same-practice ME 8.3 pp before peer referrals"
     location: "Sec mechanisms; Table tab:peer col (4)"
@@ -701,7 +701,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: peer-same-prac-cardioem-peer
     claim: "cardiology same-practice ME falls to 5.9 pp with peer referrals (about a third reduction)"
     location: "Sec mechanisms; Table tab:peer col (5)"
@@ -712,7 +712,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: peer-same-prac-derm-base
     claim: "dermatology same-practice ME 17.5 pp before peer referrals"
     location: "Sec mechanisms; Table tab:peer col (7)"
@@ -723,7 +723,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: peer-same-prac-derm-peer
     claim: "dermatology same-practice ME falls to 11.0 pp with peer referrals (about a third reduction)"
     location: "Sec mechanisms; Table tab:peer col (8)"
@@ -734,7 +734,7 @@ claims:
     tolerance: 0.1
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
 
   # ---- Sec dynamics: cross-specialty test of same-practice attenuation (4_cross_specialty.R) ----
   # Per-specialty samples are disjoint, so cross-specialty estimates are independent; the
@@ -749,7 +749,7 @@ claims:
     tolerance: 0.001
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: xspec-dyn-ortho-vs-cardioem-p
     claim: "ortho decline significantly steeper than cardiology, difference p = 0.002"
     location: "Results sec:dynamics"
@@ -760,7 +760,7 @@ claims:
     tolerance: 0.001
     status: PASS
     explanation: "Prose rounds 0.0017 to p = 0.002."
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: xspec-dyn-ortho-vs-derm-p
     claim: "ortho vs dermatology difference only marginal, p = 0.07"
     location: "Results sec:dynamics"
@@ -771,7 +771,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
 
   # ---- Secondary identification: co-location off specialist moves (6_specialist_moves.R) ----
   # Two-way (PCP + specialist) FE LPM on the mover-menu sample; CoPresent is co-location
@@ -787,7 +787,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: sm-copresent-derm
     claim: "co-location raises referral probability by about 8.0 pp in dermatology (specialist-move design)"
     location: "Sec identifying-practice-affiliation (sec:practice-id); Table tab:specmoves"
@@ -798,7 +798,7 @@ claims:
     tolerance: 0.005
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: sm-copresent-ortho
     claim: "co-location effect about 10.7 pp in orthopedic surgery, imprecisely estimated (specialist-move design)"
     location: "Sec identifying-practice-affiliation (sec:practice-id); Table tab:specmoves"
@@ -809,7 +809,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation: "Imprecise (thin mover sample, 498 movers); not statistically significant."
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
 
   # ---- Secondary identification: cross-specialty availability (7_within_pcp_avail.R) ----
   # Collapsed mover-by-specialty LPM, PCP FE, in-house referral share on in-house
@@ -826,7 +826,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-slope-bench
     claim: "distance, concordance, and quality account for an availability slope of 1.28"
     location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
@@ -837,7 +837,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-slope-affil
     claim: "practice-affiliation residual availability slope is 0.73"
     location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
@@ -848,7 +848,7 @@ claims:
     tolerance: 0.03
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-affil-se
     claim: "standard error on the affiliation slope is 0.15"
     location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
@@ -859,7 +859,7 @@ claims:
     tolerance: 0.01
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-slope-affil-noqual
     claim: "the affiliation slope is unchanged when specialist quality is excluded from the benchmark"
     location: "Subsec cross-specialty availability (sec:availability)"
@@ -870,7 +870,7 @@ claims:
     tolerance: 0.03
     status: PASS
     explanation: "0.722 without quality vs 0.726 with quality; backs the unchanged-with-or-without-quality claim."
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-excess-pp
     claim: "in-house referrals exceed the distance/quality benchmark by 10.1 percentage points"
     location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
@@ -881,7 +881,7 @@ claims:
     tolerance: 0.3
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-excess-se
     claim: "standard error on the excess in-house share is 0.6 percentage points"
     location: "Subsec cross-specialty availability (sec:availability)"
@@ -892,7 +892,7 @@ claims:
     tolerance: 0.05
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-share-in
     claim: "the average mover sends 19.3 percent of referrals in-house"
     location: "Subsec cross-specialty availability (sec:availability)"
@@ -903,7 +903,7 @@ claims:
     tolerance: 0.003
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-share-avail
     claim: "in-house specialists are 5.1 percent of the average mover's local choice set"
     location: "Subsec cross-specialty availability (sec:availability)"
@@ -914,7 +914,7 @@ claims:
     tolerance: 0.003
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-share-bench
     claim: "the distance, concordance, and quality benchmark predicts a 9.1 percent in-house share"
     location: "Subsec cross-specialty availability (sec:availability)"
@@ -925,7 +925,7 @@ claims:
     tolerance: 0.003
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
   - id: wpa-movers
     claim: "the availability slope is identified from 3,280 movers who appear in more than one specialty"
     location: "Subsec cross-specialty availability (sec:availability); Table tab:avail"
@@ -936,4 +936,4 @@ claims:
     tolerance: 0
     status: PASS
     explanation:
-    last_verified: 2026-08-12
+    last_verified: 2026-08-17
