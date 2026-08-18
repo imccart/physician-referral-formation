@@ -670,67 +670,67 @@ claims:
   # within each specialty col 1 = baseline, col 2 = adds peer referrals, col 3 = drops practice.
   # Values are scaled to percentage points (x100) when paper_tables.R combines the per-specialty tables.
   - id: peer-same-prac-ortho-base
-    claim: "orthopedic surgery same-practice ME 9.9 pp before peer referrals"
+    claim: "orthopedic surgery same-practice ME 36.9 pp before peer referrals"
     location: "Sec mechanisms; Table tab:peer col (1)"
     script: code/analysis/5_peer_referrals.R
     artifact: results/tables/peer_referrals_all.tex
     artifact_key: "row=Same practice group,col=(1)"
-    expected_value: 9.9
+    expected_value: 36.9
     tolerance: 0.1
     status: PASS
     explanation: "Estimated by 5_peer_referrals.R (PCP+year FE, full-sample specialist FE as offset); combined into peer_referrals_all.tex by paper_tables.R with x100 pp scaling."
     last_verified: 2026-08-17
   - id: peer-same-prac-ortho-peer
-    claim: "orthopedic surgery same-practice ME falls to 8.1 pp with peer referrals (about a fifth reduction)"
+    claim: "orthopedic surgery same-practice ME falls to 32.8 pp with peer referrals (about a tenth reduction)"
     location: "Sec mechanisms; Table tab:peer col (2)"
     script: code/analysis/5_peer_referrals.R
     artifact: results/tables/peer_referrals_all.tex
     artifact_key: "row=Same practice group,col=(2)"
-    expected_value: 8.1
+    expected_value: 32.8
     tolerance: 0.1
     status: PASS
     explanation:
     last_verified: 2026-08-17
   - id: peer-same-prac-cardioem-base
-    claim: "cardiology same-practice ME 8.3 pp before peer referrals"
+    claim: "cardiology same-practice ME 34.1 pp before peer referrals"
     location: "Sec mechanisms; Table tab:peer col (4)"
     script: code/analysis/5_peer_referrals.R
     artifact: results/tables/peer_referrals_all.tex
     artifact_key: "row=Same practice group,col=(4)"
-    expected_value: 8.3
+    expected_value: 34.1
     tolerance: 0.1
     status: PASS
     explanation:
     last_verified: 2026-08-17
   - id: peer-same-prac-cardioem-peer
-    claim: "cardiology same-practice ME falls to 5.9 pp with peer referrals (about a third reduction)"
+    claim: "cardiology same-practice ME falls to 27.7 pp with peer referrals (about a fifth reduction)"
     location: "Sec mechanisms; Table tab:peer col (5)"
     script: code/analysis/5_peer_referrals.R
     artifact: results/tables/peer_referrals_all.tex
     artifact_key: "row=Same practice group,col=(5)"
-    expected_value: 5.9
+    expected_value: 27.7
     tolerance: 0.1
     status: PASS
     explanation:
     last_verified: 2026-08-17
   - id: peer-same-prac-derm-base
-    claim: "dermatology same-practice ME 17.5 pp before peer referrals"
+    claim: "dermatology same-practice ME 42.6 pp before peer referrals"
     location: "Sec mechanisms; Table tab:peer col (7)"
     script: code/analysis/5_peer_referrals.R
     artifact: results/tables/peer_referrals_all.tex
     artifact_key: "row=Same practice group,col=(7)"
-    expected_value: 17.5
+    expected_value: 42.6
     tolerance: 0.1
     status: PASS
     explanation:
     last_verified: 2026-08-17
   - id: peer-same-prac-derm-peer
-    claim: "dermatology same-practice ME falls to 11.0 pp with peer referrals (about a third reduction)"
+    claim: "dermatology same-practice ME falls to 34.6 pp with peer referrals (about a fifth reduction)"
     location: "Sec mechanisms; Table tab:peer col (8)"
     script: code/analysis/5_peer_referrals.R
     artifact: results/tables/peer_referrals_all.tex
     artifact_key: "row=Same practice group,col=(8)"
-    expected_value: 11.0
+    expected_value: 34.6
     tolerance: 0.1
     status: PASS
     explanation:

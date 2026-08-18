@@ -119,6 +119,15 @@ compute_mfx_peer <- function(model, data, spec_covars) {
   eta   <- eta[ok]
   dat_v <- dat_v[ok, ]
 
+  # Referral-probability weight, matching the main two-stage MFX (2_logit_twfe.R):
+  # predicted probability with same-practice off, normalized to sum to 1, so the peer
+  # marginal effects are on the same scale as the headline estimates rather than a flat
+  # mean diluted over the near-impossible pairs. In the column that drops same_prac, eta
+  # already excludes it, so nothing is subtracted.
+  sp_contrib <- if ("same_prac" %in% spec_covars) beta[["same_prac"]] * dat_v[["same_prac"]] else 0
+  w_base <- plogis(eta - sp_contrib)
+  w_base <- w_base / sum(w_base)
+
   bin_vars <- c("same_sex", "same_race", "same_prac", "new_specialist")
 
   map(spec_covars, function(v) {
@@ -135,7 +144,7 @@ compute_mfx_peer <- function(model, data, spec_covars) {
 
     p1 <- plogis(eta1)
     p0 <- plogis(eta0)
-    dp <- mean(p1 - p0)
+    dp <- sum(w_base * (p1 - p0))
 
     grad_i <- matrix(0, nrow = length(eta), ncol = length(spec_covars))
     colnames(grad_i) <- spec_covars
@@ -150,7 +159,7 @@ compute_mfx_peer <- function(model, data, spec_covars) {
       grad_i[, k] <- (p1 * (1 - p1)) * deta1_dk - (p0 * (1 - p0)) * deta0_dk
     }
 
-    g_bar <- colMeans(grad_i)
+    g_bar <- colSums(grad_i * w_base)
     se <- sqrt(as.numeric(t(g_bar) %*% V %*% g_bar))
 
     tibble(term = v, estimate = dp, std.error = se)

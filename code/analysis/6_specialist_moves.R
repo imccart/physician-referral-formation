@@ -98,10 +98,10 @@ write_csv(sm_desc_all, "results/tables/specialist_moves_desc.csv")
 fmt_pp <- function(b, s) sprintf("%.1f (%.1f)%s", 100 * b, 100 * s, ifelse(abs(b / s) > 1.96, "$^{*}$", ""))
 est_tbl <- sm_est_all[, .(
   Specialty = sm_lab[specialty],
-  `Co-location`  = mapply(fmt_pp, copresent, copresent_se),
-  `Before-join`  = sprintf("%.1f", 100 * rate_before),
-  `Co-present`   = sprintf("%.1f", 100 * rate_co),
-  `After-left`   = sprintf("%.1f", 100 * rate_after),
+  `Practice affiliation`  = mapply(fmt_pp, copresent, copresent_se),
+  `Before` = sprintf("%.1f", 100 * rate_before),
+  `During` = sprintf("%.1f", 100 * rate_co),
+  `After`  = sprintf("%.1f", 100 * rate_after),
   Movers = format(n_movers, big.mark = ","),
   Pairs  = format(n_pairs, big.mark = ","))]
 kable(est_tbl, format = "latex", booktabs = TRUE, linesep = "", escape = FALSE,
