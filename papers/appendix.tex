@@ -3,6 +3,7 @@
 \usepackage[labelfont=bf]{caption}
 \usepackage[left=1in,right=1in,top=1in,bottom=0.75in]{geometry}
 \usepackage[round]{natbib}
+\usepackage[en-GB]{datetime2}
 \bibliographystyle{aer}
 \setstretch{1.5}
 
@@ -36,9 +37,7 @@ SUPPLEMENTAL APPENDIX}
     \end{tabular}
   \end{tabular}}
 
-\date{%
-July 2026
-}
+\date{\DTMenglishmonthname{\month} \the\year}
 \maketitle
 
 \section{Monte Carlo Validation of Two-Stage Estimation}
