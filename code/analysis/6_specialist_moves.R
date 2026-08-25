@@ -102,7 +102,7 @@ est_tbl <- sm_est_all[, .(
   `Before` = sprintf("%.1f", 100 * rate_before),
   `During` = sprintf("%.1f", 100 * rate_co),
   `After`  = sprintf("%.1f", 100 * rate_after),
-  Movers = format(n_movers, big.mark = ","),
+  `PCP movers` = format(n_movers, big.mark = ","),
   Pairs  = format(n_pairs, big.mark = ","))]
 kable(est_tbl, format = "latex", booktabs = TRUE, linesep = "", escape = FALSE,
       align = c("l", "r", "r", "r", "r", "r", "r")) %>%

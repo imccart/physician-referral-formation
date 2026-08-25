@@ -237,9 +237,17 @@ concordance, and specialist quality.
 \subsection{Specialist Moves}
 \label{sec:specmoves}
 
-A mover's practice affiliation with a given specialist is set by the overlap of two independent
-timelines, the mover's arrival and the specialist's tenure in the practice the mover joins. We
-restrict the arrival choice set to specialists who occupied the mover's destination practice at
+Our first design uses variation that the movers themselves do not choose, namely the
+specialists' own moves between practices. Consider a cardiologist who was a member of a group
+practice from 2010 to 2015 and then left. A PCP who relocates into that practice in 2013 arrives
+while the cardiologist is still there, and is affiliated with that cardiologist. A PCP who relocates
+into the same practice in 2016 arrives after the cardiologist has left, and is not affiliated with
+that cardiologist. By exploiting the cardiologist's move alongside the timing of the PCP's own
+relocation, we identify the effect of practice affiliation free of confounding from the
+unobservables that might shape a PCP's original choice of practice.
+
+We
+restrict the choice set to specialists who occupied the mover's destination practice at
 some point in the sample, and we let $\mathrm{CoPresent}_{ij}$ equal one if specialist $j$ is a
 member of that practice in the year mover $i$ arrives, that is, if $i$'s arrival falls within
 $j$'s tenure spell there. On this sample we estimate the linear probability model
@@ -252,8 +260,10 @@ effects. Equation~\eqref{eq:specmoves} retains the two-sided fixed-effect struct
 formation model, and because it is linear the effects enter directly without the
 incidental-parameters problem that requires the quadruple estimator in
 Section~\ref{sec:estimation}. The parameter $\delta$ is the effect of practice affiliation on the
-referral probability, identified within specialist from the timing of the specialist's own move
-rather than from the mover's choice of practice. We cluster standard errors by Hospital Referral
+referral probability. It is identified by comparing pairs in which the specialist was a member of
+the mover's destination practice in the arrival year against pairs in which the specialist was a
+member at some other point but not that year, having either left before the mover arrived or not
+yet joined. We cluster standard errors by Hospital Referral
 Region.
 
 The identifying assumption is that a mover's arrival year is independent of when the specialist
@@ -406,6 +416,13 @@ In forming referral networks, experts can rely on convenience, such as organizat
 Across all three specialties, practice group affiliation is by far the largest contributor to initial link formation, with geographic proximity also emerging as a robust and persistent factor. Gender concordance is meaningful in orthopedic surgery but plays a smaller role in dermatology and is negligible for cardiology. Other measures of demographic concordance, including age, experience, and race, play at best a limited role. As PCPs spend more time in their new market, the effect of practice affiliation attenuates in orthopedic surgery but not in cardiology or dermatology. Link decomposition and period-specific estimation confirm that the orthopedic decline reflects genuine behavioral change rather than compositional dilution, consistent with organizational convenience playing a diminishing role where a specialist's contribution is most observable to the referring PCP.
 
 The gender-concordance dimension of our results connects to \citet{zeltzer2020}, who documents robust gender homophily in Medicare referrals using a related discrete-choice framework. We also incorporate gender alongside practice affiliation and geographic proximity, and we identify these determinants using a mover-based design where PCPs build their referral networks from scratch after relocating, together with a two-sided fixed-effects estimator for PCPs and specialists. By examining three specialties with distinct institutional settings and demographic compositions, we show that the dominance of organizational ties in referral formation is not specific to any single clinical area, though the magnitude varies across specialties.
+
+We note that the practice-affiliation effect bundles two forces we do not separate. A shared
+practice lowers the cost of referring in-house, and a practice can also actively channel referrals
+inward through how it structures coordination, scheduling, and the handling of outside referrals
+\citep{whaley2024-jpube, singh2023}. For where patients end up the distinction does not matter,
+since either force routes the referral through organizational structure rather than a specialist's
+match quality.
 
 We conclude with three policy observations. First, while increasing horizontal integration of physician practices can have large negative consequences for competitiveness and physician pricing \citep{koch2021}, our results point to a further channel. Insofar as mergers strengthen the practice affiliations that shape referrals, they can direct patients toward specialists with higher risk-adjusted spending and more non-elective admissions, without a detectable difference in survival.
 Second, our results highlight the role of geographic proximity as a persistent factor in referral formation. Because referral choices are effectively constrained to a narrow geographic subset of specialists, demographic homophily has limited scope to affect patient outcomes. Whether the same would hold in settings where distance is less binding (e.g., telehealth or urban specialist density) is an open question for future work. Third, while organizational affiliation plays a dominant role in PCPs' initial referral networks, these effects attenuate over time in orthopedic surgery, the setting where specialist quality is most observable, though not in cardiology or dermatology. This attenuation suggests that the initial convenience-driven network is not permanent and that PCPs adjust their referral patterns as they gain local experience.
