@@ -279,35 +279,13 @@ group.
 
 Table~\ref{tab:specmoves} reports the results. Net of specialist and PCP fixed effects,
 practice affiliation raises the referral probability by 6.5 percentage points in cardiology and 8.0
-percentage points in dermatology, both statistically significant, and by 10.7 percentage points
-in orthopedic surgery, where the smaller mover sample leaves the estimate imprecise. The placebo
-is clean in all three specialties. Movers who arrive before the specialist joins refer at the
-baseline rate, 7.5, 6.2, and 8.5 percent, well below the 11.8, 15.6, and 16.8 percent among
-movers who arrive while the specialist is present, and referral falls back toward baseline among
-movers who arrive after the specialist has left. Because practice affiliation here is set by the
-specialist's own move rather than the mover's choice of practice, the significant effects in
-cardiology and dermatology, together with the clean placebo, corroborate
-the practice-affiliation effect using variation orthogonal to the practice-selection concern, with
-orthopedic surgery directionally consistent but imprecisely estimated. The design is identified
-only from pairs in which the specialist moved.
+percentage points in dermatology, both statistically significant. We also estimate a similar but
+imprecise effect in orthopedic surgery of 10.7 percentage points. Movers who arrive before the
+specialist joins refer no more than baseline, so the effect is not driven by PCP movers timing
+their relocation to the specialist's presence. Because this variation comes from the specialist's
+move rather than the PCP mover's choice of practice, the effects corroborate the
+practice-affiliation effect free of the practice-selection concern.
 
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Practice Affiliation Identified from Specialist Moves}\footnote{Estimates from
-Equation~\eqref{eq:specmoves}, a two-sided (PCP and specialist) fixed-effects linear probability
-model on the sample of mover-specialist pairs in which the specialist occupied the mover's
-destination practice at some point. The Practice affiliation column reports $\widehat{\delta}$ in
-percentage points, with standard errors clustered by Hospital Referral Region in parentheses.
-The Before, During, and After columns report the raw share of pairs with an
-observed referral among movers who arrive before the specialist joins the practice, while the
-specialist is present, and after the specialist leaves. An asterisk denotes significance at the
-5 percent level.}}
-\label{tab:specmoves}
-\centerline{\input{../results/tables/specialist_moves_all.tex}}
-\end{minipage}
-\end{table}
 
 \subsection{Cross-Specialty Availability}
 \label{sec:availability}
@@ -353,25 +331,6 @@ benchmark, so the excess does not reflect in-house specialists being more desira
 outcomes. Drawing on variation the specialist-move design does not use, this design points to the
 same conclusion, that the pull toward in-house specialists reflects the practice tie rather than
 proximity, concordance, or quality.
-
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[]{\textbf{Cross-Specialty Availability}\footnote{Estimates from Equation~\eqref{eq:avail},
-a PCP fixed-effects regression at the mover-by-specialty level. The dependent variable is the share
-of a mover's specialty-specific referrals directed to a specialist in the mover's own practice, and
-availability is the share of the mover's local choice set for that specialty inside the practice.
-Standard errors clustered by Hospital Referral Region are in parentheses. The benchmark row reports
-the availability slope of the in-house share predicted by a referral model on distance, demographic
-concordance, and risk-adjusted specialist quality but not practice affiliation, and the affiliation
-row is the residual, with the two summing to the total. Excess in-house share is the mean difference
-between the actual and benchmark in-house shares among movers who appear in more than one specialty.
-Under random allocation the availability slope equals one.}}
-\label{tab:avail}
-\centerline{\input{../results/tables/within_pcp_avail_all.tex}}
-\end{minipage}
-\end{table}
 
 
 \section{Peer Referrals and Practice Affiliation}
@@ -430,38 +389,17 @@ Second, our results highlight the role of geographic proximity as a persistent f
 Taken together, convenience is the dominant factor in referral formation. In cardiology and dermatology, the specialists chosen for convenience have higher risk-adjusted spending and more non-elective admissions, with no detectable difference in survival. Because these referral relationships persist, an allocation shaped by organizational and geographic convenience continues to direct patients for years, leaving a lasting mark on health care spending and utilization.
 
 
-
 %%% BIBLIOGRAPHY
 
 \pagebreak
 \bibliography{BibTeX_Library}
 
 
-%%% Figures and Tables
+%%% Tables and Figures
 
 \clearpage
-\section*{Figures and Tables}
+\section*{Tables and Figures}
 
-\begin{figure}[htb]                                                                                                                                         \centering
-\begin{minipage}[h]{6in}
-\caption[caption]{PCP Mover Origin-Destination Flows by Specialty\footnote{Each arc connects a mover's pre-relocation HRR to their post-relocation HRR. Only non-contiguous moves are included. For readability, arcs are limited to the top 10 destination flows from each of the 20 highest-volume origin HRRs.}}
-\centerline{
-\begin{tabular}{c}
-  \includegraphics[width=4in]{../results/figures/fig_movers_ortho.png} \\[-1cm]
-  (a) Orthopedic Surgery \\[-2pt]
-  \includegraphics[width=4in]{../results/figures/fig_movers_cardioem.png} \\[-1cm]
-  (b) Cardiology \\[-2pt]
-  \includegraphics[width=4in]{../results/figures/fig_movers_derm.png} \\[-1cm]
-  (c) Dermatology
-\end{tabular}}
-\label{fig:movers}
-\end{minipage}
-\end{figure}
-
-
-%%% COMBINED TABLES AND FIGURES
-
-\clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
@@ -474,6 +412,7 @@ Taken together, convenience is the dominant factor in referral formation. In car
 \end{minipage}
 \end{table}
 
+\clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
@@ -513,18 +452,6 @@ Taken together, convenience is the dominant factor in referral formation. In car
 \end{table}
 
 \clearpage
-\begin{figure}[h]
-\centering
-\begin{minipage}[h]{6in}
-\caption[caption]{Marginal Effects Across Specialties\footnote{Forest plot of average marginal effects from the full-specification two-stage model (Table~\ref{tab:logit-twfe}) for orthopedic surgery, cardiology, and dermatology. Horizontal bars are 95\% confidence intervals based on delta-method standard errors.}}
-\centerline{%
-    \includegraphics{../results/figures/mfx_cross_specialty.png}
-}
-\label{fig:mfx-cross}
-\end{minipage}
-\end{figure}
-
-\clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
@@ -538,18 +465,6 @@ Taken together, convenience is the dominant factor in referral formation. In car
 \end{table}
 
 \clearpage
-\begin{figure}[h]
-\centering
-\begin{minipage}[h]{6in}
-\caption[caption]{Dynamics of Marginal Effects Across Specialties\footnote{Average marginal effects by post-move year for orthopedic surgery, cardiology, and dermatology. Each panel shows the marginal effect of the indicated covariate from separate two-stage estimates for each post-move year (referrals made in that year alone, one through four years post-relocation). Vertical bands are 95\% confidence intervals.}}
-\centerline{%
-    \includegraphics{../results/figures/mfx_by_window_cross.png}
-}
-\label{fig:mfx-window-cross}
-\end{minipage}
-\end{figure}
-
-\clearpage
 \begin{table}[!h]
 \centering
 \footnotesize
@@ -559,6 +474,45 @@ Taken together, convenience is the dominant factor in referral formation. In car
     \input{../results/tables/persist.tex}
 }
 \label{tab:persist}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Practice Affiliation Identified from Specialist Moves}\footnote{Estimates from
+Equation~\eqref{eq:specmoves}, a two-sided (PCP and specialist) fixed-effects linear probability
+model on the sample of mover-specialist pairs in which the specialist occupied the mover's
+destination practice at some point. The Practice affiliation column reports $\widehat{\delta}$ in
+percentage points, with standard errors clustered by Hospital Referral Region in parentheses.
+The Before, During, and After columns report the raw share of pairs with an
+observed referral among movers who arrive before the specialist joins the practice, while the
+specialist is present, and after the specialist leaves. An asterisk denotes significance at the
+5 percent level.}}
+\label{tab:specmoves}
+\centerline{\input{../results/tables/specialist_moves_all.tex}}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Cross-Specialty Availability}\footnote{Estimates from Equation~\eqref{eq:avail},
+a PCP fixed-effects regression at the mover-by-specialty level. The dependent variable is the share
+of a mover's specialty-specific referrals directed to a specialist in the mover's own practice, and
+availability is the share of the mover's local choice set for that specialty inside the practice.
+Standard errors clustered by Hospital Referral Region are in parentheses. The benchmark row reports
+the availability slope of the in-house share predicted by a referral model on distance, demographic
+concordance, and risk-adjusted specialist quality but not practice affiliation, and the affiliation
+row is the residual, with the two summing to the total. Excess in-house share is the mean difference
+between the actual and benchmark in-house shares among movers who appear in more than one specialty.
+Under random allocation the availability slope equals one.}}
+\label{tab:avail}
+\centerline{\input{../results/tables/within_pcp_avail_all.tex}}
 \end{minipage}
 \end{table}
 
@@ -587,6 +541,47 @@ Taken together, convenience is the dominant factor in referral formation. In car
 \label{tab:realloc}
 \end{minipage}
 \end{table}
+
+\clearpage
+\begin{figure}[htb]                                                                                                                                         \centering
+\begin{minipage}[h]{6in}
+\caption[caption]{PCP Mover Origin-Destination Flows by Specialty\footnote{Each arc connects a mover's pre-relocation HRR to their post-relocation HRR. Only non-contiguous moves are included. For readability, arcs are limited to the top 10 destination flows from each of the 20 highest-volume origin HRRs.}}
+\centerline{
+\begin{tabular}{c}
+  \includegraphics[width=4in]{../results/figures/fig_movers_ortho.png} \\[-1cm]
+  (a) Orthopedic Surgery \\[-2pt]
+  \includegraphics[width=4in]{../results/figures/fig_movers_cardioem.png} \\[-1cm]
+  (b) Cardiology \\[-2pt]
+  \includegraphics[width=4in]{../results/figures/fig_movers_derm.png} \\[-1cm]
+  (c) Dermatology
+\end{tabular}}
+\label{fig:movers}
+\end{minipage}
+\end{figure}
+
+\clearpage
+\begin{figure}[h]
+\centering
+\begin{minipage}[h]{6in}
+\caption[caption]{Marginal Effects Across Specialties\footnote{Forest plot of average marginal effects from the full-specification two-stage model (Table~\ref{tab:logit-twfe}) for orthopedic surgery, cardiology, and dermatology. Horizontal bars are 95\% confidence intervals based on delta-method standard errors.}}
+\centerline{%
+    \includegraphics{../results/figures/mfx_cross_specialty.png}
+}
+\label{fig:mfx-cross}
+\end{minipage}
+\end{figure}
+
+\clearpage
+\begin{figure}[h]
+\centering
+\begin{minipage}[h]{6in}
+\caption[caption]{Dynamics of Marginal Effects Across Specialties\footnote{Average marginal effects by post-move year for orthopedic surgery, cardiology, and dermatology. Each panel shows the marginal effect of the indicated covariate from separate two-stage estimates for each post-move year (referrals made in that year alone, one through four years post-relocation). Vertical bands are 95\% confidence intervals.}}
+\centerline{%
+    \includegraphics{../results/figures/mfx_by_window_cross.png}
+}
+\label{fig:mfx-window-cross}
+\end{minipage}
+\end{figure}
 
 
 %%% END

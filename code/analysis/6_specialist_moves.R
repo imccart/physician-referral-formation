@@ -91,6 +91,11 @@ for (sm_sp in sm_specs) {
 
 sm_est_all  <- rbindlist(sm_est)
 sm_desc_all <- rbindlist(sm_desc)
+# Consistent within-specialty order: Stable then Mobile in every specialty.
+sm_desc_all[, grp := factor(grp, levels = c("Stable", "Mobile"))]
+sm_desc_all[, specialty := factor(specialty, levels = sm_specs)]
+setorder(sm_desc_all, specialty, grp)
+sm_desc_all[, `:=`(grp = as.character(grp), specialty = as.character(specialty))]
 write_csv(sm_est_all,  "results/tables/specialist_moves_est.csv")
 write_csv(sm_desc_all, "results/tables/specialist_moves_desc.csv")
 

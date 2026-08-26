@@ -101,58 +101,22 @@ mfx_table <- map(results, function(r) {
   pivot_wider(names_from = iter, values_from = mfx,
               names_prefix = "iter_")
 
-# Diagnostics panel: deviance, doctor FE SD, mean p-hat
-diag_table <- map(results, function(r) {
-  tibble(iter = r$iter, deviance = r$deviance,
-         doc_fe_sd = r$fe_doc_sd, mean_phat = r$mean_phat)
-}) %>% bind_rows()
+# Format the marginal-effects table (the reported quantities). The recovery's
+# raw deviance and doctor-effect dispersion are not tabulated, since a few
+# perfectly separated doctor effects inflate them without affecting the
+# marginal effects (see the appendix text on separation).
+mfx_out <- mfx_table %>%
+  mutate(across(-variable, ~ formatC(.x, digits = 4, format = "f")),
+         variable = paste0("\\hspace{1em}", variable))
 
-diag_rows <- tribble(
-  ~variable, ~iter_10, ~iter_25, ~iter_50, ~iter_100, ~iter_250,
-  "Deviance",
-    diag_table$deviance[1], diag_table$deviance[2], diag_table$deviance[3],
-    diag_table$deviance[4], diag_table$deviance[5],
-  "Doctor FE (SD)",
-    diag_table$doc_fe_sd[1], diag_table$doc_fe_sd[2], diag_table$doc_fe_sd[3],
-    diag_table$doc_fe_sd[4], diag_table$doc_fe_sd[5],
-  "Mean $\\hat{p}$",
-    diag_table$mean_phat[1], diag_table$mean_phat[2], diag_table$mean_phat[3],
-    diag_table$mean_phat[4], diag_table$mean_phat[5]
-)
-
-# Helper: format large numbers in scientific notation for LaTeX
-fmt_diag <- function(x) {
-  sapply(x, function(val) {
-    if (is.na(val)) return("")
-    if (abs(val) >= 1e6) {
-      exp_val <- floor(log10(abs(val)))
-      mantissa <- val / 10^exp_val
-      paste0("$", formatC(mantissa, digits = 2, format = "f"),
-             " \\times 10^{", exp_val, "}$")
-    } else {
-      formatC(val, digits = 2, format = "f")
-    }
-  })
-}
-
-# Combine and format
-full_table <- bind_rows(
-  mfx_table %>% mutate(across(-variable,
-                               ~ formatC(.x, digits = 4, format = "f"))),
-  tibble(variable = "", iter_10 = "", iter_25 = "", iter_50 = "",
-         iter_100 = "", iter_250 = ""),
-  diag_rows %>% mutate(across(-variable, fmt_diag))
-)
-
-kable(full_table,
+kable(mfx_out,
       format    = "latex",
       booktabs  = TRUE,
       align     = c("l", rep("r", 5)),
       col.names = c("", "10", "25", "50", "100", "250"),
-      escape    = FALSE) %>%
+      escape    = FALSE,
+      linesep   = "") %>%
   add_header_above(c(" " = 1, "Maximum iterations" = 5)) %>%
-  pack_rows("Panel A: Average marginal effects", 1, nrow(mfx_table)) %>%
-  pack_rows("Panel B: Diagnostics", nrow(mfx_table) + 2, nrow(full_table)) %>%
   save_kable(sprintf("results/tables/app_convergence_%s.tex", current_specialty))
 
 message(sprintf("Saved: results/tables/app_convergence_%s.tex", current_specialty))

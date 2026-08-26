@@ -75,7 +75,6 @@ writeLines(c(
 "\\begin{tabular}{lccc}", "\\toprule",
 " & Movers & Non-movers & Adj.\\ diff. \\\\", "\\midrule",
 row("Within-practice referral share","wp",3),
-row("Cross-region referral share","xhrr",3),
 row("Same-gender referral share","ss",3),
 row("Same-race referral share","sr",3),
 row("Distinct specialists per year","n_spec",2),
