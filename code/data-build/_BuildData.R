@@ -188,3 +188,6 @@ for (current_specialty in names(specialties)) {
 
   message("=== Done: ", current_specialty, " ===\n")
 }
+
+# Practice composition for the coordination secondary analysis (uses in-session df_mdppas)
+source("code/data-build/7_practice_composition.R")
