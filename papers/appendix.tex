@@ -167,6 +167,21 @@ The large marginal effect of practice affiliation raises the question of whether
 Across all three specialties, the remaining coefficients (gender concordance, distance, race, age, experience) are qualitatively similar to the full specification, though magnitudes shift modestly as variation previously absorbed by practice affiliation is redistributed. This suggests that the demographic and geographic determinants of referral formation are not artifacts of collinearity with practice affiliation.
 
 
+\section{Selection on Unobservables}
+\label{sec:oster}
+
+A further concern is that the practice-affiliation effect reflects selection on unobservables rather than a causal effect of organizational proximity. We assess this using the bound of \cite{oster2019}, which asks how strong selection on unobserved determinants of referral would need to be, relative to the selection on observed determinants revealed by our covariates, to drive the practice-affiliation coefficient to zero.
+
+We compare a short specification, in which practice affiliation is the only covariate, to the long specification used throughout the paper, which adds gender, race, age, and experience concordance along with distance. Table~\ref{tab:oster} reports the practice-affiliation coefficient and pseudo-$R^2$ from each, together with the implied $\delta^*$, the ratio of unobserved to observed selection needed to drive the coefficient to zero. Under the most conservative assumption, that the unobserved and observed determinants of referral could together explain the entire variation in referral probability ($R_{max}=1$), $\delta^*$ exceeds one in all three specialties (1.07 in orthopedic surgery, 1.19 in cardiology, 3.22 in dermatology), meaning unobserved selection would need to be at least as strong as everything our observed covariates already capture, and in dermatology more than three times as strong, to eliminate the effect. Under the more conventional assumption that $R_{max}$ is $1.3$ times the long specification's pseudo-$R^2$, following \cite{oster2019}, $\delta^*$ is substantially larger still (6.34, 5.54, and 11.82, respectively). The practice-affiliation effect is therefore not fragile to plausible degrees of selection on unobserved determinants of referral.
+
+\begin{table}[!h]
+\centering
+\input{../results/tables/oster_bound_all.tex}
+\caption{Oster Bound for Practice Affiliation}
+\label{tab:oster}
+\end{table}
+
+
 \section{Link Decomposition}
 \label{sec:link-decomp}
 

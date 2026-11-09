@@ -32,8 +32,8 @@ hrr <- d[, .(wp_rate = mean(same_prac, na.rm=TRUE), mean_prac_size = mean(size, 
 hrr[, spec_per_pcp := n_spec / n_pcp]
 hrr <- merge(hrr, pcp_any[, .(share_pcp_wp = mean(any_wp)), by = doc_hrr], by = "doc_hrr")
 V <- c("wp_rate","share_pcp_wp","mean_prac_size","n_spec","n_pcp","spec_per_pcp")
-mo <- merge(movers, hrr, by.x="origin", by.y="doc_hrr"); setnames(mo, V, paste0("o_",V))
-mo <- merge(mo, hrr, by.x="destination", by.y="doc_hrr"); setnames(mo, V, paste0("d_",V))
+mo <- merge(movers, hrr, by.x="origin", by.y="doc_hrr", all.x = TRUE); setnames(mo, V, paste0("o_",V))
+mo <- merge(mo, hrr, by.x="destination", by.y="doc_hrr", all.x = TRUE); setnames(mo, V, paste0("d_",V))
 mkt <- sapply(V, function(v) c(mean(mo[[paste0("o_",v)]], na.rm=TRUE), mean(mo[[paste0("d_",v)]], na.rm=TRUE)))
 
 n3 <- function(x) format(round(x), big.mark=",")
@@ -80,5 +80,3 @@ row("Same-race referral share","sr",3),
 row("Distinct specialists per year","n_spec",2),
 row("Specialists per patient","rate",3),
 "\\bottomrule", "\\end{tabular}"), "results/tables/mover_disposition.tex")
-
-cat("wrote mover_markets.tex and mover_disposition.tex\n")

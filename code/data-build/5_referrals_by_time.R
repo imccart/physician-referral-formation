@@ -38,15 +38,6 @@ ref_windows <- map(1:6, function(k) {
   bind_rows()
 
 
-## example: count distinct specialists per PCP in each window
-net_size_by_window <- ref_windows %>%
-  group_by(window, doctor) %>%
-  summarise(n_specs = n_distinct(specialist), .groups = "drop") %>%
-  group_by(window) %>%
-  summarise(mean_degree = mean(n_specs))
-
-print(net_size_by_window)
-
 write.csv(ref_windows, sprintf("data/output/df_initial_referrals_cuml_%s.csv", current_specialty), row.names=FALSE)
 rm(df_ref_initial_cuml, ref_windows); gc()
 
@@ -168,15 +159,3 @@ for (yr in years) {
 }
 
 rm(dt_windows); gc()
-
-## read back, attach specialist quality, and re-save
-df_jochmans_windows <- as_tibble(fread(out_file))
-df_jochmans_windows <- df_jochmans_windows %>%
-  left_join(spec_quality %>% rename(spec1_qual = spec_qual,
-                                    spec1_total_patients = total_spec_patients),
-            by = c("spec1" = "specialist")) %>%
-  left_join(spec_quality %>% rename(spec2_qual = spec_qual,
-                                    spec2_total_patients = total_spec_patients),
-            by = c("spec2" = "specialist"))
-
-write_csv(df_jochmans_windows, out_file, na = "")

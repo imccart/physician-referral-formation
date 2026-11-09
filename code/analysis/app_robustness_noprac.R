@@ -2,8 +2,6 @@
 ## Re-estimate the full Jochmans spec without same_prac, then two-stage MFX.
 ## Output: two-column table (structural β + MFX) for the no-practice model.
 
-message("  Robustness: dropping same_prac...")
-
 # Stage 1: Jochmans without same_prac
 covars_noprac <- c("same_sex", "diff_dist", "same_race", "diff_age", "diff_gradyear")
 
@@ -45,7 +43,7 @@ compute_mfx_noprac <- function(stage2, joch_model, spec_covars) {
   beta  <- stage2$beta
   eta   <- stage2$eta[stage2$valid]
   dat_v <- dat_fe[stage2$valid, ]
-  V     <- vcov(joch_model, type = "HC1")[spec_covars, spec_covars]
+  V     <- vcov(joch_model)[spec_covars, spec_covars]
 
   w_base <- plogis(eta); w_base <- w_base / sum(w_base)
 
@@ -82,8 +80,6 @@ compute_mfx_noprac <- function(stage2, joch_model, spec_covars) {
 
 stage2_noprac <- recover_fes_noprac(logit_noprac, covars_noprac)
 mfx_noprac    <- compute_mfx_noprac(stage2_noprac, logit_noprac, covars_noprac)
-
-message("  No-practice robustness: ", stage2_noprac$n_valid, " valid obs")
 
 # Build two-column table: structural β + MFX
 vars_noprac <- c("same_sex", "diff_dist", "same_race", "diff_age", "diff_gradyear")

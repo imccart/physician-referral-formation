@@ -12,8 +12,6 @@ run_specs <- c("ortho", "cardioem", "derm")
 
 for (peer_spec in run_specs) {
 
-message("Peer referral analysis: ", peer_spec)
-
 # Read data
 df_full <- read_csv(sprintf("data/output/df_full_referrals_%s.csv", peer_spec),
                     show_col_types = FALSE)
@@ -21,24 +19,33 @@ df_logit_peer <- read_csv(sprintf("data/output/df_logit_movers_%s.csv", peer_spe
                           show_col_types = FALSE)
 
 # Step 1: Build peer referral counts from full referral data ----------------
-# Count distinct PCPs per (group, specialist, year) in the PRIOR year (t-1)
-# This captures the practice's existing referral network before the mover arrives
+# Group-level referrer count per (group, specialist, year t-1), and the focal
+# doctor's own referral to that specialist in t-1, both shifted to merge onto year t.
 
-peer_counts <- df_full %>%
+group_counts <- df_full %>%
   filter(!is.na(doc_group) & doc_group != "") %>%
   group_by(doc_group, specialist, Year) %>%
   summarise(n_referring_pcps = n_distinct(doctor), .groups = "drop") %>%
-  mutate(Year = Year + 1) %>%    # shift forward so it merges as t-1 counts onto year t
-  rename(peer_referrals = n_referring_pcps)
+  mutate(Year = Year + 1)
+
+own_prior_ref <- df_full %>%
+  distinct(doctor, specialist, Year) %>%
+  mutate(Year = Year + 1, own_referred = 1L)
 
 
 # Step 2: Merge onto mover choice set --------------------------------------
-# For mover PCP i in group g, specialist j, year t:
-#   peer_referrals = number of other PCPs in group g who referred to j in year t-1
+# peer_referrals = other PCPs in the group (excluding the focal doctor) who
+# referred to the specialist in year t-1.
 
 df_peer <- df_logit_peer %>%
-  left_join(peer_counts, by = c("doc_group", "specialist", "Year")) %>%
-  mutate(peer_referrals = replace_na(peer_referrals, 0L))
+  left_join(group_counts, by = c("doc_group", "specialist", "Year")) %>%
+  left_join(own_prior_ref, by = c("doctor", "specialist", "Year")) %>%
+  mutate(
+    n_referring_pcps = replace_na(n_referring_pcps, 0L),
+    own_referred = replace_na(own_referred, 0L),
+    peer_referrals = pmax(n_referring_pcps - own_referred, 0L)
+  ) %>%
+  select(-n_referring_pcps, -own_referred)
 
 
 # Step 2b: Merge the full-sample specialist fixed effect (specialist_fe.R) ---
@@ -54,12 +61,11 @@ df_peer <- df_peer %>%
   left_join(spec_fe_tab, by = "spec_key") %>%
   mutate(gamma_spec = coalesce(gamma_j, 0)) %>%
   select(-spec_key, -gamma_j)
-message("  Specialist FE match: ",
-        format(sum(df_peer$gamma_spec != 0), big.mark = ","), " of ",
-        format(nrow(df_peer), big.mark = ","), " choice-set rows")
 
 
 # Step 3: Three conditional logit specs, specialist FE held fixed as offset --
+# glm.iter raised from fixest's default 25: dermatology's peer_b/peer_c need it
+# to actually settle (deviance is stable from iter=100 through iter=1000).
 
 covars_a <- c("same_sex", "same_race", "same_prac", "dist_miles",
               "diff_age", "diff_gradyear")
@@ -76,7 +82,8 @@ peer_a <- feglm(
   data = df_peer,
   offset = ~gamma_spec,
   vcov = ~doctor,
-  family = binomial(link = "logit")
+  family = binomial(link = "logit"),
+  glm.iter = 1000
 )
 
 peer_b <- feglm(
@@ -85,7 +92,8 @@ peer_b <- feglm(
   data = df_peer,
   offset = ~gamma_spec,
   vcov = ~doctor,
-  family = binomial(link = "logit")
+  family = binomial(link = "logit"),
+  glm.iter = 1000
 )
 
 peer_c <- feglm(
@@ -94,7 +102,8 @@ peer_c <- feglm(
   data = df_peer,
   offset = ~gamma_spec,
   vcov = ~doctor,
-  family = binomial(link = "logit")
+  family = binomial(link = "logit"),
+  glm.iter = 1000
 )
 
 
@@ -231,11 +240,9 @@ kable(tbl_all, format = "latex", booktabs = TRUE, escape = FALSE, linesep = "",
       col.names = c("", "(1)", "(2)", "(3)")) %>%
   save_kable(sprintf("results/tables/peer_referrals_%s.tex", peer_spec))
 
-message("  Peer referral table saved: peer_referrals_", peer_spec, ".tex")
-
 
 # Cleanup
-rm(df_full, df_logit_peer, peer_counts, df_peer, spec_fe_tab,
+rm(df_full, df_logit_peer, group_counts, own_prior_ref, df_peer, spec_fe_tab,
    peer_a, peer_b, peer_c,
    mfx_a, mfx_b, mfx_c, m_a, m_b, m_c, tbl_rows, footer, tbl_all)
 gc()

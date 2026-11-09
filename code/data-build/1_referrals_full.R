@@ -6,9 +6,9 @@ df_full_referrals <- df_referrals %>%
   left_join(df_mdppas %>% mutate(across(c(sex, birth, spec, zip, group, hrr, hrrcity, hrrstate), ~., .names = "spec_{.col}")) %>% select(starts_with("spec_"), npi, year), 
               by = c("Specialist_ID" = "npi", "Year"="year")) %>%
   left_join(df_race %>% select(npi, spec_race=rf_pred_race),
-            by=c("Specialist_ID"="npi")) %>%
+            by=c("Specialist_ID"="npi"), relationship = "many-to-one") %>%
   left_join(df_race %>% select(npi, doc_race=rf_pred_race),
-            by=c("Practice_ID"="npi")) %>%
+            by=c("Practice_ID"="npi"), relationship = "many-to-one") %>%
   left_join(df_phycompare %>% select(npi, doc_grad_year=grad_year, doc_med_school=med_school),
             by=c("Practice_ID"="npi")) %>%           
   left_join(df_phycompare %>% select(npi, spec_grad_year=grad_year, spec_med_school=med_school),

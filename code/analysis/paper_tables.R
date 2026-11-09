@@ -31,23 +31,36 @@ read_tabular_full <- function(path) {
 # 1. Descriptive stats — stacked panels
 # ============================================================
 
-desc_panels <- map(specs, function(s) {
-  body <- read_tabular_body(sprintf("results/tables/desc_%s.tex", s))
-  c(sprintf("\\addlinespace[0.5em]"),
-    sprintf("\\multicolumn{3}{l}{\\textbf{%s}}\\\\", spec_labels[s]),
-    body)
-}) %>% unlist()
+## Each per-specialty desc_%s.tex stacks a Doctors panel then a Specialists
+## panel (10 stat rows each); split on the "Panel A./B." group header lines
+## so Table 1 (doctors) and Table 2 (specialists) each read only their own
+## entity's rows, consistent with what the paper actually inputs.
+desc_split <- function(entity_label) {
+  panels <- map(specs, function(s) {
+    body <- read_tabular_body(sprintf("results/tables/desc_%s.tex", s))
+    start <- grep(sprintf("Panel [AB]\\. %s", entity_label), body)[1] + 1
+    other_start <- grep("^\\\\multicolumn\\{3\\}\\{l\\}\\{\\\\textbf\\{Panel", body)
+    end_candidates <- other_start[other_start > start]
+    end <- if (length(end_candidates) > 0) end_candidates[1] - 1 else length(body)
+    rows <- body[start:end]
+    rows <- rows[!grepl("^\\\\addlinespace", trimws(rows))]
+    c(sprintf("\\addlinespace[0.3em]"),
+      sprintf("\\multicolumn{3}{l}{\\textbf{%s}}\\\\", spec_labels[s]),
+      rows)
+  }) %>% unlist()
+  c(
+    "\\begin{tabular}{lrr}",
+    "\\toprule",
+    "  & All referrals & PCP movers\\\\",
+    "\\midrule",
+    panels,
+    "\\bottomrule",
+    "\\end{tabular}"
+  )
+}
 
-desc_combined <- c(
-  "\\begin{tabular}{lrr}",
-  "\\toprule",
-  "  & All referrals & PCP movers\\\\",
-  "\\midrule",
-  desc_panels,
-  "\\bottomrule",
-  "\\end{tabular}"
-)
-writeLines(desc_combined, "results/tables/desc_all.tex")
+writeLines(desc_split("Doctors \\(any outgoing referrals\\)"), "results/tables/desc_doctors_all.tex")
+writeLines(desc_split("Specialists \\(any incoming referrals\\)"), "results/tables/desc_specialists_all.tex")
 
 
 # ============================================================
@@ -93,9 +106,7 @@ writeLines(link_combined, "results/tables/link_stats_all.tex")
 est_files <- sprintf("results/tables/estimates_%s.csv", specs)
 has_estimates <- all(file.exists(est_files))
 
-if (!has_estimates) {
-  message("Skipping estimation tables (estimates CSVs not found -- re-run 2_logit_twfe.R)")
-} else {
+if (has_estimates) {
 
 est <- map(specs, function(s) {
   read_csv(sprintf("results/tables/estimates_%s.csv", s), show_col_types = FALSE)
@@ -373,6 +384,31 @@ writeLines(decomp_combined, "results/tables/app_link_decomposition_all.tex")
 
 
 # ============================================================
+# 9. Appendix: Oster bound — one row per specialty
+# ============================================================
+
+oster_rows <- map_chr(specs, function(s) {
+  d <- read_csv(sprintf("results/tables/oster_bound_%s.csv", s), show_col_types = FALSE)
+  sprintf("%s & %.2f & %.2f & %.2f & %.2f & %.2f & %.2f \\\\",
+          spec_labels[s], d$beta_short, d$beta_long, d$r2_short, d$r2_long,
+          d$delta_star_rmax1, d$delta_star_rmax13)
+})
+
+oster_combined <- c(
+  "\\begin{tabular}{lrrrrrr}",
+  "\\toprule",
+  " & \\multicolumn{2}{c}{$\\beta$ (same\\_prac)} & \\multicolumn{2}{c}{Pseudo $R^2$} & \\multicolumn{2}{c}{$\\delta^*$} \\\\",
+  "\\cmidrule(l{3pt}r{3pt}){2-3} \\cmidrule(l{3pt}r{3pt}){4-5} \\cmidrule(l{3pt}r{3pt}){6-7}",
+  " & Short & Long & Short & Long & $R_{max}=1$ & $R_{max}=1.3\\tilde{R}$ \\\\",
+  "\\midrule",
+  oster_rows,
+  "\\bottomrule",
+  "\\end{tabular}"
+)
+writeLines(oster_combined, "results/tables/oster_bound_all.tex")
+
+
+# ============================================================
 # 10. Appendix: Robustness no-practice — 6 cols (β + MFX × 3)
 # ============================================================
 
@@ -381,6 +417,7 @@ noprac_data <- map(specs, function(s) {
   body_start <- grep("\\\\midrule", lines)[1] + 1
   body_end   <- grep("\\\\bottomrule", lines)[1] - 1
   body <- lines[body_start:body_end]
+  body <- body[!grepl("^\\\\midrule", trimws(body))]
   map(body, function(line) {
     parts <- trimws(strsplit(gsub("\\\\\\\\", "", line), "&")[[1]])
     parts
@@ -391,6 +428,7 @@ n_rows_np <- length(noprac_data$ortho)
 noprac_rows <- character(0)
 for (i in seq_len(n_rows_np)) {
   label <- noprac_data$ortho[[i]][1]
+  if (label %in% c("Year FE", "Quartet obs")) noprac_rows <- c(noprac_rows, "\\midrule")
   vals <- map_chr(specs, function(s) {
     paste(noprac_data[[s]][[i]][-1], collapse = " & ")
   }) %>% paste(collapse = " & ")
@@ -563,6 +601,3 @@ conf_combined <- c(
   "\\end{tabular}"
 )
 writeLines(conf_combined, "results/tables/app_conf_all.tex")
-
-
-message("All combined tables written to results/tables/")

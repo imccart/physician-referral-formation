@@ -37,9 +37,9 @@ df_ref_big <- df_ref_big %>%
   left_join(df_mdppas %>% mutate(across(c(sex, birth, spec, zip, group, hrr, hrrcity, hrrstate), ~., .names = "spec_{.col}")) %>% select(starts_with("spec_"), npi, year), 
               by = c("specialist" = "npi", "Year"="year")) %>%
   left_join(df_race %>% select(npi, spec_race=rf_pred_race),
-            by=c("specialist"="npi")) %>%
+            by=c("specialist"="npi"), relationship = "many-to-one") %>%
   left_join(df_race %>% select(npi, doc_race=rf_pred_race),
-            by=c("doctor"="npi")) %>%
+            by=c("doctor"="npi"), relationship = "many-to-one") %>%
   left_join(df_phycompare %>% select(npi, doc_grad_year=grad_year, doc_med_school=med_school),
             by=c("doctor"="npi")) %>%           
   left_join(df_phycompare %>% select(npi, spec_grad_year=grad_year, spec_med_school=med_school),

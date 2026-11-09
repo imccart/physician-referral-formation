@@ -53,10 +53,18 @@ getsp <- function(sp) {
   by <- lapply(later_p, function(p)
     feols(as.formula(paste("referral ~ First +", paste(covs, collapse = "+"),
           "| specialist + doctor")), g[period == p], cluster = ~ doc_hrr + specialist))
-  setNames(c(get1(m1), get1(m2), get1(by[[1]]), get1(by[[2]]), get1(by[[3]]), nobs(m2)),
-           c("d1c", "d1s", "d2c", "d2s", "y2c", "y2s", "y3c", "y3s", "y4c", "y4s", "n"))
+  raw_tie   <- g[First == 1, mean(referral)]
+  raw_notie <- g[First == 0, mean(referral)]
+  setNames(c(get1(m1), get1(m2), get1(by[[1]]), get1(by[[2]]), get1(by[[3]]), nobs(m2),
+             raw_tie, raw_notie),
+           c("d1c", "d1s", "d2c", "d2s", "y2c", "y2s", "y3c", "y3s", "y4c", "y4s", "n",
+             "raw_tie", "raw_notie"))
 }
 R <- sapply(specs, getsp)   # rows = stats, cols = ortho / cardioem / derm
+
+write_csv(as_tibble(t(R[c("raw_tie", "raw_notie"), ]), rownames = "specialty") %>%
+            mutate(ratio = raw_tie / raw_notie),
+          "results/tables/persist_raw.csv")
 
 co     <- function(k) paste(sprintf("%.3f", R[k, ]), collapse = " & ")
 se_row <- function(k) paste(sprintf("(%.3f)", R[k, ]), collapse = " & ")

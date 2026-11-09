@@ -74,9 +74,7 @@ joch_parts <- joch_parts[vapply(joch_parts, nrow, integer(1)) > 0L]
 df_jochmans <- if (length(joch_parts) > 0) rbindlist(joch_parts) else data.table()
 rm(groups, joch_parts); gc()
 
-df_jochmans <- as_tibble(df_jochmans) %>%
-  left_join(spec_quality %>% rename(spec1_qual=spec_qual, spec1_total_patients=total_spec_patients), by = c("spec1"="specialist")) %>%
-  left_join(spec_quality %>% rename(spec2_qual=spec_qual, spec2_total_patients=total_spec_patients), by = c("spec2"="specialist"))
+df_jochmans <- as_tibble(df_jochmans)
 
 write_csv(df_jochmans, sprintf("data/output/df_jochmans_%s.csv", current_specialty), na = "")
 rm(final_ref_movers, df_jochmans); gc()

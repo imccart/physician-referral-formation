@@ -181,7 +181,7 @@ for (current_specialty in names(specialties)) {
     "df_full_referrals", "df_initial_referrals", "df_movers", "df_mover_counts",
     "final_ref_big", "final_ref_movers", "final_ref_windows",
     "df_ref_big", "df_ref_windows", "df_ref_initial_cuml",
-    "ref_windows", "move_intervals", "net_size_by_window",
+    "ref_windows", "move_intervals",
     "df_jochmans", "df_jochmans_windows"
   )))
   gc()
