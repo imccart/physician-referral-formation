@@ -73,60 +73,13 @@ The mover design assumes that a physician's relocation is not driven by the refe
 
 Table~\ref{tab:mover-markets} compares each mover's destination market to their origin market. Movers relocate to larger and more specialist-dense markets, as expected of physicians moving to new and often larger areas. On the dimensions that would bias our estimates, destinations instead resemble origins. For example, the share of referrals made within a practice, the share of PCPs with a same-practice specialist available, and mean practice size are each slightly lower at the destination rather than higher. Further, movers do not relocate to markets that are more organizationally integrated or more oriented toward within-practice referral.
 
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[]{\textbf{Mover Origin versus Destination Markets}\footnote{Characteristics of each mover's origin and destination market, averaged across movers. Market characteristics are computed at the HRR level over all referrals. The upper panel reports measures of how much the market facilitates within-practice referral, and the lower panel reports market size and specialist density.}}
-\centerline{%
-    \input{../results/tables/mover_markets.tex}
-}
-\label{tab:mover-markets}
-\end{minipage}
-\end{table}
-
 Table~\ref{tab:mover-disp} compares movers' referral behavior before they relocate to that of non-movers. Movers' raw within-practice share is only marginally higher than non-movers', 0.123 versus 0.100. Once we control for physician and practice characteristics, movers refer in-house slightly less, so their pre-move behavior shows no preference for within-practice referral. Their remaining differences, in demographic concordance and the number of specialists, are small.
-
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[]{\textbf{Mover versus Non-mover Referral Behavior}\footnote{Referral behavior of movers, measured in the years before relocation, compared with non-movers. The adjusted difference is the coefficient on a mover indicator from a regression that also controls for physician gender, age, experience, panel size, practice size, and specialty.}}
-\centerline{%
-    \input{../results/tables/mover_disposition.tex}
-}
-\label{tab:mover-disp}
-\end{minipage}
-\end{table}
 
 
 \section{Mobile Specialists}
 \label{sec:specmoves-desc}
 
-The specialist-move identification in the main text draws on specialists who
-move between practices. Table~\ref{tab:specmoves-desc} compares these mobile specialists to
-those observed in a single practice, on demographics, referral volume, and the risk-adjusted
-quality of their Medicare patients. Across the three specialties the two groups are broadly
-similar, with mobile specialists somewhat busier as measured by the number of referring PCPs
-and close to the stayers in risk-adjusted spending, admissions, and mortality, so the
-specialists supplying the co-location variation are not a sharply selected group.
-
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Mobile versus Stable Specialists}\footnote{Comparison of specialists
-who move between practice groups (Mobile) to those observed in a single practice (Stable),
-among specialists with a clean, non-oscillating practice history. Experience is years since
-medical school graduation. Referring PCPs is the count of distinct PCPs who refer to the
-specialist. Adjusted spending, non-elective admissions, and mortality are the empirical-Bayes
-risk-adjusted specialist outcomes described in Section~\ref{sec:welfare}, where negative
-values indicate lower spending, fewer admissions, and lower mortality than expected. Entries
-are medians except for the male share.}}
-\label{tab:specmoves-desc}
-\centerline{\resizebox{\linewidth}{!}{\input{../results/tables/specialist_moves_desc.tex}}}
-\end{minipage}
-\end{table}
+The specialist-move identification in the main text draws on specialists who move between practices. Table~\ref{tab:specmoves-desc} compares these mobile specialists to those observed in a single practice, on demographics, referral volume, and the risk-adjusted quality of their Medicare patients. Across the three specialties the two groups are broadly similar, with mobile specialists somewhat busier as measured by the number of referring PCPs and close to the stayers in risk-adjusted spending, admissions, and mortality, so the specialists supplying the co-location variation are not a sharply selected group.
 
 
 \section{Race Predictions}
@@ -170,21 +123,9 @@ Across all three specialties, the remaining coefficients (gender concordance, di
 \section{Selection on Unobservables}
 \label{sec:oster}
 
-A further concern is that the practice-affiliation effect reflects selection on unobservables rather than a causal effect of organizational proximity. We assess this using the bound of \cite{oster2019}, which asks how strong selection on unobserved determinants of referral would need to be, relative to the selection on observed determinants revealed by our covariates, to drive the practice-affiliation coefficient to zero.
+The main text addresses the possibility that the practice-affiliation effect reflects selection on unobservables, rather than a causal effect of organizational proximity, principally through design, namely the mover design itself and the specialist-move and cross-specialty availability designs, each of which draws on variation the PCP does not choose. Here we provide a further, complementary check, assessing the practice-affiliation effect directly using the bound of \citet{oster2019}, which asks how strong selection on unobserved determinants of referral would need to be, relative to the selection on observed determinants revealed by our covariates, to drive the practice-affiliation coefficient to zero.
 
 We compare a short specification, in which practice affiliation is the only covariate, to the long specification used throughout the paper, which adds gender, race, age, and experience concordance along with distance. Table~\ref{tab:oster} reports the practice-affiliation coefficient and pseudo-$R^2$ from each, together with the implied $\delta^*$, the ratio of unobserved to observed selection needed to drive the coefficient to zero. Under the most conservative assumption, that the unobserved and observed determinants of referral could together explain the entire variation in referral probability ($R_{max}=1$), $\delta^*$ exceeds one in all three specialties (1.07 in orthopedic surgery, 1.19 in cardiology, 3.22 in dermatology), meaning unobserved selection would need to be at least as strong as everything our observed covariates already capture, and in dermatology more than three times as strong, to eliminate the effect. Under the more conventional assumption that $R_{max}$ is $1.3$ times the long specification's pseudo-$R^2$, following \cite{oster2019}, $\delta^*$ is substantially larger still (6.34, 5.54, and 11.82, respectively). The practice-affiliation effect is therefore not fragile to plausible degrees of selection on unobserved determinants of referral.
-
-\begin{table}[!h]
-\centering
-\footnotesize
-\begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Oster Bound for Practice Affiliation}\footnote{The short specification includes only practice affiliation. The long specification adds distance and gender, race, age, and experience concordance. $\delta^*$ is the \citet{oster2019} ratio of selection on unobservables to selection on observables needed to drive the practice-affiliation coefficient to zero, reported under $R_{max}=1$ and under $R_{max}=1.3$ times the long specification's pseudo-$R^2$.}}
-\centerline{%
-    \input{../results/tables/oster_bound_all.tex}
-}
-\label{tab:oster}
-\end{minipage}
-\end{table}
 
 
 \section{Link Decomposition}
@@ -264,6 +205,56 @@ The per-specialty view makes the heterogeneity in the practice-affiliation dynam
     \input{../results/tables/app_convergence_all.tex}
 }
 \label{tab:convergence}
+\end{minipage}
+\end{table}
+
+
+%%% MOVER SELECTION TABLES
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Mover Origin versus Destination Markets}\footnote{Characteristics of each mover's origin and destination market, averaged across movers. Market characteristics are computed at the HRR level over all referrals. The upper panel reports measures of how much the market facilitates within-practice referral, and the lower panel reports market size and specialist density.}}
+\centerline{%
+    \input{../results/tables/mover_markets.tex}
+}
+\label{tab:mover-markets}
+\end{minipage}
+\end{table}
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[]{\textbf{Mover versus Non-mover Referral Behavior}\footnote{Referral behavior of movers, measured in the years before relocation, compared with non-movers. The adjusted difference is the coefficient on a mover indicator from a regression that also controls for physician gender, age, experience, panel size, practice size, and specialty.}}
+\centerline{%
+    \input{../results/tables/mover_disposition.tex}
+}
+\label{tab:mover-disp}
+\end{minipage}
+\end{table}
+
+
+%%% MOBILE SPECIALISTS TABLE
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Mobile versus Stable Specialists}\footnote{Comparison of specialists
+who move between practice groups (Mobile) to those observed in a single practice (Stable),
+among specialists with a clean, non-oscillating practice history. Experience is years since
+medical school graduation. Referring PCPs is the count of distinct PCPs who refer to the
+specialist. Adjusted spending, non-elective admissions, and mortality are the empirical-Bayes
+risk-adjusted specialist outcomes described in Section~\ref{sec:welfare}, where negative
+values indicate lower spending, fewer admissions, and lower mortality than expected. Entries
+are medians except for the male share.}}
+\label{tab:specmoves-desc}
+\centerline{\resizebox{\linewidth}{!}{\input{../results/tables/specialist_moves_desc.tex}}}
 \end{minipage}
 \end{table}
 
@@ -372,6 +363,22 @@ The per-specialty view makes the heterogeneity in the practice-affiliation dynam
     \input{../results/tables/app_robustness_noprac_all.tex}
 }
 \label{tab:noprac}
+\end{minipage}
+\end{table}
+
+
+%%% OSTER BOUND TABLE
+
+\clearpage
+\begin{table}[!h]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Oster Bound for Practice Affiliation}\footnote{The short specification includes only practice affiliation. The long specification adds distance and gender, race, age, and experience concordance. $\delta^*$ is the \citet{oster2019} ratio of selection on unobservables to selection on observables needed to drive the practice-affiliation coefficient to zero, reported under $R_{max}=1$ and under $R_{max}=1.3$ times the long specification's pseudo-$R^2$.}}
+\centerline{%
+    \input{../results/tables/oster_bound_all.tex}
+}
+\label{tab:oster}
 \end{minipage}
 \end{table}
 
