@@ -101,7 +101,7 @@ Table~\ref{tab:mover-disp} compares movers' referral behavior before they reloca
 
 
 \section{Mobile Specialists}
-\label{app:specmoves-desc}
+\label{sec:specmoves-desc}
 
 The specialist-move identification in the main text draws on specialists who
 move between practices. Table~\ref{tab:specmoves-desc} compares these mobile specialists to
@@ -176,9 +176,14 @@ We compare a short specification, in which practice affiliation is the only cova
 
 \begin{table}[!h]
 \centering
-\input{../results/tables/oster_bound_all.tex}
-\caption{Oster Bound for Practice Affiliation}
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Oster Bound for Practice Affiliation}\footnote{The short specification includes only practice affiliation. The long specification adds distance and gender, race, age, and experience concordance. $\delta^*$ is the \citet{oster2019} ratio of selection on unobservables to selection on observables needed to drive the practice-affiliation coefficient to zero, reported under $R_{max}=1$ and under $R_{max}=1.3$ times the long specification's pseudo-$R^2$.}}
+\centerline{%
+    \input{../results/tables/oster_bound_all.tex}
+}
 \label{tab:oster}
+\end{minipage}
 \end{table}
 
 
